@@ -1,0 +1,218 @@
+/* ============================================================
+   DRIPPING SECRETS — Events Platform CSS  (v9.85)
+   ============================================================ */
+
+:root {
+  --ev-pink: #E91E8C;
+  --ev-purple: #4B1F5F;
+  --ev-gold: #C89B3C;
+  --ev-dark: #1a0a24;
+  --ev-card: rgba(255,255,255,0.04);
+  --ev-border: rgba(255,255,255,0.08);
+  --ev-radius: 16px;
+}
+
+/* ── Hero ─────────────────────────────────────────────────── */
+.ev-hero {
+  background: linear-gradient(135deg, #1a0a24 0%, #2d1040 50%, #1a0a24 100%);
+  padding: 80px 20px 60px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.ev-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 60% at 50% 0%, rgba(233,30,140,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.ev-hero h1 { font-size: clamp(2rem,5vw,3.2rem); color: #fff; margin: 0 0 12px; }
+.ev-hero p  { font-size: 1.1rem; color: rgba(255,255,255,0.7); max-width: 560px; margin: 0 auto 32px; }
+.ev-hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.ev-btn-primary {
+  background: linear-gradient(135deg, var(--ev-pink), #c2185b);
+  color: #fff; border: none; padding: 14px 32px; border-radius: 50px;
+  font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none;
+  transition: opacity .2s, transform .2s;
+}
+.ev-btn-primary:hover { opacity: .9; transform: translateY(-2px); }
+.ev-btn-ghost {
+  background: transparent; color: #fff;
+  border: 2px solid rgba(255,255,255,0.3); padding: 12px 28px;
+  border-radius: 50px; font-size: 1rem; font-weight: 600;
+  cursor: pointer; text-decoration: none; transition: border-color .2s;
+}
+.ev-btn-ghost:hover { border-color: var(--ev-pink); }
+
+/* ── Filter Bar ───────────────────────────────────────────── */
+.ev-filter-bar {
+  background: var(--ev-dark);
+  padding: 20px;
+  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  border-bottom: 1px solid var(--ev-border);
+}
+.ev-filter-btn {
+  background: var(--ev-card); color: rgba(255,255,255,.7);
+  border: 1px solid var(--ev-border); padding: 8px 20px;
+  border-radius: 50px; cursor: pointer; font-size: .9rem;
+  transition: all .2s;
+}
+.ev-filter-btn:hover, .ev-filter-btn.active {
+  background: var(--ev-pink); color: #fff; border-color: var(--ev-pink);
+}
+
+/* ── Calendar View ────────────────────────────────────────── */
+.ev-section { max-width: 1200px; margin: 0 auto; padding: 48px 20px; }
+.ev-section-title {
+  font-size: 1.5rem; color: #fff; margin: 0 0 24px;
+  display: flex; align-items: center; gap: 12px;
+}
+.ev-section-title .ev-badge {
+  background: var(--ev-pink); color: #fff;
+  font-size: .75rem; padding: 3px 10px; border-radius: 50px;
+}
+
+.ev-calendar {
+  background: var(--ev-card); border: 1px solid var(--ev-border);
+  border-radius: var(--ev-radius); overflow: hidden;
+}
+.ev-cal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; background: rgba(233,30,140,.1);
+  border-bottom: 1px solid var(--ev-border);
+}
+.ev-cal-header h3 { color: #fff; margin: 0; font-size: 1.1rem; }
+.ev-cal-nav { display: flex; gap: 8px; }
+.ev-cal-nav button {
+  background: var(--ev-card); color: #fff; border: 1px solid var(--ev-border);
+  width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 1rem;
+  transition: background .2s;
+}
+.ev-cal-nav button:hover { background: rgba(233,30,140,.2); }
+.ev-cal-grid {
+  display: grid; grid-template-columns: repeat(7,1fr);
+}
+.ev-cal-day-name {
+  padding: 12px 8px; text-align: center;
+  color: rgba(255,255,255,.4); font-size: .75rem; font-weight: 600;
+  text-transform: uppercase; border-bottom: 1px solid var(--ev-border);
+}
+.ev-cal-cell {
+  padding: 8px; min-height: 80px; border-right: 1px solid var(--ev-border);
+  border-bottom: 1px solid var(--ev-border); cursor: pointer;
+  transition: background .15s;
+}
+.ev-cal-cell:hover { background: rgba(233,30,140,.06); }
+.ev-cal-cell.has-event { background: rgba(233,30,140,.04); }
+.ev-cal-cell.today { background: rgba(233,30,140,.12); }
+.ev-cal-cell.other-month .ev-cal-date { color: rgba(255,255,255,.2); }
+.ev-cal-date { font-size: .85rem; color: rgba(255,255,255,.6); margin-bottom: 4px; }
+.ev-cal-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ev-pink); display: inline-block; margin-right: 3px; }
+
+/* ── Event Cards ──────────────────────────────────────────── */
+.ev-grid {
+  display: grid; grid-template-columns: repeat(auto-fill,minmax(320px,1fr)); gap: 24px;
+}
+.ev-card {
+  background: var(--ev-card); border: 1px solid var(--ev-border);
+  border-radius: var(--ev-radius); overflow: hidden; transition: transform .2s, border-color .2s;
+  display: flex; flex-direction: column;
+}
+.ev-card:hover { transform: translateY(-4px); border-color: rgba(233,30,140,.4); }
+.ev-card-banner {
+  height: 140px; background: linear-gradient(135deg, var(--ev-purple), #2d1040);
+  display: flex; align-items: center; justify-content: center; position: relative;
+  overflow: hidden;
+}
+.ev-card-banner::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 30% 70%, rgba(233,30,140,.4), transparent 60%);
+}
+.ev-card-banner .ev-card-type {
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(0,0,0,.5); color: #fff; font-size: .7rem;
+  padding: 4px 10px; border-radius: 50px; backdrop-filter: blur(6px);
+}
+.ev-card-icon { font-size: 2.8rem; position: relative; z-index: 1; }
+.ev-card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.ev-card-title { font-size: 1.1rem; color: #fff; font-weight: 700; margin: 0; }
+.ev-card-meta { color: rgba(255,255,255,.55); font-size: .85rem; }
+.ev-card-meta span { display: inline-block; margin-right: 12px; }
+.ev-card-desc { color: rgba(255,255,255,.6); font-size: .88rem; line-height: 1.5; flex: 1; }
+.ev-card-footer {
+  padding: 16px 20px 20px; display: flex; align-items: center;
+  justify-content: space-between; gap: 12px;
+}
+.ev-card-spots { color: rgba(255,255,255,.5); font-size: .82rem; }
+.ev-card-spots strong { color: var(--ev-pink); }
+.ev-rsvp-btn {
+  background: linear-gradient(135deg, var(--ev-pink), #c2185b);
+  color: #fff; border: none; padding: 10px 22px; border-radius: 50px;
+  font-size: .9rem; font-weight: 600; cursor: pointer; transition: opacity .2s;
+}
+.ev-rsvp-btn:hover { opacity: .85; }
+.ev-rsvp-btn:disabled { background: rgba(255,255,255,.1); cursor: default; color: rgba(255,255,255,.4); }
+
+/* ── RSVP Modal ───────────────────────────────────────────── */
+.ev-modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7);
+  z-index: 9999; display: flex; align-items: center; justify-content: center;
+  padding: 20px; opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.ev-modal-overlay.open { opacity: 1; pointer-events: all; }
+.ev-modal {
+  background: #1e0d2e; border: 1px solid var(--ev-border); border-radius: 20px;
+  width: 100%; max-width: 500px; padding: 32px;
+  transform: translateY(20px); transition: transform .2s;
+}
+.ev-modal-overlay.open .ev-modal { transform: translateY(0); }
+.ev-modal h3 { color: #fff; margin: 0 0 6px; font-size: 1.3rem; }
+.ev-modal-sub { color: rgba(255,255,255,.5); font-size: .9rem; margin: 0 0 24px; }
+.ev-form-row { margin-bottom: 16px; }
+.ev-form-row label { display: block; color: rgba(255,255,255,.7); font-size: .88rem; margin-bottom: 6px; }
+.ev-form-row input, .ev-form-row select, .ev-form-row textarea {
+  width: 100%; background: rgba(255,255,255,.06);
+  border: 1px solid var(--ev-border); border-radius: 10px;
+  color: #fff; padding: 12px 14px; font-size: .95rem; box-sizing: border-box;
+  transition: border-color .2s;
+}
+.ev-form-row input:focus, .ev-form-row select:focus { outline: none; border-color: var(--ev-pink); }
+.ev-form-row select option { background: #1e0d2e; }
+.ev-modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+.ev-modal-actions .ev-btn-primary { flex: 1; }
+.ev-modal-close { background: transparent; border: 1px solid var(--ev-border); color: rgba(255,255,255,.6); padding: 12px 20px; border-radius: 50px; cursor: pointer; font-size: .95rem; transition: border-color .2s; }
+.ev-modal-close:hover { border-color: rgba(255,255,255,.3); }
+
+/* ── Host Portal ──────────────────────────────────────────── */
+.ev-host-section {
+  background: linear-gradient(135deg, rgba(75,31,95,.4), rgba(26,10,36,.8));
+  border: 1px solid rgba(233,30,140,.2);
+  border-radius: var(--ev-radius); padding: 40px; text-align: center; margin: 48px 0;
+}
+.ev-host-section h2 { color: #fff; font-size: 1.8rem; margin: 0 0 12px; }
+.ev-host-section p { color: rgba(255,255,255,.6); font-size: 1rem; margin: 0 0 24px; }
+.ev-host-perks {
+  display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px;
+}
+.ev-host-perk {
+  background: var(--ev-card); border: 1px solid var(--ev-border);
+  border-radius: 12px; padding: 16px 20px; text-align: center; min-width: 130px;
+}
+.ev-host-perk-icon { font-size: 1.6rem; margin-bottom: 6px; }
+.ev-host-perk-label { color: rgba(255,255,255,.6); font-size: .82rem; }
+
+/* ── Upcoming Empty ───────────────────────────────────────── */
+.ev-empty {
+  text-align: center; padding: 60px 20px;
+  color: rgba(255,255,255,.4); font-size: 1rem;
+}
+.ev-empty-icon { font-size: 3rem; margin-bottom: 12px; }
+
+/* ── Mobile ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .ev-hero { padding: 60px 20px 40px; }
+  .ev-cal-cell { min-height: 50px; }
+  .ev-grid { grid-template-columns: 1fr; }
+  .ev-host-section { padding: 28px 20px; }
+  .ev-modal { padding: 24px; }
+}

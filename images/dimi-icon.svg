@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <defs>
+    <clipPath id="circ"><circle cx="80" cy="80" r="80"/></clipPath>
+  </defs>
+
+  <!-- BG -->
+  <circle cx="80" cy="80" r="80" fill="#1B0A38"/>
+
+  <g clip-path="url(#circ)">
+
+    <!-- BLAZER body -->
+    <path d="M0,160 L0,118 Q38,102 80,108 Q122,102 160,118 L160,160 Z" fill="#6B2FA0"/>
+    <!-- Fuchsia shirt center -->
+    <path d="M66,110 L80,122 L94,110 L94,160 L66,160 Z" fill="#D92B87"/>
+    <!-- Left lapel -->
+    <path d="M0,118 L66,110 L80,160 L0,160 Z" fill="#541F82"/>
+    <!-- Right lapel -->
+    <path d="M160,118 L94,110 L80,160 L160,160 Z" fill="#541F82"/>
+    <!-- Pocket square gold hint -->
+    <path d="M104,116 L112,113 L115,120 L106,122 Z" fill="#F5C518" opacity="0.85"/>
+
+    <!-- NECK -->
+    <rect x="71" y="100" width="18" height="14" rx="7" fill="#C4915A"/>
+
+    <!-- FACE -->
+    <ellipse cx="80" cy="70" rx="33" ry="36" fill="#C4915A"/>
+    <!-- Jaw shadow -->
+    <path d="M57,84 Q57,104 80,108 Q103,104 103,84" fill="#A87040" opacity="0.3"/>
+
+    <!-- HAIR main block -->
+    <path d="M47,62 Q49,30 80,28 Q111,30 113,62 Q108,40 80,40 Q52,40 47,62 Z" fill="#16112A"/>
+    <!-- Hair left side fall -->
+    <path d="M47,62 Q47,48 56,42 Q53,52 52,64 Z" fill="#16112A"/>
+    <!-- Part / swept highlight -->
+    <path d="M62,32 Q80,26 96,32 Q86,28 80,29 Q74,28 62,32 Z" fill="#2A1F48" opacity="0.9"/>
+    <!-- Side strand over forehead -->
+    <path d="M58,44 Q65,38 73,40 Q66,44 62,52 Z" fill="#1E193A"/>
+
+    <!-- LEFT EAR -->
+    <ellipse cx="47" cy="72" rx="5" ry="6" fill="#C4915A"/>
+    <!-- RIGHT EAR + gold hoop -->
+    <ellipse cx="113" cy="72" rx="5" ry="6" fill="#C4915A"/>
+    <circle cx="116.5" cy="74" r="5.5" fill="none" stroke="#F5C518" stroke-width="3"/>
+
+    <!-- EYEBROWS — left arched, right slightly higher (the look) -->
+    <path d="M58,55 Q67,49 76,53" stroke="#16112A" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+    <path d="M84,52 Q93,48 103,54" stroke="#16112A" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+
+    <!-- LEFT EYE -->
+    <path d="M58,64 Q68,57 78,64 Q68,72 58,64 Z" fill="#F5F0E8"/>
+    <ellipse cx="68" cy="64" rx="4.2" ry="4.2" fill="#22100A"/>
+    <circle cx="69.8" cy="62.5" r="1.4" fill="white" opacity="0.9"/>
+    <!-- Upper lid line -->
+    <path d="M58,63 Q68,57 78,63" stroke="#16112A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+
+    <!-- RIGHT EYE -->
+    <path d="M82,64 Q92,57 102,64 Q92,72 82,64 Z" fill="#F5F0E8"/>
+    <ellipse cx="92" cy="64" rx="4.2" ry="4.2" fill="#22100A"/>
+    <circle cx="93.8" cy="62.5" r="1.4" fill="white" opacity="0.9"/>
+    <!-- Upper lid line -->
+    <path d="M82,63 Q92,57 102,63" stroke="#16112A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+
+    <!-- NOSE — minimal, tasteful -->
+    <path d="M78,74 Q76,81 72,83 Q76,85 80,84 Q84,85 88,83 Q84,81 82,74 Z" fill="#A06830" opacity="0.4"/>
+
+    <!-- SMIRK — confident, slightly pulled right -->
+    <path d="M66,92 Q74,99 91,93" stroke="#8B4020" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- Upper lip curve -->
+    <path d="M66,92 Q73,88 80,90 Q87,88 91,93" stroke="#8B4020" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+    <!-- Cheek warmth -->
+    <ellipse cx="56" cy="79" rx="10" ry="7" fill="#D4704A" opacity="0.12"/>
+    <ellipse cx="104" cy="79" rx="10" ry="7" fill="#D4704A" opacity="0.12"/>
+
+  </g>
+
+  <!-- Ring -->
+  <circle cx="80" cy="80" r="77.5" fill="none" stroke="#8B4FD8" stroke-width="3" opacity="0.6"/>
+</svg>

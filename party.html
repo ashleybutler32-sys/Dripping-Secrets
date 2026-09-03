@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Build Your Secrets Party — Dripping Secrets</title>
+  <meta name="description" content="Build your custom luxury Secrets Party experience. Select your products, sign your agreement, and lock in your date. A Secret Keeper will host it all."/>
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#7c3aed"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Dripping Secrets"/>
+  <link rel="apple-touch-icon" href="/images/icon-192.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <!-- jsPDF for contract PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root { --plum:#4B1F5F; --rose:#B76E79; --gold:#c9a84c; --bg:#0e0618; --card:#16082a; --border:rgba(183,110,121,.2); }
+    *,*::before,*::after{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:#f0e6f0;font-family:'Jost',sans-serif;padding-top:72px}
+
+    /* ── HERO ── */
+    .party-hero{position:relative;padding:80px 24px 56px;text-align:center;overflow:hidden}
+    .party-hero-bg{position:absolute;inset:0;z-index:0;
+      background:radial-gradient(ellipse 70% 60% at 30% 30%,rgba(75,31,95,.45),transparent 55%),
+                 radial-gradient(ellipse 60% 50% at 75% 60%,rgba(183,110,121,.28),transparent 55%),
+                 radial-gradient(ellipse 40% 40% at 50% 100%,rgba(124,58,237,.18),transparent 60%);
+      animation:heroGlow 14s ease-in-out infinite alternate}
+    @keyframes heroGlow{0%{opacity:.8;transform:scale(1)}100%{opacity:1;transform:scale(1.03)}}
+    .party-hero-content{position:relative;z-index:2;max-width:700px;margin:0 auto}
+    .hero-eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:rgba(183,110,121,.9);margin-bottom:16px}
+    .hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.4rem,5.5vw,4rem);font-weight:600;line-height:1.1;color:#f5e6f0;margin:0 0 16px}
+    .hero-sub{font-size:.98rem;color:rgba(255,255,255,.6);max-width:540px;margin:0 auto 28px;line-height:1.75}
+    .hero-badges{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+    .hero-badge{background:rgba(183,110,121,.12);border:1px solid rgba(183,110,121,.25);border-radius:20px;padding:6px 14px;font-size:.78rem;color:#d4a0a8;letter-spacing:.05em}
+
+    /* ── PROGRESS STEPPER ── */
+    .stepper{display:flex;justify-content:center;gap:0;padding:36px 16px 28px;max-width:700px;margin:0 auto}
+    .step-node{display:flex;flex-direction:column;align-items:center;flex:1;position:relative}
+    .step-node:not(:last-child)::after{content:'';position:absolute;top:16px;left:50%;width:100%;height:2px;background:var(--border);z-index:0}
+    .step-node.done::after{background:var(--rose)}
+    .step-circle{width:34px;height:34px;border-radius:50%;border:2px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:600;position:relative;z-index:1;transition:all .3s;flex-shrink:0}
+    .step-node.active .step-circle{border-color:var(--rose);background:var(--rose);color:#fff}
+    .step-node.done .step-circle{border-color:var(--rose);background:var(--rose);color:#fff}
+    .step-label{font-size:.68rem;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:8px;text-align:center}
+    .step-node.active .step-label,.step-node.done .step-label{color:var(--rose)}
+
+    /* ── WIZARD CONTAINER ── */
+    .wizard{max-width:860px;margin:0 auto;padding:0 16px 80px}
+    .wizard-step{display:none}
+    .wizard-step.active{display:block}
+
+    /* ── CARDS ── */
+    .w-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px 28px;margin-bottom:20px}
+    .w-card h2{font-family:'Cormorant Garamond',serif;font-size:1.7rem;color:#e8c4d0;margin:0 0 8px}
+    .w-card p{color:rgba(255,255,255,.6);font-size:.9rem;margin:0 0 24px;line-height:1.7}
+    .section-title{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--rose);margin-bottom:14px;font-weight:600}
+
+    /* ── QUIZ OPTIONS ── */
+    .quiz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:20px}
+    .quiz-opt{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.1);border-radius:14px;padding:18px 16px;cursor:pointer;text-align:center;transition:all .2s}
+    .quiz-opt:hover{border-color:var(--rose);background:rgba(183,110,121,.1)}
+    .quiz-opt.selected{border-color:var(--rose);background:rgba(183,110,121,.18)}
+    .quiz-opt-icon{font-size:2rem;margin-bottom:8px}
+    .quiz-opt-label{font-weight:600;font-size:.95rem;margin-bottom:4px}
+    .quiz-opt-desc{font-size:.78rem;color:rgba(255,255,255,.5)}
+    .count-btns{display:flex;align-items:center;gap:14px}
+    .count-btn{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid var(--border);color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+    .count-btn:hover{background:rgba(183,110,121,.2)}
+    .count-val{font-size:1.4rem;font-weight:600;min-width:36px;text-align:center}
+
+    /* ── DATE PICKER ── */
+    .date-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .form-group{display:flex;flex-direction:column;gap:6px}
+    .form-group label{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+    .form-group input,.form-group select,.form-group textarea{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:11px 14px;color:#fff;font-family:'Jost',sans-serif;font-size:.92rem;outline:none;transition:border-color .2s}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--rose)}
+    .form-group select option{background:#1a0a2e;color:#fff}
+    .time-pills{display:flex;flex-wrap:wrap;gap:10px}
+    .time-pill{padding:9px 18px;border-radius:24px;border:1px solid var(--border);background:rgba(255,255,255,.04);font-size:.85rem;cursor:pointer;transition:all .2s;color:rgba(255,255,255,.7)}
+    .time-pill:hover,.time-pill.selected{border-color:var(--rose);background:rgba(183,110,121,.18);color:#fff}
+
+    /* ── PARTY PRODUCTS ── */
+    .party-products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+    .party-prod-card{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s;cursor:pointer}
+    .party-prod-card:hover{border-color:var(--rose)}
+    .party-prod-card.in-bundle{border-color:var(--rose);background:rgba(183,110,121,.1)}
+    .party-prod-img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+    .party-prod-body{padding:12px}
+    .party-prod-name{font-size:.85rem;font-weight:600;margin-bottom:6px;line-height:1.35}
+    .party-prod-price{font-size:.9rem;color:var(--rose);font-weight:700}
+    .party-prod-add{width:100%;margin-top:10px;padding:8px;border-radius:8px;border:1px solid var(--rose);background:transparent;color:var(--rose);font-family:'Jost',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.04em}
+    .party-prod-card.in-bundle .party-prod-add{background:var(--rose);color:#fff}
+    .party-tab-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+    .party-tab{padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:rgba(255,255,255,.04);font-size:.8rem;cursor:pointer;transition:all .2s;color:rgba(255,255,255,.6)}
+    .party-tab:hover,.party-tab.active{border-color:var(--rose);background:rgba(183,110,121,.15);color:#fff}
+
+    /* ── PARTY CART SIDEBAR ── */
+    .party-layout{display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start}
+    @media(max-width:720px){.party-layout{grid-template-columns:1fr}}
+    .party-cart{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:sticky;top:90px}
+    .party-cart h3{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:#e8c4d0;margin:0 0 16px}
+    .party-cart-items{display:flex;flex-direction:column;gap:10px;max-height:320px;overflow-y:auto;margin-bottom:16px}
+    .pci{display:flex;justify-content:space-between;align-items:center;font-size:.82rem;gap:8px}
+    .pci-name{flex:1;line-height:1.3;color:rgba(255,255,255,.8)}
+    .pci-price{color:var(--rose);font-weight:600;white-space:nowrap}
+    .pci-rm{background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:1rem;padding:0;flex-shrink:0}
+    .pci-rm:hover{color:#f87171}
+    .party-cart-line{display:flex;justify-content:space-between;font-size:.82rem;color:rgba(255,255,255,.5);padding:4px 0;border-top:1px solid rgba(255,255,255,.06)}
+    .party-cart-total{display:flex;justify-content:space-between;font-weight:700;font-size:1rem;color:#fff;padding:10px 0 0;border-top:1px solid var(--border)}
+    .party-cart-gift{background:rgba(75,31,95,.3);border:1px solid rgba(183,110,121,.25);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#e8b4ba;margin-bottom:12px}
+    .empty-cart-msg{text-align:center;font-size:.82rem;color:rgba(255,255,255,.35);padding:24px 0}
+
+    /* ── CONTRACT ── */
+    .contract-box{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:22px;max-height:340px;overflow-y:auto;font-size:.83rem;color:rgba(255,255,255,.65);line-height:1.75;margin-bottom:22px}
+    .contract-box h4{color:#e8c4d0;font-size:.95rem;margin:0 0 8px;font-family:'Cormorant Garamond',serif}
+    .contract-box p,.contract-box li{margin-bottom:8px}
+    .contract-box ol{padding-left:20px}
+    .sig-row{display:grid;grid-template-columns:2fr 1fr;gap:14px;align-items:end}
+    .sig-line{border-bottom:2px solid var(--rose);padding:10px 0 6px;font-family:'Cormorant Garamond',serif;font-size:1.2rem;min-height:46px;cursor:text;color:#e8c4d0;letter-spacing:.03em}
+
+    /* ── REVIEW & CHECKOUT ── */
+    .review-items{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+    .ri{display:flex;justify-content:space-between;font-size:.88rem;color:rgba(255,255,255,.8);padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+    .ri-label{color:rgba(255,255,255,.5)}
+    .order-total-row{display:flex;justify-content:space-between;font-size:1.1rem;font-weight:700;color:#fff;padding:14px 0 0;border-top:1px solid var(--border)}
+    .payment-methods{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:16px}
+    .pay-method{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;transition:all .2s;font-size:.82rem;color:rgba(255,255,255,.7)}
+    .pay-method:hover,.pay-method.selected{border-color:var(--rose);background:rgba(183,110,121,.12);color:#fff}
+    .pay-method-icon{font-size:1.5rem;margin-bottom:6px}
+    .pay-instructions{background:rgba(183,110,121,.08);border:1px solid rgba(183,110,121,.2);border-radius:10px;padding:16px;margin-top:14px;font-size:.85rem;line-height:1.65;display:none}
+    .pay-instructions.show{display:block}
+    .addon-card{display:flex;flex-direction:column;gap:6px;background:rgba(255,255,255,.03);border:2px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;transition:all .25s;position:relative;user-select:none}
+    .addon-card:hover{border-color:rgba(183,110,121,.5);background:rgba(183,110,121,.06)}
+    .addon-card.selected{border-color:var(--rose);background:rgba(183,110,121,.12)}
+    .addon-icon{color:rgba(255,255,255,.5);margin-bottom:4px}
+    .addon-card.selected .addon-icon{color:var(--rose)}
+    .addon-name{font-size:.88rem;font-weight:700;color:#fff;line-height:1.3}
+    .addon-desc{font-size:.75rem;color:rgba(255,255,255,.45);line-height:1.5;flex:1}
+    .addon-badge{font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--rose);font-weight:600;margin-top:4px}
+    .addon-card.selected .addon-badge{color:#fff;background:var(--rose);display:inline-block;padding:2px 8px;border-radius:20px;width:fit-content}
+    .addon-check{position:absolute;top:10px;right:10px;width:18px;height:18px;border-radius:50%;border:2px solid var(--border);background:transparent;transition:all .2s}
+    .addon-card.selected .addon-check{background:var(--rose);border-color:var(--rose);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath d='M1 5l3 3 7-7' stroke='white' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center;background-size:10px}
+
+    /* ── BUTTONS ── */
+    .btn-primary{background:linear-gradient(135deg,#B76E79,#7c3aed);color:#fff;border:none;border-radius:10px;padding:14px 28px;font-family:'Jost',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;letter-spacing:.04em;transition:transform .15s,box-shadow .15s}
+    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(183,110,121,.3)}
+    .btn-ghost{background:none;border:1px solid var(--border);color:rgba(255,255,255,.6);border-radius:10px;padding:13px 28px;font-family:'Jost',sans-serif;font-size:.92rem;cursor:pointer;transition:border-color .2s}
+    .btn-ghost:hover{border-color:var(--rose);color:#fff}
+    .nav-btns{display:flex;justify-content:space-between;align-items:center;padding-top:10px;flex-wrap:wrap;gap:10px}
+
+    /* ── SUCCESS ── */
+    .success-screen{display:none;text-align:center;padding:60px 24px}
+    .success-icon{font-size:3.5rem;margin-bottom:20px}
+    .success-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4.5vw,3rem);color:#e8c4d0;margin-bottom:14px}
+    .success-sub{font-size:.95rem;color:rgba(255,255,255,.65);max-width:520px;margin:0 auto 30px;line-height:1.75}
+    .success-actions{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+
+    /* ── HOSTESS GIFT TAG ── */
+    .hostess-gift-tag{background:linear-gradient(135deg,rgba(75,31,95,.6),rgba(183,110,121,.2));border:1px solid rgba(183,110,121,.35);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px;margin-bottom:16px}
+    .hgt-icon{font-size:2rem;flex-shrink:0}
+    .hgt-text{font-size:.85rem;line-height:1.5;color:rgba(255,255,255,.8)}
+    .hgt-name{font-weight:600;color:#e8b4ba}
+
+    @media(max-width:600px){
+      .date-grid{grid-template-columns:1fr}
+      .sig-row{grid-template-columns:1fr}
+      .party-hero{padding:60px 16px 40px}
+    }
+  </style>
+</head>
+<body>
+  <!-- ── NAV ── -->
+  <a href="#main-content" class="skip-nav">Skip to Main Content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <button class="hamburger" id="hamburger" onclick="document.getElementById('main-nav').classList.toggle('open')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <a href="/" class="site-logo">
+        <img src="/images/Vector.png" alt="Dripping Secrets" height="36" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
+        <span style="display:none;font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:#f5e6f0;">Dripping Secrets</span>
+      </a>
+      <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+        <a href="/shop.html">Shop</a>
+        <a href="/party.html" class="active">Secrets Party</a>
+        <a href="/services.html">Services</a>
+        <a href="/bundles.html">Bundles</a>
+        <a href="/boxes.html">Build a Box</a>
+        <a href="/sneaky-link-bags.html">Sneaky Link Bags</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        
+        <a href="/admin.html" class="nav-admin-link" title="Back Office" aria-label="Back Office"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
+      </nav>
+      <div class="header-actions">
+        <button class="account-btn" id="account-btn" onclick="if(typeof openAccountBtn==='function')openAccountBtn()" aria-label="My Account">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span id="account-label">Sign In</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── HERO ── -->
+  <section role="main" id="main-content" class="party-hero">
+    <div class="party-hero-bg"></div>
+    <div class="party-hero-content">
+      <div class="hero-eyebrow">Luxury In-Home Experience</div>
+      <h1 class="hero-title">Build Your<br><em>Secrets Party</em></h1>
+      <p class="hero-sub">You pick the products. We handle the experience. Your Secret Keeper brings the whole vibe — plus a little surprise for the host.</p>
+      <div class="hero-badges">
+        <span class="hero-badge">Secret Keeper Hosted</span>
+        <span class="hero-badge">Free Hostess Gift</span>
+        <span class="hero-badge">Signed Agreement Included</span>
+        <span class="hero-badge">US Direct Delivery 2–5 Days</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PROGRESS STEPPER ── -->
+  <div class="stepper" id="stepper">
+    <div class="step-node active" id="sn-1"><div class="step-circle">1</div><div class="step-label">Vibe</div></div>
+    <div class="step-node" id="sn-2"><div class="step-circle">2</div><div class="step-label">Date</div></div>
+    <div class="step-node" id="sn-3"><div class="step-circle">3</div><div class="step-label">Build</div></div>
+    <div class="step-node" id="sn-4"><div class="step-circle">4</div><div class="step-label">Sign</div></div>
+    <div class="step-node" id="sn-5"><div class="step-circle">5</div><div class="step-label">Book</div></div>
+  </div>
+
+  <!-- ── WIZARD ── -->
+  <div class="wizard">
+
+    <!-- ────────────────── STEP 1: QUIZ ────────────────── -->
+    <div class="wizard-step active" id="step-1">
+      <div class="w-card">
+        <h2>Let's set the vibe, darling</h2>
+        <p>Dimi needs a little information to curate your free hostess gift and set the tone for the most unforgettable night. Your guests will never guess it was this easy.</p>
+
+        <div class="section-title">What's the energy for this party?</div>
+        <div class="quiz-grid" id="vibe-opts">
+          <div class="quiz-opt" data-vibe="sensual" onclick="selectVibe(this)">
+            <div class="quiz-opt-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B76E79" stroke-width="1.8"><path d="M12 22c0-4-4-6-4-10a4 4 0 0 1 8 0c0 4-4 6-4 10z"/><path d="M12 8c0-2 1.5-4 3-4" stroke-opacity=".5"/></svg></div>
+            <div class="quiz-opt-label">Sensual</div>
+            <div class="quiz-opt-desc">Intimate, luxurious, romantic vibes</div>
+          </div>
+          <div class="quiz-opt" data-vibe="playful" onclick="selectVibe(this)">
+            <div class="quiz-opt-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B76E79" stroke-width="1.8"><path d="M3 3l7 7M8 3l1 5-5-1M3 8l5 1-1 5"/><circle cx="17" cy="7" r="2" fill="#B76E79" fill-opacity=".3"/><circle cx="14" cy="14" r="1.5" fill="#4B1F5F" fill-opacity=".4"/><circle cx="20" cy="13" r="1" fill="#B76E79"/></svg></div>
+            <div class="quiz-opt-label">Playful</div>
+            <div class="quiz-opt-desc">Fun, games, laughter — we're here for it</div>
+          </div>
+          <div class="quiz-opt" data-vibe="adventurous" onclick="selectVibe(this)">
+            <div class="quiz-opt-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B76E79" stroke-width="1.8"><path d="M12 22c4 0 7-3 7-7 0-2-1-4-3-5 0 2-1 3-2 3-1 0-2-1-2-3-2 2-3 4-3 6 0 2 1 4 3 6z"/><path d="M12 22c-2 0-4-2-4-4 0-1 .5-2 1.5-2.5" stroke-opacity=".5"/></svg></div>
+            <div class="quiz-opt-label">Adventurous</div>
+            <div class="quiz-opt-desc">Pushing limits, trying new things</div>
+          </div>
+          <div class="quiz-opt" data-vibe="all" onclick="selectVibe(this)">
+            <div class="quiz-opt-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B76E79" stroke-width="1.8"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3" fill="#B76E79" fill-opacity=".2"/></svg></div>
+            <div class="quiz-opt-label">All of the Above</div>
+            <div class="quiz-opt-desc">Don't make me choose!</div>
+          </div>
+        </div>
+
+        <div class="section-title">How many guests are you expecting?</div>
+        <div class="count-btns" style="margin-bottom:24px">
+          <button class="count-btn" onclick="changeGuests(-1)">−</button>
+          <div class="count-val" id="guest-count">8</div>
+          <button class="count-btn" onclick="changeGuests(1)">+</button>
+          <span style="font-size:.85rem;color:rgba(255,255,255,.45);margin-left:6px">guests (min 5)</span>
+        </div>
+
+        <div class="section-title">Any specific preferences or must-haves?</div>
+        <div class="form-group" style="margin-bottom:28px">
+          <textarea id="quiz-notes" rows="3" placeholder="e.g. 'Focus on couples items' or 'Keep it beginner-friendly' or 'Surprise me completely'" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:12px 14px;color:#fff;font-family:'Jost',sans-serif;font-size:.9rem;width:100%;resize:vertical;"></textarea>
+        </div>
+
+        <div class="nav-btns">
+          <div></div>
+          <button class="btn-primary" onclick="goToStep(2)">Next: Pick Your Date</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ────────────────── STEP 2: DATE & TIME ────────────────── -->
+    <div class="wizard-step" id="step-2">
+      <div class="w-card">
+        <h2>Lock in your date</h2>
+        <p>Your Secret Keeper will confirm availability within 24 hours of booking. Pick a date at least 5 business days out to ensure products arrive on time.</p>
+
+        <div class="date-grid" style="margin-bottom:24px">
+          <div class="form-group">
+            <label>Party Date</label>
+            <input type="date" id="party-date" min="" style="color-scheme:dark"/>
+          </div>
+          <div class="form-group">
+            <label>Party Start Time</label>
+            <select id="party-time">
+              <option value="18:00">6:00 PM</option>
+              <option value="19:00" selected>7:00 PM</option>
+              <option value="20:00">8:00 PM</option>
+              <option value="15:00">3:00 PM (Afternoon)</option>
+              <option value="14:00">2:00 PM (Afternoon)</option>
+              <option value="custom">Other (note in comments)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Duration (estimated)</label>
+            <select id="party-duration">
+              <option value="2">~2 hours</option>
+              <option value="3" selected>~3 hours</option>
+              <option value="4">~4 hours</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Party Location — City, TX</label>
+            <input type="text" id="party-city" placeholder="e.g. Frisco, TX"/>
+          </div>
+        </div>
+
+        <div class="section-title">Time Slot</div>
+        <div class="time-pills" style="margin-bottom:28px">
+          <div class="time-pill" data-slot="evening" onclick="selectSlot(this)">Evening Party (6–10 PM)</div>
+          <div class="time-pill selected" data-slot="night" onclick="selectSlot(this)">Night Party (7–11 PM)</div>
+          <div class="time-pill" data-slot="afternoon" onclick="selectSlot(this)">Afternoon Soirée (2–6 PM)</div>
+          <div class="time-pill" data-slot="brunch" onclick="selectSlot(this)">Brunch Sip & Shop (11 AM–2 PM)</div>
+        </div>
+
+        <div class="nav-btns">
+          <button class="btn-ghost" onclick="goToStep(1)">← Back</button>
+          <button class="btn-primary" onclick="goToStep(3)">Next: Build Your Bundle</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ────────────────── STEP 3: BUNDLE BUILDER ────────────────── -->
+    <div class="wizard-step" id="step-3">
+      <div class="w-card" style="padding-bottom:16px">
+        <h2>Build your party bundle</h2>
+        <p>Everything you add ships directly to you before the party — products are yours to keep. Your Secret Keeper brings the experience, the energy, and your surprise hostess gift.</p>
+      </div>
+
+      <div class="party-layout">
+        <!-- Product Grid -->
+        <div>
+          <div class="party-tab-bar" id="party-tab-bar">
+            <div class="party-tab active" data-cat="party_exclusive" onclick="filterPartyProducts('party_exclusive',this)">Party Essentials</div>
+            <div class="party-tab" data-cat="toys" onclick="filterPartyProducts('toys',this)">Toys</div>
+            <div class="party-tab" data-cat="roses" onclick="filterPartyProducts('roses',this)">Roses</div>
+            <div class="party-tab" data-cat="couples" onclick="filterPartyProducts('couples',this)">Couples</div>
+            <div class="party-tab" data-cat="bondage" onclick="filterPartyProducts('bondage',this)">Bondage</div>
+            <div class="party-tab" data-cat="machines" onclick="filterPartyProducts('machines',this)">Machines</div>
+            <div class="party-tab" data-cat="accessories" onclick="filterPartyProducts('accessories',this)">Accessories</div>
+            <div class="party-tab" data-cat="wellness" onclick="filterPartyProducts('wellness',this)">Wellness</div>
+          </div>
+          <div class="party-products-grid" id="party-products-grid">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+        <!-- Party Cart -->
+        <div>
+          <div class="party-cart" id="party-cart-panel">
+            <h3>Your Party Bundle</h3>
+            <div class="party-cart-items" id="party-cart-items">
+              <div class="empty-cart-msg" id="empty-cart-msg">No items yet — start building!</div>
+            </div>
+            <div id="hostess-gift-slot" class="party-cart-gift" style="display:none">
+              <div style="font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(183,110,121,.8);margin-bottom:4px">Free Hostess Gift from Dimi</div>
+              <div id="hostess-gift-name" style="font-weight:600;color:#e8b4ba"></div>
+              <div style="font-size:.78rem;color:rgba(255,255,255,.5)">Selected based on your vibe quiz — FREE</div>
+            </div>
+            <div class="party-cart-line"><span>Products Subtotal</span><span id="pc-subtotal">$0.00</span></div>
+            <div class="party-cart-line"><span>Secret Keeper Fee</span><span>$150.00</span></div>
+            <div class="party-cart-line" style="color:var(--gold)"><span>Hostess Gift</span><span>FREE</span></div>
+            <div class="party-cart-total"><span>Estimated Total</span><span id="pc-total">$150.00</span></div>
+            <p style="font-size:.73rem;color:rgba(255,255,255,.35);margin:10px 0 16px;line-height:1.5">Products ship 2–5 days before your party. Final total confirmed at checkout.</p>
+            <button class="btn-primary" style="width:100%" onclick="goToStep(4)" id="next-to-sign-btn">Continue to Sign Agreement</button>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <div class="nav-btns">
+          <button class="btn-ghost" onclick="goToStep(2)">← Back</button>
+          <button class="btn-primary" onclick="goToStep(4)">Next: Sign Agreement</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ────────────────── STEP 4: CONTRACT ────────────────── -->
+    <div class="wizard-step" id="step-4">
+      <div class="w-card">
+        <h2>Service Agreement</h2>
+        <p>Please read and sign the agreement below. This protects both of us and ensures we're all on the same beautiful page.</p>
+
+        <div class="contract-box" id="contract-box">
+          <h4>DRIPPING SECRETS — SECRETS PARTY SERVICE AGREEMENT</h4>
+          <p>This Service Agreement ("Agreement") is entered into between the client signing below ("Client") and Dripping Secrets LLC ("Company"), a Texas-based adult product retailer and party host.</p>
+          <ol>
+            <li><strong>Service Description.</strong> The Company provides a luxury in-home Secrets Party experience, including curated product presentation, party hosting by a certified Secret Keeper, and a pre-selected product bundle delivered to the Client's address. This is strictly a retail and entertainment service.</li>
+            <li><strong>Liability Waiver.</strong> Client voluntarily releases, waives, and discharges Dripping Secrets LLC, its owners, officers, employees, Secret Keepers, contractors, and representatives from any and all liability, claims, demands, damages, or causes of action of any kind, arising from: (a) use of any product purchased through this service; (b) any activity, interaction, or experience during or after the event; or (c) any physical, emotional, psychological, or relational outcomes. The Company makes no express or implied warranties regarding outcomes, results, compatibility, or satisfaction.</li>
+            <li><strong>Adult Consent.</strong> Client confirms they are 18 years of age or older and that all attendees present at the event will be adults aged 18 or older. The Company is not responsible for verifying attendee ages; that responsibility falls solely on the Client and host.</li>
+            <li><strong>Personal Use.</strong> All products are sold strictly for personal adult entertainment and personal use only. Dripping Secrets LLC is a licensed adult product retailer. Nothing in this service constitutes medical advice, therapeutic guidance, health claims, or professional sexual education services.</li>
+            <li><strong>Cancellation Policy.</strong> Cancellations made more than 72 hours before the scheduled event receive a full product refund (minus shipping). Cancellations within 72 hours of the event are subject to a $75.00 non-refundable cancellation fee. No-shows forfeit the full Secret Keeper fee.</li>
+            <li><strong>Photography & Privacy.</strong> Client agrees not to photograph, video record, or live-stream any Secret Keeper, Company staff, or branded materials without prior written consent. Client assumes full responsibility for the privacy of all other attendees.</li>
+            <li><strong>Indemnification.</strong> Client agrees to indemnify and hold harmless the Company from any claims arising from Client's use of products or conduct during the event.</li>
+            <li><strong>Governing Law.</strong> This Agreement shall be governed by the laws of the State of Texas. Any disputes shall be resolved through binding arbitration in Collin County, Texas.</li>
+          </ol>
+          <p><em>By signing below, Client acknowledges they have read, understood, and voluntarily agree to all terms above.</em></p>
+        </div>
+
+        <div class="sig-row">
+          <div class="form-group">
+            <label>Type your full legal name to sign</label>
+            <input type="text" id="sig-name" placeholder="Full Name" oninput="updateSigPreview(this.value)" style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;letter-spacing:.03em"/>
+            <div class="sig-line" id="sig-preview"></div>
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="text" id="sig-date" readonly style="color:rgba(255,255,255,.5)"/>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-top:20px;margin-bottom:28px;background:rgba(255,255,255,.04);border-radius:10px;padding:14px">
+          <input type="checkbox" id="sig-confirm" style="margin-top:2px;width:18px;height:18px;accent-color:var(--rose);flex-shrink:0"/>
+          <label for="sig-confirm" style="font-size:.85rem;color:rgba(255,255,255,.7);cursor:pointer;line-height:1.6">I confirm I am 18+ years of age, have read the full agreement above, and agree to all terms. I understand this constitutes a legally binding electronic signature.</label>
+        </div>
+
+        <div class="nav-btns">
+          <button class="btn-ghost" onclick="goToStep(3)">← Back</button>
+          <button class="btn-primary" onclick="goToStep(5)">I Agree — Continue to Booking</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ────────────────── STEP 5: BOOKING INFO & CHECKOUT ────────────────── -->
+    <div class="wizard-step" id="step-5">
+      <div class="w-card">
+        <h2>Almost there, gorgeous</h2>
+        <p>Fill in your information and select how you'd like to pay. Your Secret Keeper will confirm your date within 24 hours.</p>
+
+        <div class="section-title">Your Information</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px" class="form-responsive-grid">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" id="book-fname" placeholder="First Name"/>
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" id="book-lname" placeholder="Last Name"/>
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="book-email" placeholder="your@email.com"/>
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="book-phone" placeholder="(xxx) xxx-xxxx"/>
+          </div>
+        </div>
+
+        <div class="section-title">Party/Shipping Address</div>
+        <div style="display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:20px">
+          <div class="form-group">
+            <label>Street Address</label>
+            <input type="text" id="book-address" placeholder="123 Main St"/>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px" class="form-responsive-grid">
+            <div class="form-group">
+              <label>City</label>
+              <input type="text" id="book-city" placeholder="City"/>
+            </div>
+            <div class="form-group">
+              <label>State</label>
+              <input type="text" id="book-state" placeholder="TX" value="TX"/>
+            </div>
+            <div class="form-group">
+              <label>ZIP</label>
+              <input type="text" id="book-zip" placeholder="75407"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Special Requests or Notes for Your Secret Keeper</label>
+            <textarea id="book-notes" rows="2" placeholder="Dietary restrictions for favors, ambiance requests, anything you want us to know..."></textarea>
+          </div>
+        </div>
+
+        <!-- Add-On Services -->
+        <div class="section-title" style="margin-top:28px">Elevate Your Party — Optional Add-Ons</div>
+        <p style="font-size:.82rem;color:rgba(255,255,255,.5);margin-bottom:16px">We offer a full suite of services to make your Secrets Party truly unforgettable. Select anything that interests you — your Secret Keeper will follow up with pricing and availability for your date.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:24px" id="addons-grid">
+          <label class="addon-card" data-addon="catering">
+            <div class="addon-check"></div>
+            <input type="checkbox" style="display:none" />
+            <div class="addon-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+            </div>
+            <div class="addon-name">Catering</div>
+            <div class="addon-desc">Light bites, desserts, themed refreshments, or full spread — we can coordinate it all.</div>
+            <div class="addon-badge">Add-On</div>
+          </label>
+          <label class="addon-card" data-addon="setup-cleaning">
+            <div class="addon-check"></div>
+            <input type="checkbox" style="display:none" />
+            <div class="addon-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <div class="addon-name">Setup &amp; Cleaning</div>
+            <div class="addon-desc">We arrive early to set the vibe and return after to handle cleanup — you just enjoy.</div>
+            <div class="addon-badge">Add-On</div>
+          </label>
+          <label class="addon-card" data-addon="dancers-female">
+            <div class="addon-check"></div>
+            <input type="checkbox" style="display:none" />
+            <div class="addon-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v5l-3 5h6l-3-5"/><path d="M9 17l-2 4m8-4l2 4"/></svg>
+            </div>
+            <div class="addon-name">Entertainment — Female Dancers</div>
+            <div class="addon-desc">Professional female entertainers for an elevated, unforgettable atmosphere.</div>
+            <div class="addon-badge">Add-On</div>
+          </label>
+          <label class="addon-card" data-addon="dancers-male">
+            <div class="addon-check"></div>
+            <input type="checkbox" style="display:none" />
+            <div class="addon-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v5l-3 5h6l-3-5"/><path d="M9 17l-2 4m8-4l2 4"/></svg>
+            </div>
+            <div class="addon-name">Entertainment — Male Dancers</div>
+            <div class="addon-desc">Professional male entertainers — ladies (and friends), this one's for you.</div>
+            <div class="addon-badge">Add-On</div>
+          </label>
+          <label class="addon-card" data-addon="dj">
+            <div class="addon-check"></div>
+            <input type="checkbox" style="display:none" />
+            <div class="addon-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+            </div>
+            <div class="addon-name">DJ Services</div>
+            <div class="addon-desc">Custom playlist or live DJ spinning the vibe you want all night long.</div>
+            <div class="addon-badge">Add-On</div>
+          </label>
+          <label class="addon-card" data-addon="host-mc">
+            <div class="addon-check"></div>
+            <input type="checkbox" style="display:none" />
+            <div class="addon-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </div>
+            <div class="addon-name">Host / MC</div>
+            <div class="addon-desc">A charismatic host or MC to keep the energy high, games going, and your guests engaged.</div>
+            <div class="addon-badge">Add-On</div>
+          </label>
+        </div>
+        <div id="addons-note" style="display:none;background:rgba(75,31,95,.25);border:1px solid rgba(183,110,121,.3);border-radius:10px;padding:12px 16px;font-size:.82rem;color:#e8c4d0;margin-bottom:20px">
+          <strong>Selected add-ons noted!</strong> Your Secret Keeper will reach out separately with pricing and availability — no additional payment is required at checkout for these.
+        </div>
+
+        <!-- Order Review -->
+        <div class="section-title">Order Summary</div>
+        <div class="review-items" id="review-items"><!-- populated by JS --></div>
+        <div class="order-total-row"><span>Total Due</span><span id="review-total">$150.00</span></div>
+
+        <!-- Payment -->
+        <div class="section-title" style="margin-top:24px">Payment Method</div>
+        <p style="font-size:.82rem;color:rgba(255,255,255,.5);margin-bottom:14px">Select your preferred method. Payment instructions will appear after your booking is confirmed.</p>
+        <div class="payment-methods" id="payment-methods">
+          <div class="pay-method" data-method="cashapp" onclick="selectPayMethod(this)">
+            <div class="pay-method-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="#00D632"><path d="M17.06 11.57c-.7-.35-1.47-.55-2.27-.61l-.5-.04c-.74-.06-1.07-.3-1.07-.74 0-.52.52-.82 1.43-.82.74 0 1.45.19 2.13.57.1.06.22.03.29-.06l.9-1.44a.22.22 0 0 0-.06-.3A5.7 5.7 0 0 0 15.5 7.5V6.25c0-.14-.11-.25-.25-.25h-1.75c-.14 0-.25.11-.25.25v1.18c-1.7.28-2.75 1.34-2.75 2.82 0 1.82 1.26 2.6 3.19 2.76l.5.04c.88.07 1.2.35 1.2.83 0 .57-.53.89-1.5.89-.93 0-1.85-.3-2.65-.86a.22.22 0 0 0-.3.05l-.98 1.4a.22.22 0 0 0 .04.3c.87.7 1.97 1.1 3.12 1.2v1.15c0 .14.11.25.25.25h1.75c.14 0 .25-.11.25-.25v-1.2c1.8-.28 2.88-1.38 2.88-2.96 0-1.62-.95-2.53-2.94-3.03z"/></svg>
+            </div>
+            <div>CashApp</div>
+          </div>
+
+          <div class="pay-method" data-method="applepay" onclick="selectPayMethod(this)">
+            <div class="pay-method-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            </div>
+            <div>Apple Pay</div>
+          </div>
+
+          <div class="pay-method" data-method="paypal" onclick="selectPayMethod(this)">
+            <div class="pay-method-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="#003087"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.641.641 0 0 1 .633-.544h7.194c2.44 0 4.187.508 5.1 1.511.867.95 1.106 2.17.712 3.627-.027.1-.056.2-.085.3 0 .003-.002.005-.002.008-.578 2.154-2.144 3.595-4.697 4.318-.91.257-1.95.382-3.144.382H8.93a.642.642 0 0 0-.633.538L7.076 21.337z" fill="#009cde"/><path d="M19.38 9.22c-.03.19-.068.38-.11.57-.757 3.284-3.356 4.96-7.522 4.96H9.58a.641.641 0 0 0-.633.538l-1.21 7.667a.48.48 0 0 0 .474.558h3.325a.562.562 0 0 0 .556-.474l.23-1.484.447-2.888a.562.562 0 0 1 .555-.474h.793c2.568 0 4.444-.876 5.344-2.877.497-1.1.597-2.27.292-3.148a3.32 3.32 0 0 0-.373-.948z" fill="#012169"/></svg>
+            </div>
+            <div>PayPal</div>
+          </div>
+        </div>
+        <div class="pay-instructions" id="pay-instructions"></div>
+
+        <div id="book-error" style="color:#f87171;font-size:.85rem;min-height:20px;margin-top:12px;"></div>
+
+        <div class="nav-btns" style="margin-top:24px">
+          <button class="btn-ghost" onclick="goToStep(4)">← Back</button>
+          <button class="btn-primary" onclick="submitBooking()" id="submit-booking-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right:6px;vertical-align:-2px"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14H11v-2h2zm0-4H11V7h2z"/></svg>
+            Confirm My Booking
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /wizard -->
+
+  <!-- ── SUCCESS SCREEN ── -->
+  <div class="success-screen wizard" id="success-screen">
+    <div class="success-icon"><svg width="56" height="56" viewBox="0 0 24 24" fill="#B76E79" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+    <div class="success-title">Your Secrets Party is Booked!</div>
+    <p class="success-sub">Your Secret Keeper will confirm within 24 hours. Your product bundle ships directly to you 2–5 days before the party. Check your email for your signed agreement and booking confirmation.</p>
+    <div class="success-actions">
+      <button class="btn-primary" onclick="downloadContract()" id="download-contract-btn">Download Signed Agreement</button>
+      <a href="/account.html" class="btn-ghost" style="text-decoration:none;display:inline-flex;align-items:center;padding:13px 28px;border-radius:10px;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);">View in My Portal</a>
+      <a href="/shop.html" class="btn-ghost" style="text-decoration:none;display:inline-flex;align-items:center;padding:13px 28px;border-radius:10px;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);">Continue Shopping</a>
+    </div>
+  </div>
+
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/products.js"></script>
+  <script src="/js/auth.js"></script>
+  <style>
+    @media(max-width:600px){.form-responsive-grid{grid-template-columns:1fr!important}}
+  </style>
+  <script>
+  /* ── PARTY BUILDER STATE ── */
+  const partyState = {
+    vibe: null,
+    guestCount: 8,
+    quizNotes: '',
+    date: null,
+    timeSlot: 'night',
+    startTime: '19:00',
+    duration: '3',
+    city: '',
+    bundleItems: [],
+    hostessGift: null,
+    sigName: '',
+    payMethod: null,
+    bookingId: null,
+    contractBlob: null
+  };
+
+  const KEEPER_FEE = 150;
+
+  /* ── HOSTESS GIFT LOGIC ── */
+  const hostessGiftMap = {
+    sensual:     { name: 'Rosegasm Bouquet Rose Wand', id: 442, value: 66 },
+    playful:     { name: 'Nipple Nibblers Assorted Fishbowl', id: 427, value: 122 },
+    adventurous: { name: 'LELO Soraya Beads – Violet Dusk', id: 447, value: 173 },
+    all:         { name: 'Love Lickers Flavored Body Oil Display', id: 428, value: 137 }
+  };
+
+  /* ── PRODUCT DATA ── */
+  let partyProducts = [];
+  // ── Add-On Services Toggle ──────────────────────────────
+  document.addEventListener('click', function(e) {
+    const card = e.target.closest('.addon-card');
+    if (!card) return;
+    card.classList.toggle('selected');
+    const cb = card.querySelector('input[type="checkbox"]');
+    if (cb) cb.checked = card.classList.contains('selected');
+    const anySelected = document.querySelectorAll('.addon-card.selected').length > 0;
+    const note = document.getElementById('addons-note');
+    if (note) note.style.display = anySelected ? 'block' : 'none';
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    // Set date minimum (5 business days from today)
+    const minDate = new Date();
+    minDate.setDate(minDate.getDate() + 7);
+    document.getElementById('party-date').min = minDate.toISOString().split('T')[0];
+    document.getElementById('sig-date').value = new Date().toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'});
+
+    // Load products
+    const allProds = (typeof getProducts === 'function') ? getProducts() : (window.PRODUCTS || []);
+    partyProducts = allProds.filter(p =>
+      p.partyItem === true ||
+      ['party_exclusive','toys','roses','couples','bondage','machines','accessories','wellness'].includes(p.category)
+    );
+    filterPartyProducts('party_exclusive', document.querySelector('.party-tab'));
+
+    // Pre-fill if logged in
+    const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        if (user.displayName) {
+          const parts = user.displayName.split(' ');
+          document.getElementById('book-fname').value = parts[0] || '';
+          document.getElementById('book-lname').value = parts.slice(1).join(' ') || '';
+        }
+        if (user.email) document.getElementById('book-email').value = user.email;
+      }
+    });
+  });
+
+  /* ── STEP NAVIGATION ── */
+  let currentStep = 1;
+  function goToStep(n) {
+    // Validate current step
+    if (n > currentStep) {
+      if (!validateStep(currentStep)) return;
+    }
+    document.getElementById('step-' + currentStep).classList.remove('active');
+    document.getElementById('sn-' + currentStep).classList.remove('active');
+    document.getElementById('sn-' + currentStep).classList.add('done');
+    currentStep = n;
+    document.getElementById('step-' + n).classList.add('active');
+    document.getElementById('sn-' + n).classList.add('active');
+    // On step 3: assign hostess gift
+    if (n === 3 && partyState.vibe) assignHostessGift();
+    // On step 5: populate review
+    if (n === 5) populateReview();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function validateStep(n) {
+    if (n === 1) {
+      partyState.vibe = document.querySelector('.quiz-opt.selected')?.dataset.vibe || null;
+      if (!partyState.vibe) { alert('Please select a party vibe to continue.'); return false; }
+      partyState.quizNotes = document.getElementById('quiz-notes').value;
+      return true;
+    }
+    if (n === 2) {
+      const d = document.getElementById('party-date').value;
+      if (!d) { alert('Please select a party date.'); return false; }
+      partyState.date = d;
+      partyState.startTime = document.getElementById('party-time').value;
+      partyState.duration = document.getElementById('party-duration').value;
+      partyState.city = document.getElementById('party-city').value;
+      return true;
+    }
+    if (n === 3) return true;
+    if (n === 4) {
+      const nm = document.getElementById('sig-name').value.trim();
+      if (!nm) { alert('Please type your name to sign the agreement.'); return false; }
+      if (!document.getElementById('sig-confirm').checked) { alert('Please check the box confirming you agree to the terms.'); return false; }
+      partyState.sigName = nm;
+      return true;
+    }
+    return true;
+  }
+
+  /* ── QUIZ INTERACTIONS ── */
+  function selectVibe(el) {
+    document.querySelectorAll('.quiz-opt').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+  function changeGuests(delta) {
+    partyState.guestCount = Math.max(5, partyState.guestCount + delta);
+    document.getElementById('guest-count').textContent = partyState.guestCount;
+  }
+  function selectSlot(el) {
+    document.querySelectorAll('.time-pill').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    partyState.timeSlot = el.dataset.slot;
+  }
+
+  /* ── PRODUCT BROWSER ── */
+  let _partyCat = 'party_exclusive';
+  function filterPartyProducts(cat, el) {
+    _partyCat = cat;
+    document.querySelectorAll('.party-tab').forEach(t => t.classList.remove('active'));
+    if (el) el.classList.add('active');
+    const prods = partyProducts.filter(p => p.category === cat);
+    const grid = document.getElementById('party-products-grid');
+    if (!prods.length) { grid.innerHTML = '<p style="color:rgba(255,255,255,.4);grid-column:1/-1;padding:24px 0;">No items in this category yet.</p>'; return; }
+    grid.innerHTML = prods.map(p => {
+      const inBundle = partyState.bundleItems.some(b => b.id === p.id);
+      return `<div class="party-prod-card ${inBundle?'in-bundle':''}" id="ppc-${p.id}">
+        <img class="party-prod-img" src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=400'"/>
+        <div class="party-prod-body">
+          <div class="party-prod-name">${p.name}</div>
+          <div class="party-prod-price">$${(p.price||0).toFixed(2)}</div>
+          <button class="party-prod-add" onclick="toggleBundleItem(${p.id})">${inBundle?'Added — Remove':'+ Add to Bundle'}</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function toggleBundleItem(id) {
+    const prod = partyProducts.find(p => p.id === id);
+    if (!prod) return;
+    const idx = partyState.bundleItems.findIndex(b => b.id === id);
+    if (idx >= 0) {
+      partyState.bundleItems.splice(idx, 1);
+    } else {
+      partyState.bundleItems.push(prod);
+    }
+    filterPartyProducts(_partyCat, document.querySelector('.party-tab.active'));
+    updatePartyCart();
+  }
+
+  function updatePartyCart() {
+    const items = partyState.bundleItems;
+    const subtotal = items.reduce((s,p) => s + (p.price||0), 0);
+    const total = subtotal + KEEPER_FEE;
+    document.getElementById('pc-subtotal').textContent = '$' + subtotal.toFixed(2);
+    document.getElementById('pc-total').textContent = '$' + total.toFixed(2);
+    const cartItems = document.getElementById('party-cart-items');
+    const emptyMsg = document.getElementById('empty-cart-msg');
+    if (!items.length) {
+      cartItems.innerHTML = '<div class="empty-cart-msg" id="empty-cart-msg">No items yet — start building!</div>';
+      return;
+    }
+    cartItems.innerHTML = items.map(p => `
+      <div class="pci">
+        <span class="pci-name">${p.name}</span>
+        <span class="pci-price">$${(p.price||0).toFixed(2)}</span>
+        <button class="pci-rm" onclick="toggleBundleItem(${p.id})" title="Remove">&times;</button>
+      </div>`).join('');
+  }
+
+  function assignHostessGift() {
+    const vibe = partyState.vibe || 'all';
+    const gift = hostessGiftMap[vibe] || hostessGiftMap['all'];
+    partyState.hostessGift = gift;
+    document.getElementById('hostess-gift-name').textContent = gift.name;
+    document.getElementById('hostess-gift-slot').style.display = 'flex';
+  }
+
+  /* ── SIG PREVIEW ── */
+  function updateSigPreview(val) {
+    document.getElementById('sig-preview').textContent = val;
+  }
+
+  /* ── REVIEW STEP ── */
+  function populateReview() {
+    const items = partyState.bundleItems;
+    const subtotal = items.reduce((s,p) => s + (p.price||0), 0);
+    const total = subtotal + KEEPER_FEE;
+    const date = document.getElementById('party-date').value;
+    const city = document.getElementById('party-city').value;
+    document.getElementById('review-total').textContent = '$' + total.toFixed(2);
+    let html = items.map(p => `<div class="ri"><span>${p.name}</span><span>$${(p.price||0).toFixed(2)}</span></div>`).join('');
+    html += `<div class="ri"><span class="ri-label">Secret Keeper Fee</span><span>$${KEEPER_FEE.toFixed(2)}</span></div>`;
+    if (partyState.hostessGift) html += `<div class="ri"><span class="ri-label">Hostess Gift — ${partyState.hostessGift.name}</span><span style="color:var(--gold)">FREE</span></div>`;
+    if (date) html += `<div class="ri"><span class="ri-label">Party Date</span><span>${new Date(date + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}</span></div>`;
+    if (city) html += `<div class="ri"><span class="ri-label">Location</span><span>${city}</span></div>`;
+    document.getElementById('review-items').innerHTML = html;
+  }
+
+  /* ── PAYMENT SELECTION ── */
+  const payDetails = {
+    cashapp:  { label:'CashApp', detail:'Send to <strong>$flawwless23</strong>. Include your booking confirmation # in the memo. Payment due within 24 hours of booking confirmation.' },
+    applepay: { label:'Apple Pay', detail:'Apple Pay to <strong>469-300-1412</strong>. Include your name and party date in the note.' },
+    paypal:   { label:'PayPal',  detail:'Send to <strong>Assistant.manager@drippingsecrets.com</strong>. Select "Friends &amp; Family" or use Pay as Guest.' }
+  };
+  function selectPayMethod(el) {
+    document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('selected'));
+    el.classList.add('selected');
+    partyState.payMethod = el.dataset.method;
+    const info = payDetails[partyState.payMethod];
+    const box = document.getElementById('pay-instructions');
+    box.innerHTML = `<strong>${info.label}:</strong> ${info.detail}`;
+    box.classList.add('show');
+  }
+
+  /* ── SUBMIT BOOKING ── */
+  async function submitBooking() {
+    const fname = document.getElementById('book-fname').value.trim();
+    const lname = document.getElementById('book-lname').value.trim();
+    const email = document.getElementById('book-email').value.trim();
+    const phone = document.getElementById('book-phone').value.trim();
+    const address = document.getElementById('book-address').value.trim();
+    const city = document.getElementById('book-city').value.trim();
+    const state = document.getElementById('book-state').value.trim();
+    const zip = document.getElementById('book-zip').value.trim();
+    const errEl = document.getElementById('book-error');
+    errEl.textContent = '';
+
+    if (!fname || !email || !phone || !address || !city || !zip) {
+      errEl.textContent = 'Please fill in all required fields.'; return;
+    }
+    if (!partyState.payMethod) {
+      errEl.textContent = 'Please select a payment method.'; return;
+    }
+
+    const subtotal = partyState.bundleItems.reduce((s,p) => s + (p.price||0), 0);
+    const total = subtotal + KEEPER_FEE;
+
+    const bookingData = {
+      clientName: fname + ' ' + lname,
+      email, phone,
+      address: { street: address, city, state, zip },
+      partyDate: partyState.date,
+      timeSlot: partyState.timeSlot,
+      startTime: partyState.startTime,
+      duration: partyState.duration,
+      partyCity: partyState.city,
+      vibe: partyState.vibe,
+      guestCount: partyState.guestCount,
+      quizNotes: partyState.quizNotes,
+      bundleItems: partyState.bundleItems.map(p => ({ id: p.id, name: p.name, price: p.price })),
+      hostessGift: partyState.hostessGift,
+      subtotal, keeperFee: KEEPER_FEE, total,
+      paymentMethod: partyState.payMethod,
+      signedName: partyState.sigName,
+      signedDate: new Date().toISOString(),
+      bookingNotes: document.getElementById('book-notes').value,
+      addOnServices: Array.from(document.querySelectorAll('.addon-card.selected')).map(c => c.dataset.addon),
+      status: 'pending',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      userId: firebase.auth().currentUser?.uid || null
+    };
+
+    const btn = document.getElementById('submit-booking-btn');
+    btn.textContent = 'Booking...'; btn.disabled = true;
+
+    try {
+      const db = firebase.firestore();
+      const ref = await db.collection('partyBookings').add(bookingData);
+      partyState.bookingId = ref.id;
+
+      // Save to user portal files if logged in
+      if (firebase.auth().currentUser) {
+        await db.collection('users').doc(firebase.auth().currentUser.uid)
+          .collection('files').add({
+            type: 'partyContract',
+            bookingId: ref.id,
+            partyDate: partyState.date,
+            clientName: fname + ' ' + lname,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+      }
+
+      // Generate contract PDF
+      generateContractPDF(bookingData, ref.id);
+
+      // Show success
+      document.querySelector('.wizard').style.display = 'none';
+      document.getElementById('stepper').style.display = 'none';
+      document.getElementById('success-screen').style.display = 'block';
+      window.scrollTo({top:0,behavior:'smooth'});
+
+    } catch(e) {
+      console.error(e);
+      errEl.textContent = 'Booking failed — please try again or email Assistant.Manager@DrippingSecrets.com';
+      btn.textContent = 'Confirm My Booking'; btn.disabled = false;
+    }
+  }
+
+  /* ── CONTRACT PDF GENERATION ── */
+  function generateContractPDF(data, bookingId) {
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'letter' });
+      const W = doc.internal.pageSize.getWidth();
+      let y = 20;
+
+      // Header
+      doc.setFillColor(75, 31, 95);
+      doc.rect(0, 0, W, 18, 'F');
+      doc.setTextColor(240, 220, 240);
+      doc.setFontSize(14); doc.setFont('helvetica','bold');
+      doc.text('DRIPPING SECRETS', W/2, 11, {align:'center'});
+      doc.setFontSize(8); doc.setFont('helvetica','normal');
+      doc.text('Secrets Party Service Agreement', W/2, 16, {align:'center'});
+
+      y = 28;
+      doc.setTextColor(30, 10, 50);
+      doc.setFontSize(11); doc.setFont('helvetica','bold');
+      doc.text('BOOKING CONFIRMATION & SERVICE AGREEMENT', W/2, y, {align:'center'});
+      y += 6;
+      doc.setFontSize(8); doc.setFont('helvetica','normal');
+      doc.setTextColor(100, 80, 120);
+      doc.text('Booking ID: ' + bookingId, W/2, y, {align:'center'});
+      y += 10;
+
+      // Client Info
+      doc.setTextColor(30,10,50);
+      doc.setFontSize(9); doc.setFont('helvetica','bold');
+      doc.text('CLIENT INFORMATION', 14, y); y += 5;
+      doc.setFont('helvetica','normal');
+      doc.text('Name: ' + data.clientName, 14, y); y += 5;
+      doc.text('Email: ' + data.email + '   Phone: ' + data.phone, 14, y); y += 5;
+      doc.text('Address: ' + data.address.street + ', ' + data.address.city + ', ' + data.address.state + ' ' + data.address.zip, 14, y); y += 5;
+      doc.text('Party Date: ' + (data.partyDate || 'TBD') + '   Start Time: ' + data.startTime + '   Duration: ' + data.duration + 'hrs', 14, y); y += 8;
+
+      // Bundle
+      doc.setFont('helvetica','bold'); doc.text('PARTY BUNDLE', 14, y); y += 5;
+      doc.setFont('helvetica','normal');
+      data.bundleItems.forEach(item => {
+        doc.text('• ' + item.name + '  —  $' + item.price.toFixed(2), 16, y);
+        y += 5;
+        if (y > 240) { doc.addPage(); y = 20; }
+      });
+      if (data.hostessGift) {
+        doc.text('• FREE Hostess Gift: ' + data.hostessGift.name, 16, y); y += 5;
+      }
+      y += 3;
+      doc.setFont('helvetica','bold');
+      doc.text('Products Subtotal: $' + data.subtotal.toFixed(2), 14, y); y += 5;
+      doc.text('Secret Keeper Fee: $' + data.keeperFee.toFixed(2), 14, y); y += 5;
+      doc.text('TOTAL DUE: $' + data.total.toFixed(2), 14, y); y += 8;
+
+      // Agreement text
+      if (y > 180) { doc.addPage(); y = 20; }
+      doc.setFont('helvetica','bold'); doc.text('SERVICE AGREEMENT', 14, y); y += 5;
+      doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+      const agreeLines = [
+        '1. Service Description: Dripping Secrets provides a luxury in-home Secrets Party experience including product presentation,',
+        '   hosting by a certified Secret Keeper, and a pre-selected product bundle. This is strictly a retail and entertainment service.',
+        '2. Liability Waiver: Client voluntarily releases Dripping Secrets LLC and all associated parties from any and all liability,',
+        '   claims, or damages arising from product use or any activity during or after the event.',
+        '3. Adult Consent: Client confirms all attendees are 18+ years of age.',
+        '4. Personal Use: All products are for personal adult entertainment use only. No medical or therapeutic claims are made.',
+        '5. Cancellation: 72+ hrs notice = full product refund minus shipping. Within 72 hrs = $75 cancellation fee.',
+        '6. Photography: No recording of Secret Keeper staff without prior written consent.',
+        '7. Indemnification: Client agrees to indemnify the Company from claims arising from their conduct.',
+        '8. Governing Law: Disputes resolved through binding arbitration in Collin County, Texas.'
+      ];
+      agreeLines.forEach(line => { doc.text(line, 14, y); y += 4.5; });
+      y += 6;
+
+      // Signature
+      if (y > 230) { doc.addPage(); y = 20; }
+      doc.setFontSize(9); doc.setFont('helvetica','bold');
+      doc.text('ELECTRONIC SIGNATURE', 14, y); y += 8;
+      doc.setFont('helvetica','normal');
+      doc.text('Signed by: ' + data.signedName, 14, y); y += 5;
+      doc.text('Date: ' + new Date(data.signedDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}), 14, y); y += 5;
+      doc.text('By typing their name above, the client acknowledges this constitutes a legally binding electronic signature.', 14, y); y += 10;
+
+      // Footer
+      doc.setFillColor(75, 31, 95);
+      const PH = doc.internal.pageSize.getHeight();
+      doc.rect(0, PH-14, W, 14, 'F');
+      doc.setTextColor(200, 180, 210); doc.setFontSize(7);
+      doc.text('Dripping Secrets LLC  |  Assistant.Manager@DrippingSecrets.com  |  DrippingSecrets.com', W/2, PH-6, {align:'center'});
+
+      partyState.contractBlob = doc.output('blob');
+      console.log('Contract PDF generated successfully');
+    } catch(e) {
+      console.error('PDF generation error:', e);
+    }
+  }
+
+  function downloadContract() {
+    if (!partyState.contractBlob) {
+      alert('PDF not available — please contact Assistant.Manager@DrippingSecrets.com for your agreement copy.');
+      return;
+    }
+    const url = URL.createObjectURL(partyState.contractBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'DrippingSecrets-Party-Agreement-' + (partyState.bookingId || 'booking') + '.pdf';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(() => console.log('✅ SW registered'))
+          .catch(e => console.error('SW error:', e));
+      });
+    }
+    document.querySelectorAll('.main-nav a').forEach(a => {
+      a.addEventListener('click', () => document.getElementById('main-nav').classList.remove('open'));
+    });
+  </script>
+  <script src="/js/dimi-walker.js"></script>
+<script src="js/pwa.js"></script>
+  <script src="/js/age-gate.js" defer></script>
+</body>
+</html>

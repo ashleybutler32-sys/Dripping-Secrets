@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Dripping Secrets">
+  <link rel="apple-touch-icon" href="/images/icon-192.png">
+  <title>My Account | Dripping Secrets</title>
+  <meta name="description" content="Manage your orders, wishlist, reviews, and profile at Dripping Secrets." />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#7c3aed" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <style>
+    /* ===== PORTAL LAYOUT ===== */
+    .portal-wrap {
+      min-height: 100vh;
+      background: #07041a;
+      padding-top: 90px;
+      padding-bottom: 80px;
+    }
+    .portal-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ===== PORTAL HEADER ===== */
+    .portal-hero {
+      background: linear-gradient(135deg, rgba(75,31,95,0.6) 0%, rgba(124,58,237,0.3) 100%);
+      border: 1px solid rgba(183,110,121,0.25);
+      border-radius: 20px;
+      padding: 36px 40px;
+      margin-bottom: 36px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+    .portal-avatar {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4B1F5F, #B76E79);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem; color: #fff; font-weight: 600;
+      flex-shrink: 0;
+      border: 3px solid rgba(183,110,121,0.5);
+    }
+    .portal-hero-text h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.9rem; color: #fff; margin: 0 0 4px;
+    }
+    .portal-hero-text p {
+      color: rgba(255,255,255,0.55);
+      font-family: 'Jost', sans-serif; font-size: 0.85rem; margin: 0;
+    }
+    .portal-hero-stats {
+      margin-left: auto;
+      display: flex; gap: 24px; flex-wrap: wrap;
+    }
+    .portal-stat {
+      text-align: center;
+    }
+    .portal-stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem; color: #B76E79; font-weight: 600; line-height: 1;
+      display: block;
+    }
+    .portal-stat-lbl {
+      font-family: 'Jost', sans-serif; font-size: 0.72rem;
+      color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.1em;
+      display: block; margin-top: 4px;
+    }
+
+    /* ===== TABS ===== */
+    .portal-tabs {
+      display: flex; gap: 4px; flex-wrap: wrap;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 6px;
+      margin-bottom: 32px;
+    }
+    .portal-tab {
+      flex: 1; min-width: 100px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-family: 'Jost', sans-serif; font-size: 0.85rem; font-weight: 500;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer; border: none; background: transparent;
+      transition: all 0.2s ease;
+    }
+    .portal-tab:hover { color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.05); }
+    .portal-tab.active {
+      background: linear-gradient(135deg, #4B1F5F, rgba(183,110,121,0.5));
+      color: #fff;
+      border: 1px solid rgba(183,110,121,0.4);
+    }
+    .portal-tab svg { flex-shrink: 0; }
+
+    /* ===== TAB PANELS ===== */
+    .portal-panel { display: none; }
+    .portal-panel.active { display: block; }
+
+    /* ===== SECTION TITLE ===== */
+    .pt-section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem; color: #fff; margin: 0 0 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .pt-section-title span { color: #B76E79; }
+
+    /* ===== DASHBOARD CARDS ===== */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px; margin-bottom: 32px;
+    }
+    .dash-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; padding: 24px;
+      display: flex; align-items: flex-start; gap: 16px;
+    }
+    .dash-card-icon {
+      width: 46px; height: 46px; border-radius: 12px;
+      background: linear-gradient(135deg, #4B1F5F, rgba(183,110,121,0.4));
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .dash-card-body h4 {
+      font-family: 'Jost', sans-serif; font-size: 0.78rem;
+      color: rgba(255,255,255,0.5); text-transform: uppercase;
+      letter-spacing: 0.1em; margin: 0 0 6px;
+    }
+    .dash-card-body p {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem; color: #fff; font-weight: 600; margin: 0;
+      line-height: 1;
+    }
+    .dash-card-body small {
+      font-family: 'Jost', sans-serif; font-size: 0.73rem;
+      color: rgba(255,255,255,0.35); display: block; margin-top: 4px;
+    }
+
+    /* Recent orders in dashboard */
+    .recent-order-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px; margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .ro-id { font-family: 'Jost', sans-serif; font-size: 0.78rem; color: rgba(255,255,255,0.4); flex: 1; min-width: 80px; }
+    .ro-date { font-family: 'Jost', sans-serif; font-size: 0.82rem; color: rgba(255,255,255,0.55); }
+    .ro-total { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: #B76E79; font-weight: 600; }
+    .ro-status { padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-family: 'Jost', sans-serif; font-weight: 500; }
+    .ro-status.processing { background: rgba(234,179,8,0.15); color: #fbbf24; border: 1px solid rgba(234,179,8,0.3); }
+    .ro-status.shipped { background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.3); }
+    .ro-status.delivered { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+    .ro-status.pending { background: rgba(183,110,121,0.15); color: #B76E79; border: 1px solid rgba(183,110,121,0.3); }
+
+    /* ===== ORDERS PANEL ===== */
+    .order-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; padding: 24px;
+      margin-bottom: 16px;
+    }
+    .order-card-header {
+      display: flex; align-items: center; gap: 16px;
+      flex-wrap: wrap; margin-bottom: 18px;
+      padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .order-num {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; color: #fff; font-weight: 600;
+    }
+    .order-meta {
+      font-family: 'Jost', sans-serif; font-size: 0.8rem; color: rgba(255,255,255,0.45);
+    }
+    .order-amount {
+      margin-left: auto;
+      font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: #B76E79; font-weight: 600;
+    }
+    .order-items-list {
+      display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px;
+    }
+    .order-item-row {
+      display: flex; align-items: center; gap: 12px;
+      font-family: 'Jost', sans-serif; font-size: 0.84rem; color: rgba(255,255,255,0.7);
+    }
+    .order-item-row span:last-child { margin-left: auto; color: rgba(255,255,255,0.45); }
+    .order-track-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 20px; border-radius: 8px;
+      background: rgba(75,31,95,0.5); border: 1px solid rgba(183,110,121,0.35);
+      color: #B76E79; font-family: 'Jost', sans-serif; font-size: 0.82rem; font-weight: 500;
+      text-decoration: none; cursor: pointer; transition: all 0.2s;
+    }
+    .order-track-btn:hover { background: rgba(75,31,95,0.8); color: #fff; }
+    .order-tracking-info {
+      margin-top: 12px; padding: 12px 16px;
+      background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25);
+      border-radius: 10px; font-family: 'Jost', sans-serif; font-size: 0.82rem;
+      color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 10px;
+    }
+    .order-tracking-info a { color: #818cf8; text-decoration: none; }
+    .order-tracking-info a:hover { text-decoration: underline; }
+
+    /* ===== WISHLIST PANEL ===== */
+    .wishlist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 18px;
+    }
+    .wl-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .wl-card:hover { transform: translateY(-3px); border-color: rgba(183,110,121,0.4); }
+    .wl-card-img {
+      width: 100%; aspect-ratio: 1;
+      object-fit: cover; display: block;
+      background: #1a0d2e;
+    }
+    .wl-card-body { padding: 14px; }
+    .wl-card-body h4 {
+      font-family: 'Jost', sans-serif; font-size: 0.85rem; color: #fff;
+      margin: 0 0 6px; line-height: 1.3;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .wl-card-price {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: #B76E79; font-weight: 600;
+      display: block; margin-bottom: 12px;
+    }
+    .wl-card-actions { display: flex; gap: 8px; }
+    .wl-btn-cart {
+      flex: 1; padding: 8px; border-radius: 8px;
+      background: linear-gradient(135deg, #4B1F5F, #7c3aed);
+      border: none; color: #fff; font-family: 'Jost', sans-serif; font-size: 0.8rem;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .wl-btn-cart:hover { opacity: 0.85; }
+    .wl-btn-remove {
+      padding: 8px 10px; border-radius: 8px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.45); cursor: pointer; transition: all 0.2s;
+    }
+    .wl-btn-remove:hover { color: #ef4444; border-color: rgba(239,68,68,0.4); }
+
+    /* ===== REVIEWS PANEL ===== */
+    .review-product-select {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px; padding: 20px; margin-bottom: 28px;
+    }
+    .review-product-select h3 {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: #fff; margin: 0 0 16px;
+    }
+    .review-prod-list {
+      display: flex; flex-direction: column; gap: 10px; max-height: 320px; overflow-y: auto;
+    }
+    .review-prod-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 16px; border-radius: 10px;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .review-prod-row:hover, .review-prod-row.selected {
+      background: rgba(75,31,95,0.4); border-color: rgba(183,110,121,0.4);
+    }
+    .review-prod-row img {
+      width: 48px; height: 48px; border-radius: 8px; object-fit: cover; background: #1a0d2e;
+    }
+    .review-prod-row span {
+      font-family: 'Jost', sans-serif; font-size: 0.88rem; color: rgba(255,255,255,0.8);
+    }
+    .review-form {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 24px;
+    }
+    .review-form h3 {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: #fff; margin: 0 0 16px;
+    }
+    .star-picker { display: flex; gap: 8px; margin-bottom: 16px; }
+    .star-btn {
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.2); font-size: 1.5rem; transition: color 0.15s;
+      padding: 0; line-height: 1;
+    }
+    .star-btn.active, .star-btn:hover { color: #fbbf24; }
+    .review-textarea {
+      width: 100%; min-height: 100px; padding: 14px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px; color: #fff; font-family: 'Jost', sans-serif; font-size: 0.9rem;
+      resize: vertical; outline: none; box-sizing: border-box;
+    }
+    .review-textarea:focus { border-color: rgba(183,110,121,0.6); }
+    .review-submit-btn {
+      margin-top: 14px; padding: 12px 28px;
+      background: linear-gradient(135deg, #4B1F5F, #B76E79);
+      border: none; border-radius: 10px; color: #fff;
+      font-family: 'Jost', sans-serif; font-size: 0.9rem; font-weight: 500;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .review-submit-btn:hover { opacity: 0.85; }
+    .review-submit-btn:disabled { opacity: 0.4; cursor: default; }
+    .reviews-written { margin-top: 32px; }
+    .review-card {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 20px; margin-bottom: 14px;
+    }
+    .review-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .review-card-stars { color: #fbbf24; font-size: 0.9rem; }
+    .review-card-product { font-family: 'Jost', sans-serif; font-size: 0.82rem; color: rgba(255,255,255,0.5); }
+    .review-card-date { font-family: 'Jost', sans-serif; font-size: 0.78rem; color: rgba(255,255,255,0.3); margin-left: auto; }
+    .review-card-body { font-family: 'Jost', sans-serif; font-size: 0.88rem; color: rgba(255,255,255,0.7); line-height: 1.6; }
+    .verified-badge {
+      display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px;
+      border-radius: 20px; background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3);
+      color: #4ade80; font-size: 0.7rem; font-family: 'Jost', sans-serif;
+    }
+
+    /* ===== PROFILE PANEL ===== */
+    .profile-section {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; padding: 28px; margin-bottom: 20px;
+    }
+    .profile-section h3 {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; color: #fff;
+      margin: 0 0 20px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .profile-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    }
+    .profile-grid.single { grid-template-columns: 1fr; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label {
+      font-family: 'Jost', sans-serif; font-size: 0.78rem; color: rgba(255,255,255,0.5);
+      text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .form-input {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px; padding: 12px 14px; color: #fff;
+      font-family: 'Jost', sans-serif; font-size: 0.9rem; outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus { border-color: rgba(183,110,121,0.6); }
+    .form-input:disabled { opacity: 0.4; cursor: default; }
+    .save-btn {
+      margin-top: 20px; padding: 12px 32px;
+      background: linear-gradient(135deg, #4B1F5F, #B76E79);
+      border: none; border-radius: 10px; color: #fff;
+      font-family: 'Jost', sans-serif; font-size: 0.9rem; font-weight: 500;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .save-btn:hover { opacity: 0.85; }
+    .save-msg { font-family: 'Jost', sans-serif; font-size: 0.82rem; color: #4ade80; margin-top: 10px; display: none; }
+    .notif-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px; border-radius: 12px; background: rgba(255,255,255,0.03);
+    }
+    .notif-row p { font-family: 'Jost', sans-serif; font-size: 0.88rem; color: rgba(255,255,255,0.7); margin: 0; flex: 1; }
+    .notif-row small { font-family: 'Jost', sans-serif; font-size: 0.75rem; color: rgba(255,255,255,0.35); display: block; }
+    .toggle-switch { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background: rgba(255,255,255,0.15); border-radius: 26px; transition: 0.3s;
+    }
+    .toggle-slider:before {
+      content: ''; position: absolute;
+      height: 20px; width: 20px; left: 3px; bottom: 3px;
+      background: #fff; border-radius: 50%; transition: 0.3s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: #B76E79; }
+    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+    .danger-btn {
+      padding: 10px 22px; border-radius: 10px;
+      background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+      color: #ef4444; font-family: 'Jost', sans-serif; font-size: 0.85rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .danger-btn:hover { background: rgba(239,68,68,0.2); }
+
+    /* ===== REWARDS TEASER ===== */
+    .rewards-teaser {
+      background: linear-gradient(135deg, rgba(75,31,95,0.5), rgba(183,110,121,0.2));
+      border: 1px solid rgba(183,110,121,0.3); border-radius: 16px; padding: 32px;
+      text-align: center; margin-bottom: 20px;
+    }
+    .rewards-teaser h3 {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: #fff; margin: 0 0 10px;
+    }
+    .rewards-teaser p { font-family: 'Jost', sans-serif; font-size: 0.9rem; color: rgba(255,255,255,0.6); margin: 0 0 20px; }
+    .rewards-bar-wrap {
+      max-width: 400px; margin: 0 auto 12px;
+    }
+    .rewards-bar-track {
+      height: 10px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;
+    }
+    .rewards-bar-fill {
+      height: 100%; background: linear-gradient(90deg, #4B1F5F, #B76E79);
+      border-radius: 10px; transition: width 0.8s ease;
+    }
+    .rewards-bar-label { font-family: 'Jost', sans-serif; font-size: 0.78rem; color: rgba(255,255,255,0.4); margin-top: 6px; }
+
+    /* ===== EMPTY STATES ===== */
+    .portal-empty {
+      text-align: center; padding: 60px 20px;
+      color: rgba(255,255,255,0.35); font-family: 'Jost', sans-serif;
+    }
+    .portal-empty svg { opacity: 0.3; margin-bottom: 16px; }
+    .portal-empty p { font-size: 0.9rem; margin: 0 0 20px; }
+    .portal-empty a {
+      display: inline-block; padding: 10px 24px;
+      background: linear-gradient(135deg, #4B1F5F, #B76E79);
+      border-radius: 10px; color: #fff; text-decoration: none;
+      font-size: 0.85rem; transition: opacity 0.2s;
+    }
+    .portal-empty a:hover { opacity: 0.85; }
+
+    /* ===== AUTH GUARD ===== */
+    #portal-auth-guard {
+      min-height: 100vh; background: #07041a;
+      display: flex; align-items: center; justify-content: center;
+      padding-top: 90px;
+    }
+    .auth-guard-inner {
+      text-align: center; max-width: 400px; padding: 0 20px;
+    }
+    .auth-guard-inner h2 {
+      font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: #fff; margin: 0 0 12px;
+    }
+    .auth-guard-inner p { font-family: 'Jost', sans-serif; color: rgba(255,255,255,0.55); margin: 0 0 28px; }
+    .auth-guard-btns { display: flex; gap: 12px; justify-content: center; }
+
+    /* ===== LOADING ===== */
+    #portal-loading {
+      min-height: 100vh; background: #07041a;
+      display: flex; align-items: center; justify-content: center; padding-top: 90px;
+    }
+    .portal-spinner {
+      width: 48px; height: 48px; border-radius: 50%;
+      border: 3px solid rgba(183,110,121,0.2);
+      border-top-color: #B76E79;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Mobile */
+    @media(max-width: 640px) {
+      .portal-hero { padding: 24px 20px; gap: 16px; }
+      .portal-hero-stats { margin-left: 0; width: 100%; justify-content: space-around; }
+      .portal-tab { padding: 10px 12px; font-size: 0.78rem; }
+      .profile-grid { grid-template-columns: 1fr; }
+      .wishlist-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+  <link rel="stylesheet" href="/css/dimi-actor.css">
+  <link rel="stylesheet" href="/css/rewards.css">
+  <link rel="stylesheet" href="/css/memberships.css">
+  <link rel="stylesheet" href="/css/creator-portal.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <a href="#main-content" class="skip-nav">Skip to Main Content</a>
+
+  <header id="site-header">
+    <div class="header-inner">
+      <a href="/" class="logo-link">
+        <img src="/images/logo.png" alt="Dripping Secrets" class="logo" />
+      </a>
+      <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+        <a href="/shop.html">Shop</a>
+        <a href="/party.html">Secrets Party</a>
+        <a href="/services.html">Services</a>
+        <a href="/bundles.html">Bundles</a>
+        <a href="/boxes.html">Build a Box</a>
+        <a href="/sneaky-link-bags.html">Sneaky Link Bags</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        
+        <a href="/admin.html" class="nav-admin-link" title="Back Office" aria-label="Back Office"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
+      </nav>
+      <div class="header-actions">
+        <button class="account-btn active-page" id="account-btn" aria-label="My Account" title="My Account">
+          <span id="account-label">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#B76E79" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v1h20v-1c0-3.33-6.67-5-10-5z"/></svg>
+          </span>
+        </button>
+        <button class="cart-btn" onclick="openCart()" aria-label="Open cart">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#B76E79" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96C5 16.1 5.9 17 7 17h14v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63H19c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0023.45 4H5.21L4.27 2H1z"/></svg>
+          <span class="cart-badge" id="cart-badge" style="display:none;">0</span>
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Menu" onclick="toggleNav()">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- AUTH GUARD (shown if not logged in) -->
+  <div id="portal-auth-guard" style="display:none;">
+    <div class="auth-guard-inner">
+      <div style="margin-bottom:16px;"><svg width="56" height="56" viewBox="0 0 24 24" fill="#B76E79" aria-hidden="true"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg></div>
+      <h2>My Account</h2>
+      <p>Sign in to access your orders, wishlist, and exclusive perks.</p>
+      <div class="auth-guard-btns">
+        <button class="btn-primary" onclick="openAuthModal('login')">Sign In</button>
+        <button class="btn-ghost" onclick="openAuthModal('signup')">Create Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="portal-loading">
+    <div class="portal-spinner"></div>
+  </div>
+
+  <!-- PORTAL MAIN (hidden until auth confirmed) -->
+  <div id="portal-main" role="main" style="display:none;">
+    <div class="portal-wrap">
+      <div class="portal-inner">
+
+        <!-- HERO HEADER -->
+        <div class="portal-hero">
+          <div class="portal-avatar" id="portal-avatar">S</div>
+          <div class="portal-hero-text">
+            <h2 id="portal-name">Welcome back</h2>
+            <p id="portal-email">Loading...</p>
+            <div style="margin-top:8px;">
+              <span class="verified-badge">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                Secret Keeper
+              </span>
+            </div>
+          </div>
+          <div class="portal-hero-stats">
+            <div class="portal-stat">
+              <span class="portal-stat-num" id="stat-orders">0</span>
+              <span class="portal-stat-lbl">Orders</span>
+            </div>
+            <div class="portal-stat">
+              <span class="portal-stat-num" id="stat-wishlist">0</span>
+              <span class="portal-stat-lbl">Wishlist</span>
+            </div>
+            <div class="portal-stat">
+              <span class="portal-stat-num" id="stat-reviews">0</span>
+              <span class="portal-stat-lbl">Reviews</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="portal-tabs" role="tablist">
+          <button class="portal-tab active" onclick="switchPortalTab('dashboard')" data-tab="dashboard">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+            Dashboard
+          </button>
+          <button class="portal-tab" onclick="switchPortalTab('orders')" data-tab="orders">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+            My Orders
+          </button>
+          <button class="portal-tab" onclick="switchPortalTab('wishlist')" data-tab="wishlist">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            Wishlist
+          </button>
+          <button class="portal-tab" onclick="switchPortalTab('reviews')" data-tab="reviews">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            Reviews
+          </button>
+          <button class="portal-tab" onclick="switchPortalTab('profile')" data-tab="profile">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v1h20v-1c0-3.33-6.67-5-10-5z"/></svg>
+            Profile
+          </button>
+          <button class="portal-tab" onclick="switchPortalTab('rewards')" data-tab="rewards">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            Rewards
+          </button>
+          <button class="portal-tab" onclick="switchPortalTab('subscriptions')" data-tab="subscriptions">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8h16v10zm-2-6H6v-2h12v2zm-4 4H6v-2h8v2z"/></svg>
+            My Subscription
+          </button>
+          <button class="portal-tab" onclick="switchPortalTab('membership')" data-tab="membership">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+            Membership
+          </button>
+        </div>
+
+        <!-- DASHBOARD TAB -->
+        <div class="portal-panel active" id="tab-dashboard">
+          <div class="dash-grid">
+            <div class="dash-card">
+              <div class="dash-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="#B76E79"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+              </div>
+              <div class="dash-card-body">
+                <h4>Total Orders</h4>
+                <p id="dash-orders">0</p>
+                <small>All time</small>
+              </div>
+            </div>
+            <div class="dash-card">
+              <div class="dash-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="#B76E79"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              </div>
+              <div class="dash-card-body">
+                <h4>Wishlist</h4>
+                <p id="dash-wishlist">0</p>
+                <small>Items saved</small>
+              </div>
+            </div>
+            <div class="dash-card">
+              <div class="dash-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="#B76E79"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+              </div>
+              <div class="dash-card-body">
+                <h4>Reviews Written</h4>
+                <p id="dash-reviews">0</p>
+                <small>Verified purchases</small>
+              </div>
+            </div>
+            <div class="dash-card" style="cursor:pointer;" onclick="switchPortalTab('profile')">
+              <div class="dash-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="#B76E79"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+              </div>
+              <div class="dash-card-body">
+                <h4>Profile</h4>
+                <p style="font-size:1rem;color:rgba(255,255,255,0.6)">Edit Info</p>
+                <small>Name, address, prefs</small>
+              </div>
+            </div>
+          </div>
+          <h3 class="pt-section-title">Recent <span>Orders</span></h3>
+          <div id="dash-recent-orders">
+            <div class="portal-empty" style="padding:30px 0;">
+              <p>No orders yet — <a href="/shop.html">start shopping!</a></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ORDERS TAB -->
+        <div class="portal-panel" id="tab-orders">
+          <h3 class="pt-section-title">My <span>Orders</span></h3>
+          <div id="orders-list">
+            <div class="portal-empty">
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+              <p>No orders yet. Your first purchase is waiting!</p>
+              <a href="/shop.html">Shop the Collection</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- WISHLIST TAB -->
+        <div class="portal-panel" id="tab-wishlist">
+          <h3 class="pt-section-title">My <span>Wishlist</span></h3>
+          <div class="wishlist-grid" id="wishlist-grid">
+            <div class="portal-empty" style="grid-column:1/-1;">
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              <p>Your wishlist is empty.</p>
+              <a href="/shop.html">Browse the Collection</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- REVIEWS TAB -->
+        <div class="portal-panel" id="tab-reviews">
+          <h3 class="pt-section-title">Leave a <span>Review</span></h3>
+          <div class="review-product-select">
+            <h3>Select a Purchased Product</h3>
+            <div class="review-prod-list" id="review-prod-list">
+              <p style="font-family:'Jost',sans-serif;font-size:0.85rem;color:rgba(255,255,255,0.4);">Loading your purchases…</p>
+            </div>
+          </div>
+          <div class="review-form" id="review-form" style="display:none;">
+            <h3 id="review-product-title">Review: Product Name</h3>
+            <div class="star-picker" id="star-picker">
+              <button class="star-btn" data-val="1" onclick="setRating(1)">★</button>
+              <button class="star-btn" data-val="2" onclick="setRating(2)">★</button>
+              <button class="star-btn" data-val="3" onclick="setRating(3)">★</button>
+              <button class="star-btn" data-val="4" onclick="setRating(4)">★</button>
+              <button class="star-btn" data-val="5" onclick="setRating(5)">★</button>
+            </div>
+            <textarea class="review-textarea" id="review-text" placeholder="Tell other Secret Keepers about your experience…" maxlength="600"></textarea>
+            <br>
+            <button class="review-submit-btn" id="review-submit-btn" onclick="submitReview()">Post Review</button>
+            <p id="review-success-msg" style="display:none;color:#4ade80;font-family:'Jost',sans-serif;font-size:0.82rem;margin-top:10px;">✓ Review posted! Thank you, girlfriend.</p>
+          </div>
+          <div class="reviews-written" id="reviews-written">
+            <h3 class="pt-section-title" style="margin-top:32px;">Your <span>Reviews</span></h3>
+            <div id="reviews-list-wrap">
+              <p style="font-family:'Jost',sans-serif;font-size:0.85rem;color:rgba(255,255,255,0.35);">No reviews yet.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROFILE TAB -->
+        <div class="portal-panel" id="tab-profile">
+          <h3 class="pt-section-title">My <span>Profile</span></h3>
+          <div class="profile-section">
+            <h3>Account Details</h3>
+            <div class="profile-grid">
+              <div class="form-group">
+                <label>Display Name</label>
+                <input type="text" class="form-input" id="prof-name" placeholder="Your name" />
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" class="form-input" id="prof-email" disabled />
+              </div>
+            </div>
+            <button class="save-btn" onclick="saveProfile()">Save Changes</button>
+            <p class="save-msg" id="prof-save-msg">✓ Profile updated!</p>
+          </div>
+          <div class="profile-section">
+            <h3>Shipping Address</h3>
+            <div class="profile-grid">
+              <div class="form-group" style="grid-column:1/-1;">
+                <label>Full Name</label>
+                <input type="text" class="form-input" id="ship-name" placeholder="Full name on package" />
+              </div>
+              <div class="form-group" style="grid-column:1/-1;">
+                <label>Street Address</label>
+                <input type="text" class="form-input" id="ship-address" placeholder="123 Main St, Apt 4B" />
+              </div>
+              <div class="form-group">
+                <label>City</label>
+                <input type="text" class="form-input" id="ship-city" placeholder="City" />
+              </div>
+              <div class="form-group">
+                <label>State</label>
+                <input type="text" class="form-input" id="ship-state" placeholder="TX" maxlength="2" />
+              </div>
+              <div class="form-group">
+                <label>ZIP Code</label>
+                <input type="text" class="form-input" id="ship-zip" placeholder="75001" maxlength="10" />
+              </div>
+            </div>
+            <button class="save-btn" onclick="saveShipping()">Save Address</button>
+            <p class="save-msg" id="ship-save-msg">✓ Address saved!</p>
+          </div>
+          <div class="profile-section">
+            <h3>Notifications</h3>
+            <div class="notif-row">
+              <div style="flex:1;">
+                <p>Shipping &amp; Tracking Updates</p>
+                <small>Get an email when your order ships and your tracking number is ready</small>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="notif-shipping" checked onchange="saveNotifPref()" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="notif-row" style="margin-top:12px;">
+              <div style="flex:1;">
+                <p>Marketing &amp; Promotions</p>
+                <small>New drops, exclusive deals, and members-only offers straight to your inbox</small>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="notif-marketing" checked onchange="saveNotifPref()" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="profile-section">
+            <h3>Account Actions</h3>
+            <button class="danger-btn" onclick="doSignOut()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;vertical-align:-2px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sign Out
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+      <!-- REWARDS PANEL (Sprint D · v9.80) -->
+      <div class="portal-panel" id="tab-rewards">
+        <h2 class="pt-section-title"><span>Dripping</span> Rewards</h2>
+        <div id="rewards-dashboard-container">
+          <div style="text-align:center;padding:40px;color:rgba(255,255,255,.45);font-family:'Jost',sans-serif;font-size:.9rem">
+            Sign in to view your rewards.
+          </div>
+        </div>
+      </div>
+
+      <!-- MEMBERSHIP TAB -->
+      <div class="portal-panel" id="tab-membership">
+        <h2 class="pt-section-title"><span>My</span> Membership</h2>
+        <div id="membership-tab-container">
+          <div style="text-align:center;padding:40px;color:rgba(255,255,255,.45);font-family:'Jost',sans-serif;font-size:.9rem">
+            Sign in to view your membership.
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBSCRIPTION TAB -->
+      <div class="portal-panel" id="tab-subscriptions">
+        <h2 class="pt-section-title"><span>My</span> Subscription</h2>
+        <div id="acct-sub-container">
+          <div style="text-align:center;padding:40px;color:rgba(255,255,255,.45);font-family:'Jost',sans-serif;font-size:.9rem">Sign in to view your subscription.</div>
+        </div>
+      </div>
+
+      <!-- CREATOR TAB -->
+      <div class="portal-panel" id="tab-creator">
+        <h2 class="pt-section-title"><span>My</span> Creator Portal</h2>
+        <div id="creator-portal-container">
+          <div style="text-align:center;padding:40px;color:rgba(255,255,255,.45);font-family:'Jost',sans-serif;font-size:.9rem">
+            Sign in to view your creator dashboard.
+          </div>
+        </div>
+      </div>
+
+  <!-- CART + AUTH MODALS -->
+  <div id="cart-overlay" onclick="closeCart()"></div>
+  <div id="cart-drawer"></div>
+  <div id="auth-overlay" onclick="closeAuthModal()"></div>
+  <div id="auth-modal"></div>
+  <div id="notif-toast" class="notif-toast" style="display:none;"></div>
+
+  <!-- SCRIPTS -->
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/products.js"></script>
+  <script src="/js/boxes.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/reviews.js"></script>
+  <script src="/js/rewards.js"></script>
+  <script src="/js/memberships.js"></script>
+  <script src="/js/creator-portal.js"></script>
+  <script src="/js/dimi-walker.js"></script>
+  <script>window.dimiContext = { page: 'account' };</script>
+  <script src="/js/dimi-actor.js"></script>
+  <script src="/js/dimi-memory.js"></script>
+  <script src="/js/dimi.js"></script>
+
+  <script>
+    // ============================================================
+    // PORTAL STATE
+    // ============================================================
+    let portalUser = null;
+    let portalOrders = [];
+    let portalWishlist = [];
+    let portalReviews = [];
+    let selectedReviewProduct = null;
+    let currentRating = 0;
+
+    // ============================================================
+    // FIREBASE AUTH GUARD
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof firebase === 'undefined') {
+        showPortalState('guard');
+        return;
+      }
+      // Explicitly lock to LOCAL persistence so sessions survive deploys,
+      // service-worker updates, and browser restarts — customers stay signed in.
+      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .catch(() => { /* continue regardless */ })
+        .finally(() => {
+          firebase.auth().onAuthStateChanged(async (user) => {
+            if (user) {
+              portalUser = user;
+              showPortalState('main');
+              await loadPortalData();
+            } else {
+              showPortalState('guard');
+            }
+          });
+        });
+    });
+
+    function showPortalState(state) {
+      document.getElementById('portal-loading').style.display = state === 'loading' ? 'flex' : 'none';
+      document.getElementById('portal-auth-guard').style.display = state === 'guard' ? 'flex' : 'none';
+      document.getElementById('portal-main').style.display = state === 'main' ? 'block' : 'none';
+    }
+
+    // ============================================================
+    // LOAD ALL PORTAL DATA
+    // ============================================================
+    async function loadPortalData() {
+      const u = portalUser;
+      if (!u) return;
+
+      // Avatar initials
+      const name = u.displayName || u.email || 'S';
+      const initials = name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase() || 'S';
+      document.getElementById('portal-avatar').textContent = initials;
+      document.getElementById('portal-name').textContent = `Welcome back, ${u.displayName ? u.displayName.split(' ')[0] : 'Secret Keeper'}`;
+      document.getElementById('portal-email').textContent = u.email;
+
+      // Pre-fill profile
+      document.getElementById('prof-name').value = u.displayName || '';
+      document.getElementById('prof-email').value = u.email || '';
+
+      // Load Firestore data in parallel
+      const db = firebase.firestore();
+      const [ordersSnap, userDoc] = await Promise.allSettled([
+        db.collection('users').doc(u.uid).collection('orders').orderBy('createdAt','desc').limit(30).get(),
+        db.collection('users').doc(u.uid).get()
+      ]);
+
+      // Orders
+      if (ordersSnap.status === 'fulfilled') {
+        portalOrders = ordersSnap.value.docs.map(d => ({ id: d.id, ...d.data() }));
+      }
+
+      // User profile data
+      if (userDoc.status === 'fulfilled' && userDoc.value.exists) {
+        const data = userDoc.value.data();
+        if (data.shippingAddress) {
+          document.getElementById('ship-name').value = data.shippingAddress.name || '';
+          document.getElementById('ship-address').value = data.shippingAddress.address || '';
+          document.getElementById('ship-city').value = data.shippingAddress.city || '';
+          document.getElementById('ship-state').value = data.shippingAddress.state || '';
+          document.getElementById('ship-zip').value = data.shippingAddress.zip || '';
+        }
+        if (data.shippingNotify !== undefined) {
+          document.getElementById('notif-shipping').checked = data.shippingNotify;
+        }
+        if (data.marketingOptIn !== undefined) {
+          document.getElementById('notif-marketing').checked = data.marketingOptIn;
+        }
+      }
+
+      // Wishlist from localStorage/cloud
+      if (typeof getWishlist === 'function') {
+        portalWishlist = getWishlist();
+      } else {
+        try { portalWishlist = JSON.parse(localStorage.getItem('ds_wishlist') || '[]'); } catch(e) { portalWishlist = []; }
+      }
+
+      // Reviews
+      try {
+        const revSnap = await db.collection('reviews').where('userId','==',u.uid).orderBy('createdAt','desc').limit(20).get();
+        portalReviews = revSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      } catch(e) { portalReviews = []; }
+
+      // Update stats
+      const wlCount = portalWishlist.length;
+      const ordCount = portalOrders.length;
+      const revCount = portalReviews.length;
+      document.getElementById('stat-orders').textContent = ordCount;
+      document.getElementById('stat-wishlist').textContent = wlCount;
+      document.getElementById('stat-reviews').textContent = revCount;
+      document.getElementById('dash-orders').textContent = ordCount;
+      document.getElementById('dash-wishlist').textContent = wlCount;
+      document.getElementById('dash-reviews').textContent = revCount;
+
+      renderDashRecentOrders();
+      renderOrdersList();
+      renderWishlist();
+      renderReviewProductList();
+      renderMyReviews();
+    }
+
+    // ============================================================
+    // TAB SWITCHING
+    // ============================================================
+    function switchPortalTab(tab) {
+      document.querySelectorAll('.portal-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tab);
+      });
+      document.querySelectorAll('.portal-panel').forEach(p => {
+        p.classList.toggle('active', p.id === `tab-${tab}`);
+      });
+      // Load rewards dashboard on demand
+      if (tab === 'rewards' && portalUser && window.DS_REWARDS) {
+        const container = document.getElementById('rewards-dashboard-container');
+        if (container && container.dataset.loaded !== '1') {
+          container.dataset.loaded = '1';
+          window.DS_REWARDS.renderDashboard(container, portalUser.uid, {
+            firstName: portalUser.displayName?.split(' ')[0] || '',
+            email: portalUser.email || ''
+          });
+        }
+      }
+      // Load membership tab on demand
+      if (tab === 'membership' && portalUser && window.DS_MEMBERSHIPS) {
+        const mContainer = document.getElementById('membership-tab-container');
+        if (mContainer && mContainer.dataset.loaded !== '1') {
+          mContainer.dataset.loaded = '1';
+          window.DS_MEMBERSHIPS.renderAccountTab(mContainer, portalUser);
+        }
+      }
+      // Load creator tab on demand
+      if (tab === 'creator' && portalUser && window.DSCreator) {
+        const cContainer = document.getElementById('creator-portal-container');
+        if (cContainer && cContainer.dataset.loaded !== '1') {
+          cContainer.dataset.loaded = '1';
+          window.DSCreator.initPortalTab(portalUser);
+        }
+      }
+      if (tab === 'subscriptions' && portalUser) {
+        const sc = document.getElementById('acct-sub-container');
+        if (sc && sc.dataset.loaded !== '1') {
+          sc.dataset.loaded = '1';
+          loadAccountSubscription(portalUser);
+        }
+      }
+    }
+
+    async function loadAccountSubscription(user) {
+      const sc = document.getElementById('acct-sub-container');
+      if (!sc || !window.db) return;
+      sc.innerHTML = '<p style="color:rgba(255,255,255,.4);font-size:.85rem">Loading…</p>';
+      try {
+        const snap = await db.collection('subscriptions').where('uid','==',user.uid).orderBy('createdAt','desc').limit(1).get();
+        if (snap.empty) {
+          sc.innerHTML = `<div style="text-align:center;padding:40px"><div style="font-size:2.5rem;margin-bottom:12px">📦</div><p style="color:rgba(255,255,255,.5);margin-bottom:20px">You don't have an active subscription yet.</p><a href="/subscriptions.html" style="display:inline-block;background:linear-gradient(135deg,#E91E8C,#c2185b);color:#fff;padding:11px 24px;border-radius:50px;font-size:.9rem;font-weight:700;text-decoration:none">Explore Subscription Boxes</a></div>`;
+          return;
+        }
+        const sub = snap.docs[0].data();
+        const statusColor = sub.status==='active'?'#4CAF50':sub.status==='paused'?'#ff9800':'#ff4757';
+        sc.innerHTML = `<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+            <div><div style="font-size:1.2rem;font-weight:700;color:#fff">${sub.planName||'Subscription'}</div><div style="color:rgba(255,255,255,.45);font-size:.85rem">${sub.planId||''}</div></div>
+            <span style="background:rgba(255,255,255,.06);border:1px solid ${statusColor};color:${statusColor};padding:5px 14px;border-radius:50px;font-size:.82rem;font-weight:700">${(sub.status||'active').toUpperCase()}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px">
+            <div style="background:rgba(255,255,255,.03);border-radius:10px;padding:14px"><div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-bottom:4px">Monthly Price</div><div style="color:#fff;font-weight:700">$${(sub.price||0).toFixed(2)}</div></div>
+            <div style="background:rgba(255,255,255,.03);border-radius:10px;padding:14px"><div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-bottom:4px">Next Shipment</div><div style="color:#fff;font-weight:700">${sub.nextShipmentDate||'—'}</div></div>
+            <div style="background:rgba(255,255,255,.03);border-radius:10px;padding:14px"><div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-bottom:4px">Billing</div><div style="color:#fff;font-weight:700">${sub.billingStatus||'—'}</div></div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            ${sub.status==='active'?`<button onclick="DSSubscriptions&&DSSubscriptions.pauseSubscription('${snap.docs[0].id}')" style="background:rgba(255,152,0,.1);border:1px solid #ff9800;color:#ff9800;padding:8px 16px;border-radius:50px;font-size:.83rem;font-weight:600;cursor:pointer">Pause</button>
+            <button onclick="DSSubscriptions&&DSSubscriptions.skipMonth('${snap.docs[0].id}')" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);padding:8px 16px;border-radius:50px;font-size:.83rem;font-weight:600;cursor:pointer">Skip Month</button>`:''}
+            ${sub.status==='paused'?`<button onclick="DSSubscriptions&&DSSubscriptions.resumeSubscription('${snap.docs[0].id}')" style="background:rgba(76,175,80,.1);border:1px solid #4CAF50;color:#4CAF50;padding:8px 16px;border-radius:50px;font-size:.83rem;font-weight:600;cursor:pointer">Resume</button>`:''}
+            <button onclick="DSSubscriptions&&DSSubscriptions.cancelSubscription('${snap.docs[0].id}')" style="background:rgba(255,71,87,.06);border:1px solid rgba(255,71,87,.3);color:#ff4757;padding:8px 16px;border-radius:50px;font-size:.83rem;font-weight:600;cursor:pointer">Cancel</button>
+            <a href="/subscriptions.html" style="background:rgba(233,30,140,.1);border:1px solid rgba(233,30,140,.25);color:#E91E8C;padding:8px 16px;border-radius:50px;font-size:.83rem;font-weight:600;text-decoration:none">Change Plan</a>
+          </div>
+        </div>
+        ${sub.shipmentHistory?.length ? `<h3 style="font-size:.95rem;color:rgba(255,255,255,.7);margin:0 0 12px">Shipment History</h3><div style="display:flex;flex-direction:column;gap:6px">${sub.shipmentHistory.map(h=>`<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;font-size:.85rem"><span style="color:rgba(255,255,255,.6)">${h.date||'—'}</span><span style="color:#fff">${h.planName||sub.planName||'—'}</span><span style="color:#4CAF50">${h.status||'Shipped'}</span></div>`).join('')}</div>` : ''}`;
+      } catch(e) { sc.innerHTML = '<p style="color:rgba(255,100,100,.6);font-size:.85rem">Error loading subscription data.</p>'; }
+    }
+
+    // ============================================================
+    // DASHBOARD
+    // ============================================================
+    function renderDashRecentOrders() {
+      const el = document.getElementById('dash-recent-orders');
+      if (!portalOrders.length) {
+        el.innerHTML = `<div class="portal-empty" style="padding:30px 0;"><p>No orders yet — <a href="/shop.html">start shopping!</a></p></div>`;
+        return;
+      }
+      const recent = portalOrders.slice(0, 4);
+      el.innerHTML = recent.map(o => {
+        const date = o.createdAt ? new Date(o.createdAt.seconds ? o.createdAt.seconds * 1000 : o.createdAt).toLocaleDateString() : '—';
+        const status = o.trackingNumber ? 'shipped' : (o.status || 'processing');
+        const total = typeof o.total === 'number' ? `$${o.total.toFixed(2)}` : (o.total || '—');
+        return `<div class="recent-order-row">
+          <span class="ro-id">#${(o.id || '').substring(0,8).toUpperCase()}</span>
+          <span class="ro-date">${date}</span>
+          <span class="ro-total">${total}</span>
+          <span class="ro-status ${status}">${status.charAt(0).toUpperCase()+status.slice(1)}</span>
+        </div>`;
+      }).join('');
+      if (portalOrders.length > 4) {
+        el.innerHTML += `<div style="text-align:center;margin-top:16px;"><button onclick="switchPortalTab('orders')" style="background:none;border:none;color:#B76E79;font-family:'Jost',sans-serif;font-size:0.85rem;cursor:pointer;">View all ${portalOrders.length} orders →</button></div>`;
+      }
+    }
+
+    // ============================================================
+    // ORDERS
+    // ============================================================
+    function renderOrdersList() {
+      const el = document.getElementById('orders-list');
+      if (!portalOrders.length) {
+        el.innerHTML = `<div class="portal-empty">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <p>No orders yet. Your first purchase is waiting!</p>
+          <a href="/shop.html">Shop the Collection</a>
+        </div>`;
+        return;
+      }
+      el.innerHTML = portalOrders.map(o => {
+        const date = o.createdAt ? new Date(o.createdAt.seconds ? o.createdAt.seconds * 1000 : o.createdAt).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) : '—';
+        const status = o.trackingNumber ? 'shipped' : (o.status || 'processing');
+        const total = typeof o.total === 'number' ? `$${o.total.toFixed(2)}` : (o.total || '—');
+        const items = o.items || [];
+        const itemsHTML = items.length
+          ? items.map(i => `<div class="order-item-row"><span>${i.qty || 1}× ${i.name || i.title || 'Item'}</span><span>${i.size ? i.size : ''}</span></div>`).join('')
+          : `<div class="order-item-row"><span>Order details</span></div>`;
+        const trackHTML = o.trackingNumber
+          ? `<div class="order-tracking-info">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              Tracking: <a href="https://www.ups.com/track?tracknum=${o.trackingNumber}" target="_blank" rel="noopener">${o.trackingNumber}</a>
+            </div>`
+          : '';
+        return `<div class="order-card">
+          <div class="order-card-header">
+            <div>
+              <div class="order-num">Order #${(o.id || '').substring(0,8).toUpperCase()}</div>
+              <div class="order-meta">${date} · ${o.paymentMethod || 'Manual payment'}</div>
+            </div>
+            <span class="ro-status ${status}">${status.charAt(0).toUpperCase()+status.slice(1)}</span>
+            <div class="order-amount">${total}</div>
+          </div>
+          <div class="order-items-list">${itemsHTML}</div>
+          ${o.shippingAddress ? `<div style="font-family:'Jost',sans-serif;font-size:0.8rem;color:rgba(255,255,255,0.4);margin-bottom:14px;">Ships to: ${o.shippingAddress.address || ''}, ${o.shippingAddress.city || ''}, ${o.shippingAddress.state || ''} ${o.shippingAddress.zip || ''}</div>` : ''}
+          ${trackHTML}
+        </div>`;
+      }).join('');
+    }
+
+    // ============================================================
+    // WISHLIST
+    // ============================================================
+    function renderWishlist() {
+      const grid = document.getElementById('wishlist-grid');
+      if (!portalWishlist.length) {
+        grid.innerHTML = `<div class="portal-empty" style="grid-column:1/-1;">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <p>Your wishlist is empty.</p>
+          <a href="/shop.html">Browse the Collection</a>
+        </div>`;
+        return;
+      }
+      const prods = typeof getProducts === 'function' ? getProducts() : (window.DEFAULT_PRODUCTS || []);
+      const wlProds = prods.filter(p => portalWishlist.includes(p.id));
+      if (!wlProds.length) {
+        grid.innerHTML = `<div class="portal-empty" style="grid-column:1/-1;"><p>Wishlist items not found.</p><a href="/shop.html">Shop Now</a></div>`;
+        return;
+      }
+      grid.innerHTML = wlProds.map(p => {
+        const img = p.image || p.images?.[0] || '/images/placeholder.jpg';
+        const price = typeof p.price === 'number' ? `$${p.price.toFixed(2)}` : (p.price || '—');
+        return `<div class="wl-card">
+          <img src="${img}" alt="${p.name}" class="wl-card-img" loading="lazy" onerror="this.src='/images/placeholder.jpg'" />
+          <div class="wl-card-body">
+            <h4>${p.name}</h4>
+            <span class="wl-card-price">${price}</span>
+            <div class="wl-card-actions">
+              <button class="wl-btn-cart" onclick="addToCartFromPortal(${p.id})">Add to Cart</button>
+              <button class="wl-btn-remove" onclick="removeFromWishlistPortal(${p.id})" title="Remove">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function addToCartFromPortal(productId) {
+      const prods = typeof getProducts === 'function' ? getProducts() : (window.DEFAULT_PRODUCTS || []);
+      const p = prods.find(x => x.id === productId);
+      if (p && typeof addToCart === 'function') { addToCart(p); showToast('Added to cart!'); }
+    }
+
+    function removeFromWishlistPortal(productId) {
+      if (typeof toggleWishlist === 'function') { toggleWishlist(productId); }
+      else {
+        try {
+          let wl = JSON.parse(localStorage.getItem('ds_wishlist') || '[]');
+          wl = wl.filter(id => id !== productId);
+          localStorage.setItem('ds_wishlist', JSON.stringify(wl));
+          portalWishlist = wl;
+        } catch(e) {}
+      }
+      portalWishlist = portalWishlist.filter(id => id !== productId);
+      document.getElementById('stat-wishlist').textContent = portalWishlist.length;
+      document.getElementById('dash-wishlist').textContent = portalWishlist.length;
+      renderWishlist();
+    }
+
+    // ============================================================
+    // REVIEWS
+    // ============================================================
+    function renderReviewProductList() {
+      const el = document.getElementById('review-prod-list');
+      // Get unique products from order history
+      const purchased = new Map();
+      portalOrders.forEach(o => {
+        (o.items || []).forEach(item => {
+          if (item.id && item.name && !purchased.has(item.id)) {
+            purchased.set(item.id, item);
+          }
+        });
+      });
+      if (!purchased.size) {
+        el.innerHTML = `<p style="font-family:'Jost',sans-serif;font-size:0.85rem;color:rgba(255,255,255,0.4);">Purchase something first to leave a review!</p>`;
+        return;
+      }
+      const prods = typeof getProducts === 'function' ? getProducts() : [];
+      el.innerHTML = [...purchased.values()].map(item => {
+        const prod = prods.find(p => p.id === item.id);
+        const img = prod?.image || prod?.images?.[0] || '/images/placeholder.jpg';
+        return `<div class="review-prod-row" onclick="selectReviewProduct(${JSON.stringify(item.id)}, ${JSON.stringify(item.name || 'Product')})">
+          <img src="${img}" alt="${item.name}" onerror="this.src='/images/placeholder.jpg'" />
+          <span>${item.name || 'Product'}</span>
+        </div>`;
+      }).join('');
+    }
+
+    function selectReviewProduct(id, name) {
+      selectedReviewProduct = { id, name };
+      document.querySelectorAll('.review-prod-row').forEach(r => r.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      document.getElementById('review-product-title').textContent = `Review: ${name}`;
+      document.getElementById('review-form').style.display = 'block';
+      document.getElementById('review-text').value = '';
+      document.getElementById('review-success-msg').style.display = 'none';
+      currentRating = 0;
+      setRating(0);
+      document.getElementById('review-form').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function setRating(val) {
+      currentRating = val;
+      document.querySelectorAll('.star-btn').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.val) <= val);
+      });
+    }
+
+    async function submitReview() {
+      if (!selectedReviewProduct || !currentRating) return;
+      const text = document.getElementById('review-text').value.trim();
+      if (!text) return;
+      const btn = document.getElementById('review-submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Posting…';
+      try {
+        const db = firebase.firestore();
+        const rev = {
+          userId: portalUser.uid,
+          userEmail: portalUser.email,
+          userName: portalUser.displayName || portalUser.email,
+          productId: selectedReviewProduct.id,
+          productName: selectedReviewProduct.name,
+          rating: currentRating,
+          body: text,
+          verified: true,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        const ref = await db.collection('reviews').add(rev);
+        portalReviews.unshift({ id: ref.id, ...rev, createdAt: { seconds: Date.now()/1000 } });
+        document.getElementById('stat-reviews').textContent = portalReviews.length;
+        document.getElementById('dash-reviews').textContent = portalReviews.length;
+        document.getElementById('review-success-msg').style.display = 'block';
+        document.getElementById('review-text').value = '';
+        currentRating = 0;
+        setRating(0);
+        selectedReviewProduct = null;
+        document.getElementById('review-form').style.display = 'none';
+        renderMyReviews();
+      } catch(e) {
+        alert('Could not post review. Please try again.');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Post Review';
+    }
+
+    function renderMyReviews() {
+      const el = document.getElementById('reviews-list-wrap');
+      if (!portalReviews.length) {
+        el.innerHTML = `<p style="font-family:'Jost',sans-serif;font-size:0.85rem;color:rgba(255,255,255,0.35);">No reviews yet.</p>`;
+        return;
+      }
+      el.innerHTML = portalReviews.map(r => {
+        const stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
+        const date = r.createdAt ? new Date(r.createdAt.seconds ? r.createdAt.seconds * 1000 : r.createdAt).toLocaleDateString() : '';
+        return `<div class="review-card">
+          <div class="review-card-header">
+            <span class="review-card-stars">${stars}</span>
+            <span class="review-card-product">${r.productName || 'Product'}</span>
+            ${r.verified ? `<span class="verified-badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg> Verified</span>` : ''}
+            <span class="review-card-date">${date}</span>
+          </div>
+          <div class="review-card-body">${r.body}</div>
+        </div>`;
+      }).join('');
+    }
+
+    // ============================================================
+    // PROFILE SAVES
+    // ============================================================
+    async function saveProfile() {
+      const name = document.getElementById('prof-name').value.trim();
+      if (!name || !portalUser) return;
+      try {
+        await portalUser.updateProfile({ displayName: name });
+        document.getElementById('portal-name').textContent = `Welcome back, ${name.split(' ')[0]}`;
+        const initials = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        document.getElementById('portal-avatar').textContent = initials;
+        const msg = document.getElementById('prof-save-msg');
+        msg.style.display = 'block';
+        setTimeout(() => msg.style.display = 'none', 3000);
+      } catch(e) { alert('Could not save. Please try again.'); }
+    }
+
+    async function saveShipping() {
+      if (!portalUser) return;
+      const data = {
+        name: document.getElementById('ship-name').value.trim(),
+        address: document.getElementById('ship-address').value.trim(),
+        city: document.getElementById('ship-city').value.trim(),
+        state: document.getElementById('ship-state').value.trim(),
+        zip: document.getElementById('ship-zip').value.trim()
+      };
+      try {
+        await firebase.firestore().collection('users').doc(portalUser.uid).set({ shippingAddress: data }, { merge: true });
+        const msg = document.getElementById('ship-save-msg');
+        msg.style.display = 'block';
+        setTimeout(() => msg.style.display = 'none', 3000);
+      } catch(e) { alert('Could not save address.'); }
+    }
+
+    async function saveNotifPref() {
+      if (!portalUser) return;
+      const shippingVal  = document.getElementById('notif-shipping').checked;
+      const mktEl        = document.getElementById('notif-marketing');
+      const marketingVal = mktEl ? mktEl.checked : true;
+      try {
+        await firebase.firestore().collection('users').doc(portalUser.uid).set({
+          shippingNotify: shippingVal,
+          marketingOptIn: marketingVal
+        }, { merge: true });
+        // Sync marketing preference to Brevo (fire and forget — never blocks UI)
+        fetch('/.netlify/functions/brevo-sync', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            email:  portalUser.email,
+            name:   portalUser.displayName || '',
+            action: marketingVal ? 'subscribe' : 'unsubscribe'
+          })
+        }).catch(() => {});
+        showToast(marketingVal ? '✓ Preferences saved' : '✓ Unsubscribed from marketing emails');
+      } catch(e) {}
+    }
+
+    function doSignOut() {
+      if (typeof signOut === 'function') signOut();
+      else firebase.auth().signOut().then(() => window.location.href = '/');
+    }
+
+    // ============================================================
+    // TOAST HELPER
+    // ============================================================
+    function showToast(msg) {
+      const t = document.getElementById('notif-toast');
+      if (!t) return;
+      t.textContent = msg; t.style.display = 'block';
+      setTimeout(() => t.style.display = 'none', 2500);
+    }
+
+    // Deep-link via hash
+    window.addEventListener('DOMContentLoaded', () => {
+      const hash = location.hash.replace('#','');
+      if (['dashboard','orders','wishlist','reviews','profile'].includes(hash)) {
+        setTimeout(() => switchPortalTab(hash), 600);
+      }
+    });
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js')
+          .then(function(reg) { console.log('SW registered'); })
+          .catch(function(err) { console.log('SW error', err); });
+      });
+    }
+  </script>
+<script src="js/pwa.js"></script>
+  <script src="/js/age-gate.js" defer></script>
+</body>
+</html>

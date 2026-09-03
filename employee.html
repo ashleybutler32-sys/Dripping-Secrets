@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Secret Keeper Hub — Dripping Secrets</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link rel="icon" href="images/logo.png"/>
+  <link rel="apple-touch-icon" href="images/logo.png"/>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <style>
+    :root {
+      --plum:#4B1F5F; --plum-light:#6a3080; --plum-dark:#33144a;
+      --rose:#B76E79; --rose-light:#d4949d;
+      --gold:#f0c040; --gold-dark:#c9a020;
+      --bg:#080808; --panel:#121212; --panel2:#181818; --card:#1e1e1e;
+      --border:#282828; --text:#f0f0f0; --muted:#888; --muted2:#555;
+      --green:#2ecc71; --red:#e74c3c; --orange:#f39c12; --teal:#00bcd4;
+      --sidebar-w:220px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    /* ── TOPBAR ── */
+    .topbar{background:linear-gradient(135deg,var(--plum-dark),var(--plum));padding:0 20px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.5)}
+    .topbar-brand{display:flex;align-items:center;gap:10px}
+    .topbar-brand img{height:34px;width:34px;object-fit:contain;border-radius:6px}
+    .brand-text{font-size:.9rem;font-weight:700;letter-spacing:.04em}
+    .brand-sub{font-size:.65rem;color:rgba(255,255,255,.55);letter-spacing:.1em;text-transform:uppercase}
+    .topbar-right{display:flex;align-items:center;gap:10px}
+    .emp-badge{background:rgba(255,255,255,.1);border-radius:20px;padding:5px 13px;font-size:.75rem;display:flex;align-items:center;gap:6px}
+    .emp-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+    .btn-logout{background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);padding:6px 14px;border-radius:8px;font-size:.78rem;cursor:pointer;transition:.2s}
+    .btn-logout:hover{background:rgba(255,255,255,.1)}
+    #empBadgeDisplay{display:none} #logoutBtn{display:none}
+    /* ── LOGIN GATE ── */
+    #loginGate{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 58px);padding:20px}
+    .login-card{background:var(--panel);border:1px solid var(--border);border-top:3px solid var(--rose);border-radius:16px;padding:36px 32px;width:100%;max-width:420px}
+    .login-logo{text-align:center;margin-bottom:24px}
+    .login-logo img{height:58px;width:58px;object-fit:contain;border-radius:10px}
+    .login-logo h2{margin-top:10px;font-size:1.15rem;color:var(--rose)}
+    .login-logo p{font-size:.8rem;color:var(--muted);margin-top:4px}
+    .login-mode-toggle{display:flex;background:var(--bg);border-radius:10px;padding:3px;margin-bottom:20px}
+    .login-mode-btn{flex:1;padding:8px;border:none;background:none;color:var(--muted);font-size:.82rem;border-radius:8px;cursor:pointer;transition:.2s}
+    .login-mode-btn.active{background:var(--plum);color:#fff;font-weight:600}
+    .form-group{margin-bottom:14px}
+    .form-group label{display:block;font-size:.75rem;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em}
+    .form-group input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:10px;font-size:.9rem;outline:none;transition:border-color .2s}
+    .form-group input:focus{border-color:var(--rose)}
+    .btn-primary-login{width:100%;background:linear-gradient(135deg,var(--plum),var(--plum-light));color:#fff;border:none;padding:13px;border-radius:10px;font-size:.95rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+    .btn-primary-login:hover{opacity:.88}
+    .login-error{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);color:#e74c3c;padding:10px 14px;border-radius:8px;font-size:.82rem;margin-bottom:14px;display:none}
+    .login-error.show{display:block}
+    .login-note{text-align:center;font-size:.75rem;color:var(--muted);margin-top:14px}
+    .login-note a{color:var(--rose);text-decoration:none}
+    /* ── PORTAL LAYOUT ── */
+    #portal{display:none}
+    .portal-layout{display:flex;min-height:calc(100vh - 58px)}
+    /* ── SIDEBAR ── */
+    .emp-sidebar{width:var(--sidebar-w);background:var(--panel);border-right:1px solid var(--border);padding:14px 0;flex-shrink:0;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;transition:transform .25s}
+    .nav-section-label{font-size:.62rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;padding:14px 16px 5px;margin-top:4px}
+    .emp-nav-item{display:flex;align-items:center;gap:9px;padding:10px 16px;cursor:pointer;border-left:3px solid transparent;transition:.15s;font-size:.86rem;color:#bbb;position:relative}
+    .emp-nav-item:hover{background:rgba(183,110,121,.07);color:var(--text)}
+    .emp-nav-item.active{background:rgba(183,110,121,.13);color:var(--rose);border-left-color:var(--rose);font-weight:600}
+    .nav-icon{width:18px;text-align:center;flex-shrink:0}
+    .nav-badge{background:var(--rose);color:#fff;border-radius:20px;padding:1px 6px;font-size:.65rem;font-weight:700;margin-left:auto}
+    /* ── HAMBURGER ── */
+    .hamburger{display:none;background:none;border:none;color:#fff;cursor:pointer;padding:6px;border-radius:6px}
+    /* ── SIDEBAR OVERLAY ── */
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199}
+    .sidebar-overlay.open{display:block}
+    /* ── MAIN ── */
+    .emp-main{flex:1;overflow-y:auto;min-height:calc(100vh - 58px)}
+    .tab-content{display:none;padding:24px}
+    .tab-content.active{display:block}
+    /* ── PAGE HEADER ── */
+    .page-header{margin-bottom:22px}
+    .page-header h1{font-size:1.3rem;font-weight:700;margin-bottom:4px}
+    .page-header p{font-size:.84rem;color:var(--muted)}
+    /* ── CARDS ── */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:18px}
+    .card h3{font-size:.93rem;font-weight:600;margin-bottom:14px;color:var(--rose-light);display:flex;align-items:center;gap:7px}
+    /* ── STAT GRID ── */
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:22px}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+    .stat-card .s-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+    .stat-card .s-val{font-size:1.6rem;font-weight:700;color:var(--rose)}
+    .stat-card .s-sub{font-size:.72rem;color:var(--muted);margin-top:3px}
+    /* ── PILLS ── */
+    .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.73rem;font-weight:500}
+    .pill.new,.pill.pending{background:rgba(243,156,18,.14);color:var(--orange)}
+    .pill.active,.pill.shipped,.pill.approved{background:rgba(46,204,113,.14);color:var(--green)}
+    .pill.completed,.pill.delivered{background:rgba(0,188,212,.14);color:var(--teal)}
+    .pill.cancelled,.pill.rejected{background:rgba(231,76,60,.14);color:var(--red)}
+    .pill.in-progress{background:rgba(183,110,121,.2);color:var(--rose-light)}
+    .pill.high{background:rgba(231,76,60,.15);color:var(--red)}
+    .pill.medium{background:rgba(243,156,18,.15);color:var(--orange)}
+    .pill.low{background:rgba(46,204,113,.15);color:var(--green)}
+    /* ── BUTTONS ── */
+    .btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:.84rem;font-weight:500;transition:.2s}
+    .btn-rose{background:linear-gradient(135deg,var(--plum),var(--rose));color:#fff}
+    .btn-outline{background:var(--card);border:1px solid var(--border);color:var(--text)}
+    .btn-ghost{background:none;border:1px solid var(--border);color:var(--muted)}
+    .btn:hover{opacity:.85}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .btn-sm{padding:5px 11px;font-size:.78rem}
+    /* ── TABLE ── */
+    table{width:100%;border-collapse:collapse;font-size:.84rem}
+    th{background:var(--panel2);padding:9px 12px;text-align:left;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border)}
+    td{padding:10px 12px;border-bottom:1px solid var(--border)}
+    tr:hover td{background:rgba(255,255,255,.015)}
+    .empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:.88rem}
+    .empty-state .icon{font-size:2rem;margin-bottom:10px}
+    /* ── FORMS ── */
+    .fgroup{margin-bottom:14px}
+    .fgroup label{display:block;font-size:.77rem;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+    .fgroup input,.fgroup select,.fgroup textarea{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-size:.88rem;outline:none;transition:border-color .2s}
+    .fgroup input:focus,.fgroup select:focus,.fgroup textarea:focus{border-color:var(--rose)}
+    .fgroup textarea{resize:vertical;min-height:80px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    /* ── HUB GRID ── */
+    .hub-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .hub-widget{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+    .hub-widget h4{font-size:.85rem;font-weight:600;color:var(--rose-light);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+    .hub-item{padding:8px 0;border-bottom:1px solid var(--border);font-size:.83rem;display:flex;align-items:flex-start;gap:8px}
+    .hub-item:last-child{border-bottom:none}
+    .hub-item-dot{width:7px;height:7px;border-radius:50%;background:var(--rose);margin-top:5px;flex-shrink:0}
+    /* ── ANNOUNCE CARD ── */
+    .announce-card{background:linear-gradient(135deg,rgba(75,31,95,.35),rgba(106,48,128,.2));border:1px solid rgba(183,110,121,.25);border-radius:12px;padding:16px;margin-bottom:14px}
+    .announce-card .a-title{font-size:.9rem;font-weight:600;color:var(--gold);margin-bottom:4px}
+    .announce-card .a-meta{font-size:.73rem;color:var(--muted);margin-bottom:8px}
+    .announce-card .a-body{font-size:.84rem;color:#ccc;line-height:1.6}
+    /* ── TASK ITEM ── */
+    .task-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:12px}
+    .task-check{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);cursor:pointer;flex-shrink:0;margin-top:2px;transition:.2s;background:var(--bg);display:flex;align-items:center;justify-content:center}
+    .task-check.done{background:var(--green);border-color:var(--green)}
+    .task-body{flex:1}
+    .task-title{font-size:.88rem;font-weight:500;margin-bottom:4px}
+    .task-title.done{text-decoration:line-through;color:var(--muted)}
+    .task-meta{font-size:.74rem;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+    /* ── MESSAGE ITEM ── */
+    .msg-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+    .msg-item.unread{border-left:3px solid var(--rose)}
+    .msg-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+    .msg-from{font-size:.84rem;font-weight:600;color:var(--rose-light)}
+    .msg-time{font-size:.73rem;color:var(--muted)}
+    .msg-subject{font-size:.82rem;font-weight:500;margin-bottom:5px;color:var(--gold)}
+    .msg-body{font-size:.83rem;color:#ccc;line-height:1.6}
+    /* ── TRAINING CARD ── */
+    .training-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px}
+    .training-card .t-title{font-size:.9rem;font-weight:600;margin-bottom:4px}
+    .training-card .t-desc{font-size:.8rem;color:var(--muted);margin-bottom:10px;line-height:1.5}
+    .progress-bar{background:var(--border);border-radius:20px;height:6px;overflow:hidden;margin-bottom:6px}
+    .progress-fill{background:linear-gradient(90deg,var(--plum),var(--rose));border-radius:20px;height:100%;transition:width .4s}
+    .t-progress-text{font-size:.73rem;color:var(--muted)}
+    /* ── KNOWLEDGE BASE ── */
+    .kb-section{margin-bottom:20px}
+    .kb-section h4{font-size:.88rem;font-weight:600;color:var(--gold);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+    .kb-item{padding:10px 14px;background:var(--panel2);border-radius:8px;margin-bottom:6px;font-size:.84rem;cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:8px}
+    .kb-item:hover{background:rgba(183,110,121,.1);color:var(--rose-light)}
+    /* ── REQUEST FORM ── */
+    .request-type-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+    .request-type-btn{background:var(--card);border:2px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:.2s;font-size:.82rem}
+    .request-type-btn.selected{border-color:var(--rose);background:rgba(183,110,121,.12);color:var(--rose-light)}
+    .request-type-btn:hover{border-color:var(--rose-light)}
+    .request-type-btn .rt-icon{font-size:1.4rem;margin-bottom:5px}
+    /* ── CALENDAR ── */
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px}
+    .cal-day-label{background:var(--panel2);padding:8px;text-align:center;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+    .cal-day{background:var(--card);padding:8px 6px;min-height:60px;font-size:.78rem;cursor:pointer;transition:background .2s}
+    .cal-day:hover{background:rgba(183,110,121,.1)}
+    .cal-day.today{background:rgba(75,31,95,.35);border-top:2px solid var(--rose)}
+    .cal-day.other-month{opacity:.35}
+    .cal-day .d-num{font-size:.78rem;font-weight:600;margin-bottom:4px}
+    .cal-event{background:rgba(183,110,121,.25);border-radius:3px;padding:2px 5px;font-size:.65rem;color:var(--rose-light);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .event-list-item{background:var(--card);border-left:3px solid var(--rose);border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:8px;font-size:.84rem}
+    .event-list-item .ev-title{font-weight:600;margin-bottom:3px;color:var(--rose-light)}
+    .event-list-item .ev-meta{font-size:.76rem;color:var(--muted)}
+    /* ── RECOGNITION ── */
+    .recognition-card{background:linear-gradient(135deg,rgba(240,192,64,.12),rgba(75,31,95,.25));border:1px solid rgba(240,192,64,.25);border-radius:12px;padding:16px;margin-bottom:12px;text-align:center}
+    .recognition-card .badge-icon{font-size:2.2rem;margin-bottom:8px}
+    .recognition-card .badge-title{font-size:.9rem;font-weight:700;color:var(--gold);margin-bottom:4px}
+    .recognition-card .badge-desc{font-size:.8rem;color:var(--muted)}
+    /* ── PROFILE ── */
+    .profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .profile-field label{font-size:.73rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+    .profile-field .value{font-size:.9rem;font-weight:500}
+    .emp-id-badge{background:linear-gradient(135deg,var(--plum),var(--plum-light));border-radius:10px;padding:10px 16px;display:inline-flex;align-items:center;gap:8px;font-size:.85rem;font-weight:600;margin-bottom:16px}
+    /* ── DIMI ── */
+    .dimi-window{background:var(--panel2);border:1px solid var(--border);border-radius:14px;height:440px;display:flex;flex-direction:column;overflow:hidden}
+    .dimi-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+    .dimi-bubble{max-width:80%;padding:10px 14px;border-radius:12px;font-size:.85rem;line-height:1.6}
+    .dimi-bubble.dimi{background:rgba(75,31,95,.4);border:1px solid rgba(183,110,121,.25);align-self:flex-start;color:#e0cce5}
+    .dimi-bubble.user{background:linear-gradient(135deg,var(--plum),var(--plum-light));align-self:flex-end;color:#fff}
+    .dimi-input-row{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border)}
+    .dimi-input-row input{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:10px;font-size:.88rem;outline:none}
+    .dimi-input-row input:focus{border-color:var(--rose)}
+    /* ── FULFILLMENT CARD ── */
+    .fulfillment-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px}
+    .fulfillment-card h4{color:var(--gold);font-size:.9rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+    .order-meta{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:12px}
+    .meta-item{background:var(--panel2);border-radius:6px;padding:7px 10px}
+    .meta-item label{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:3px}
+    .meta-item span{font-size:.82rem;font-weight:500}
+    .fulfillment-steps li{font-size:.83rem;color:#ccc;margin-bottom:6px;padding-left:4px;line-height:1.5}
+    /* ── MOBILE ── */
+    @media(max-width:700px){
+      .hamburger{display:flex;align-items:center;justify-content:center}
+      .emp-sidebar{position:fixed;top:58px;left:0;height:calc(100vh - 58px);z-index:200;transform:translateX(-100%);width:240px}
+      .emp-sidebar.open{transform:translateX(0);box-shadow:4px 0 20px rgba(0,0,0,.5)}
+      .tab-content{padding:16px}
+      .hub-grid,.form-row,.profile-grid{grid-template-columns:1fr}
+      .stat-grid{grid-template-columns:1fr 1fr}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── TOP BAR ── -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <button class="hamburger" id="empHamburger" onclick="toggleEmpSidebar" aria-label="Menu" aria-expanded="false">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <img src="images/logo.png" alt="DS"/>
+    <div>
+      <div class="brand-text">Dripping Secrets</div>
+      <div class="brand-sub">Secret Keeper Hub</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="emp-badge" id="empBadgeDisplay">
+      <span class="dot"></span>
+      <span id="empNameDisplay">Secret Keeper</span>
+    </div>
+    <button class="btn-logout" id="logoutBtn" onclick="doLogout">Sign Out</button>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="empSidebarOverlay" onclick="closeEmpSidebar"></div>
+
+<!-- ── LOGIN GATE ── -->
+<div id="loginGate">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="images/logo.png" alt="Dripping Secrets"/>
+      <h2>Secret Keeper Hub</h2>
+      <p>Employee access only</p>
+    </div>
+    <div id="loginError" class="login-error"></div>
+    <div class="login-mode-toggle">
+      <button class="login-mode-btn active" id="modeSignIn" onclick="setMode('signin')">Sign In</button>
+      <button class="login-mode-btn" id="modeRegister" onclick="setMode('register')">First Time? Set Up</button>
+    </div>
+    <form id="signInForm" onsubmit="doSignIn(event)">
+      <div class="form-group"><label>Work Email</label><input type="email" id="siEmail" placeholder="your@email.com" required/></div>
+      <div class="form-group"><label>Password</label><input type="password" id="siPassword" placeholder="••••••••" required/></div>
+      <button type="submit" class="btn-primary-login">Sign In</button>
+    </form>
+    <form id="registerForm" style="display:none" onsubmit="doRegister(event)">
+      <div class="form-group"><label>Work Email</label><input type="email" id="regEmail" placeholder="your@email.com" required/></div>
+      <div class="form-group"><label>Create Password</label><input type="password" id="regPassword" placeholder="Min 8 characters" required/></div>
+      <div class="form-group"><label>Confirm Password</label><input type="password" id="regConfirm" placeholder="Repeat password" required/></div>
+      <button type="submit" class="btn-primary-login">Create Account</button>
+    </form>
+    <p class="login-note">Not a Secret Keeper? <a href="index.html">Back to store</a></p>
+  </div>
+</div>
+
+<!-- ── PORTAL ── -->
+<div id="portal">
+  <div class="portal-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="emp-sidebar" id="empSidebar" aria-label="Navigation">
+
+      <div class="nav-section-label">Overview</div>
+      <div class="emp-nav-item active" onclick="switchEmpTab('hub')" id="nav-hub">
+        <span class="nav-icon">&#9962;</span> Hub
+      </div>
+      <div class="emp-nav-item" onclick="switchEmpTab('schedule')" id="nav-schedule">
+        <span class="nav-icon">&#128197;</span> My Schedule
+        <span class="nav-badge" id="scheduleBadge" style="display:none">0</span>
+      </div>
+      <div class="emp-nav-item" onclick="switchEmpTab('queue')" id="nav-queue">
+        <span class="nav-icon">&#128230;</span> My Queue
+        <span class="nav-badge" id="queueBadge" style="display:none">0</span>
+      </div>
+
+      <div class="nav-section-label">Work</div>
+      <div class="emp-nav-item" onclick="switchEmpTab('tasks')" id="nav-tasks">
+        <span class="nav-icon">&#9989;</span> My Tasks
+        <span class="nav-badge" id="tasksBadge" style="display:none">0</span>
+      </div>
+      <div class="emp-nav-item" onclick="switchEmpTab('messages')" id="nav-messages">
+        <span class="nav-icon">&#128172;</span> Messages
+        <span class="nav-badge" id="messagesBadge" style="display:none">0</span>
+      </div>
+      <div class="emp-nav-item" onclick="switchEmpTab('requests')" id="nav-requests">
+        <span class="nav-icon">&#128203;</span> My Requests
+      </div>
+      <div class="emp-nav-item" onclick="switchEmpTab('calendar')" id="nav-calendar">
+        <span class="nav-icon">&#128468;</span> Calendar
+      </div>
+
+      <div class="nav-section-label">Grow</div>
+      <div class="emp-nav-item" onclick="switchEmpTab('training')" id="nav-training">
+        <span class="nav-icon">&#127979;</span> Training
+      </div>
+      <div class="emp-nav-item" onclick="switchEmpTab('knowledge')" id="nav-knowledge">
+        <span class="nav-icon">&#128218;</span> Knowledge Base
+      </div>
+      <div class="emp-nav-item" onclick="switchEmpTab('recognition')" id="nav-recognition">
+        <span class="nav-icon">&#11088;</span> Recognition
+      </div>
+
+      <div class="nav-section-label">Me</div>
+      <div class="emp-nav-item" onclick="switchEmpTab('profile')" id="nav-profile">
+        <span class="nav-icon">&#128100;</span> My Profile
+      </div>
+      <div class="emp-nav-item" onclick="switchEmpTab('askdimi')" id="nav-askdimi">
+        <span class="nav-icon">&#129302;</span> Ask Dimi
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="emp-main">
+
+      <!-- ══════════ HUB ══════════ -->
+      <div class="tab-content active" id="tab-hub">
+        <div class="page-header" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+          <div class="adls-sidebar" style="flex:0 0 120px;width:120px;margin:0;">
+            <div data-adls="front-desk" data-adls-class="adls-img" style="height:120px;width:120px;border-radius:12px;overflow:hidden;box-shadow:0 4px 18px rgba(75,31,95,0.22);"></div>
+          </div>
+          <div>
+            <h1 id="hubGreeting">Good day, Secret Keeper</h1>
+            <p id="hubDate"></p>
+          </div>
+        </div>
+        <div class="stat-grid" id="hubStats">
+          <div class="stat-card"><div class="s-label">Open Tasks</div><div class="s-val" id="hubStatTasks">—</div><div class="s-sub">due this week</div></div>
+          <div class="stat-card"><div class="s-label">Unread Messages</div><div class="s-val" id="hubStatMsgs">—</div><div class="s-sub">from the team</div></div>
+          <div class="stat-card"><div class="s-label">Bookings</div><div class="s-val" id="hubStatBookings">—</div><div class="s-sub">upcoming</div></div>
+          <div class="stat-card"><div class="s-label">Orders in Queue</div><div class="s-val" id="hubStatQueue">—</div><div class="s-sub">pending fulfillment</div></div>
+        </div>
+        <div class="hub-grid">
+          <div class="hub-widget">
+            <h4>&#128172; Latest Announcement</h4>
+            <div id="hubAnnouncement"><div class="empty-state" style="padding:12px;font-size:.82rem">Loading…</div></div>
+          </div>
+          <div class="hub-widget">
+            <h4>&#9989; Today's Tasks</h4>
+            <div id="hubTasks"><div class="empty-state" style="padding:12px;font-size:.82rem">Loading…</div></div>
+          </div>
+          <div class="hub-widget">
+            <h4>&#127979; Training Progress</h4>
+            <div id="hubTraining"><div class="empty-state" style="padding:12px;font-size:.82rem">Loading…</div></div>
+          </div>
+          <div class="hub-widget">
+            <h4>&#11088; Recent Recognition</h4>
+            <div id="hubRecognition"><div class="empty-state" style="padding:12px;font-size:.82rem">Loading…</div></div>
+          </div>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(75,31,95,.3),rgba(240,192,64,.08));border:1px solid rgba(240,192,64,.2);border-radius:12px;padding:16px;margin-top:4px">
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <img src="images/dimi/dimi-portrait.png" onerror="this.style.display='none'" alt="Dimi" style="width:42px;height:42px;object-fit:cover;object-position:top;border-radius:50%;flex-shrink:0"/>
+            <div>
+              <div style="font-size:.88rem;font-weight:600;color:var(--rose-light);margin-bottom:5px">Dimi says…</div>
+              <div id="dimiDailyTip" style="font-size:.84rem;color:#ddd;line-height:1.6;font-style:italic">Loading your daily briefing…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ SCHEDULE ══════════ -->
+      <div class="tab-content" id="tab-schedule">
+        <div class="page-header">
+          <h1>My Schedule</h1>
+          <p>Secrets Party bookings &amp; Private Shopping Sessions assigned to you by Ashley</p>
+        </div>
+        <div class="card">
+          <h3>&#128197; Assigned Bookings</h3>
+          <div id="scheduleList"><div class="empty-state"><div class="icon">&#128197;</div>Loading your schedule…</div></div>
+        </div>
+      </div>
+
+      <!-- ══════════ QUEUE ══════════ -->
+      <div class="tab-content" id="tab-queue">
+        <div class="page-header">
+          <h2>My Queue</h2>
+          <p>Orders assigned to you for fulfillment</p>
+        </div>
+        <div id="queueList"><div class="empty-state"><div class="icon">&#128230;</div>Loading your queue…</div></div>
+      </div>
+
+      <!-- ══════════ TASKS ══════════ -->
+      <div class="tab-content" id="tab-tasks">
+        <div class="page-header">
+          <h1>My Tasks</h1>
+          <p>Tasks assigned to you by Ashley or your manager</p>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm" onclick="filterTasks('all')" id="tf-all" style="border-color:var(--rose);color:var(--rose)">All</button>
+          <button class="btn btn-outline btn-sm" onclick="filterTasks('pending')" id="tf-pending">Open</button>
+          <button class="btn btn-outline btn-sm" onclick="filterTasks('completed')" id="tf-done">Done</button>
+        </div>
+        <div id="tasksList"><div class="empty-state"><div class="icon">&#9989;</div>Loading tasks…</div></div>
+      </div>
+
+      <!-- ══════════ MESSAGES ══════════ -->
+      <div class="tab-content" id="tab-messages">
+        <div class="page-header">
+          <h1>Messages</h1>
+          <p>Company announcements, department messages, and direct messages from the team</p>
+        </div>
+        <div id="messagesList"><div class="empty-state"><div class="icon">&#128172;</div>Loading messages…</div></div>
+      </div>
+
+      <!-- ══════════ REQUESTS ══════════ -->
+      <div class="tab-content" id="tab-requests">
+        <div class="page-header">
+          <h1>My Requests</h1>
+          <p>Submit time-off requests, schedule changes, equipment needs, training requests, or general questions</p>
+        </div>
+        <div class="card">
+          <h3>&#128203; Submit a Request</h3>
+          <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Select a request type below, then fill out the details. Ashley will review and respond.</p>
+          <div class="request-type-grid" id="requestTypeGrid">
+            <div class="request-type-btn" onclick="selectRequestType('time-off',this)"><div class="rt-icon">&#127959;</div>Time Off</div>
+            <div class="request-type-btn" onclick="selectRequestType('schedule',this)"><div class="rt-icon">&#128260;</div>Schedule Change</div>
+            <div class="request-type-btn" onclick="selectRequestType('equipment',this)"><div class="rt-icon">&#128421;</div>Equipment</div>
+            <div class="request-type-btn" onclick="selectRequestType('training',this)"><div class="rt-icon">&#127979;</div>Training Request</div>
+            <div class="request-type-btn" onclick="selectRequestType('question',this)"><div class="rt-icon">&#10067;</div>Question</div>
+            <div class="request-type-btn" onclick="selectRequestType('idea',this)"><div class="rt-icon">&#128161;</div>Idea / Suggestion</div>
+            <div class="request-type-btn" onclick="selectRequestType('concern',this)"><div class="rt-icon">&#128226;</div>Concern</div>
+            <div class="request-type-btn" onclick="selectRequestType('other',this)"><div class="rt-icon">&#128462;</div>Other</div>
+          </div>
+          <div id="requestForm" style="display:none">
+            <input type="hidden" id="requestType"/>
+            <div class="fgroup"><label>Subject</label><input type="text" id="requestSubject" placeholder="Brief summary…"/></div>
+            <div class="fgroup"><label>Details</label><textarea id="requestDetails" placeholder="Describe your request in detail…"></textarea></div>
+            <div class="form-row" id="dateRangeRow" style="display:none">
+              <div class="fgroup"><label>Start Date</label><input type="date" id="requestDateFrom"/></div>
+              <div class="fgroup"><label>End Date</label><input type="date" id="requestDateTo"/></div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:6px">
+              <button class="btn btn-rose" onclick="submitRequest">Submit Request</button>
+              <button class="btn btn-ghost" onclick="cancelRequest">Cancel</button>
+            </div>
+            <div id="requestMsg" style="font-size:.82rem;margin-top:10px"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>&#128203; My Request History</h3>
+          <div id="requestHistory"><div class="empty-state">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- ══════════ CALENDAR ══════════ -->
+      <div class="tab-content" id="tab-calendar">
+        <div class="page-header">
+          <h1>Calendar</h1>
+          <p>Company events, training sessions, meetings, launches, and important dates</p>
+        </div>
+        <div class="card" style="padding:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <button class="btn btn-ghost btn-sm" onclick="calNav(-1)">&#8249; Prev</button>
+            <h3 id="calMonthLabel" style="margin:0;font-size:1rem;color:var(--gold)"></h3>
+            <button class="btn btn-ghost btn-sm" onclick="calNav(1)">Next &#8250;</button>
+          </div>
+          <div class="cal-grid">
+            <div class="cal-day-label">Sun</div><div class="cal-day-label">Mon</div><div class="cal-day-label">Tue</div>
+            <div class="cal-day-label">Wed</div><div class="cal-day-label">Thu</div><div class="cal-day-label">Fri</div><div class="cal-day-label">Sat</div>
+          </div>
+          <div class="cal-grid" id="calDaysGrid" style="border-radius:0 0 10px 10px"></div>
+        </div>
+        <div class="card">
+          <h3>&#128197; Upcoming Events</h3>
+          <div id="calEventList"><div class="empty-state">Loading events…</div></div>
+        </div>
+      </div>
+
+      <!-- ══════════ TRAINING ══════════ -->
+      <div class="tab-content" id="tab-training">
+        <div class="page-header">
+          <h1>Training Center</h1>
+          <p>Complete assigned modules, earn certifications, and level up your Secret Keeper skills</p>
+        </div>
+        <div class="card">
+          <h3>&#127979; My Training Modules</h3>
+          <div id="trainingList"><div class="empty-state"><div class="icon">&#127979;</div>Loading your training…</div></div>
+        </div>
+        <div class="card">
+          <h3>&#127942; Completed &amp; Certifications</h3>
+          <div id="trainingComplete"><div class="empty-state">Loading completions…</div></div>
+        </div>
+      </div>
+
+      <!-- ══════════ KNOWLEDGE BASE ══════════ -->
+      <div class="tab-content" id="tab-knowledge">
+        <div class="page-header">
+          <h1>Knowledge Base</h1>
+          <p>Company handbook, policies, procedures, and brand standards — all searchable through Dimi</p>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:20px">
+          <input type="text" id="kbSearch" placeholder="Search knowledge base…" oninput="filterKB" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-size:.88rem;outline:none"/>
+        </div>
+        <div id="kbContent">
+          <div class="kb-section">
+            <h4>&#128218; Company Handbook</h4>
+            <div class="kb-item" onclick="openKBArticle('welcome')"><span>&#128218;</span> Welcome to Dripping Secrets — Our Story &amp; Mission</div>
+            <div class="kb-item" onclick="openKBArticle('values')"><span>&#10024;</span> Our Values &amp; The Secret Keeper Standard</div>
+            <div class="kb-item" onclick="openKBArticle('culture')"><span>&#127775;</span> Company Culture &amp; What We Stand For</div>
+          </div>
+          <div class="kb-section">
+            <h4>&#128203; Policies</h4>
+            <div class="kb-item" onclick="openKBArticle('attendance')"><span>&#9200;</span> Attendance &amp; Punctuality Policy</div>
+            <div class="kb-item" onclick="openKBArticle('conduct')"><span>&#9733;</span> Code of Conduct</div>
+            <div class="kb-item" onclick="openKBArticle('confidentiality')"><span>&#128274;</span> Confidentiality &amp; NDA Guidelines</div>
+            <div class="kb-item" onclick="openKBArticle('social-media')"><span>&#128247;</span> Social Media &amp; Brand Representation Policy</div>
+            <div class="kb-item" onclick="openKBArticle('timeoff')"><span>&#127959;</span> Time Off &amp; Scheduling Policy</div>
+          </div>
+          <div class="kb-section">
+            <h4>&#128736; Operations</h4>
+            <div class="kb-item" onclick="openKBArticle('order-process')"><span>&#128230;</span> How to Process &amp; Fulfill an Order</div>
+            <div class="kb-item" onclick="openKBArticle('party-host')"><span>&#127881;</span> How to Host a Secrets Party</div>
+            <div class="kb-item" onclick="openKBArticle('private-shop')"><span>&#128717;</span> How to Run a Private Shopping Session</div>
+            <div class="kb-item" onclick="openKBArticle('supplier-guide')"><span>&#128666;</span> Supplier &amp; Fulfillment Guide</div>
+            <div class="kb-item" onclick="openKBArticle('customer-service')"><span>&#128241;</span> Customer Service Standards &amp; Scripts</div>
+          </div>
+          <div class="kb-section">
+            <h4>&#127775; Brand Standards</h4>
+            <div class="kb-item" onclick="openKBArticle('brand-voice')"><span>&#127775;</span> Brand Voice &amp; Tone Guide</div>
+            <div class="kb-item" onclick="openKBArticle('visual-brand')"><span>&#127912;</span> Visual Brand Standards (Colors, Logo, Typography)</div>
+            <div class="kb-item" onclick="openKBArticle('no-supplier')"><span>&#128683;</span> Supplier Confidentiality — What Not to Say to Customers</div>
+          </div>
+          <div class="kb-section">
+            <h4>&#128657; Emergency Procedures</h4>
+            <div class="kb-item" onclick="openKBArticle('emergency')"><span>&#128680;</span> Emergency Contacts &amp; Escalation Guide</div>
+            <div class="kb-item" onclick="openKBArticle('refund')"><span>&#128260;</span> Refund &amp; Return Escalation Procedure</div>
+            <div class="kb-item" onclick="openKBArticle('incident')"><span>&#128221;</span> Incident Reporting Guide</div>
+          </div>
+        </div>
+
+        <!-- KB ARTICLE MODAL -->
+        <div id="kbModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;align-items:center;justify-content:center;padding:20px">
+          <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;width:100%;max-width:600px;max-height:80vh;overflow-y:auto">
+            <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+              <h3 id="kbModalTitle" style="font-size:1rem;color:var(--gold);margin:0"></h3>
+              <button onclick="closeKBModal" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.3rem">&times;</button>
+            </div>
+            <div id="kbModalContent" style="padding:20px;font-size:.86rem;color:#ccc;line-height:1.75"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ RECOGNITION ══════════ -->
+      <div class="tab-content" id="tab-recognition">
+        <div class="page-header">
+          <h1>Recognition</h1>
+          <p>Celebrating our Secret Keepers — your wins, milestones, and achievements</p>
+        </div>
+        <div class="card">
+          <h3>&#11088; My Badges &amp; Achievements</h3>
+          <div id="myBadges" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px"></div>
+        </div>
+        <div class="card">
+          <h3>&#127942; Recognition Wall</h3>
+          <div id="recognitionWall"><div class="empty-state">Loading recognition…</div></div>
+        </div>
+        <div class="card">
+          <h3>&#127942; Company Culture Center</h3>
+          <div style="background:linear-gradient(135deg,rgba(75,31,95,.3),rgba(240,192,64,.06));border:1px solid rgba(240,192,64,.2);border-radius:10px;padding:16px;margin-bottom:14px">
+            <div style="font-size:.9rem;font-weight:700;color:var(--gold);margin-bottom:8px">Our Mission</div>
+            <p style="font-size:.85rem;color:#ccc;line-height:1.65">To provide an elevated, luxurious, and discreet shopping experience that empowers our customers to embrace their confidence, sensuality, and joy — unapologetically.</p>
+          </div>
+          <div style="background:rgba(183,110,121,.1);border:1px solid rgba(183,110,121,.2);border-radius:10px;padding:16px">
+            <div style="font-size:.9rem;font-weight:700;color:var(--rose-light);margin-bottom:8px">The Secret Keeper Promise</div>
+            <p style="font-size:.85rem;color:#ccc;line-height:1.65">You are not just staff — you are a <strong style="color:var(--gold)">Secret Keeper</strong>. Every interaction you have represents the brand. Every order you fulfill carries our promise. Every party you host creates a memory. Show up with excellence, every single time.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ PROFILE ══════════ -->
+      <div class="tab-content" id="tab-profile">
+        <div class="page-header">
+          <h1>My Profile</h1>
+          <p>Your Secret Keeper info on file</p>
+        </div>
+        <div class="card">
+          <div id="profileContent"><div class="empty-state">Loading…</div></div>
+        </div>
+        <div class="card">
+          <h3>&#128274; Change Password</h3>
+          <div class="fgroup" style="max-width:340px">
+            <label>New Password</label>
+            <input type="password" id="newPwdInput" placeholder="Min 8 characters"/>
+          </div>
+          <button class="btn btn-rose" onclick="changePassword">Update Password</button>
+          <div id="pwdMsg" style="margin-top:10px;font-size:.8rem;display:none"></div>
+        </div>
+      </div>
+
+      <!-- ══════════ ASK DIMI ══════════ -->
+      <div class="tab-content" id="tab-askdimi">
+        <div class="page-header">
+          <h1>Ask Dimi</h1>
+          <p>Your AI Secret Keeper assistant — policy questions, procedures, scheduling help, and more</p>
+        </div>
+        <div style="background:rgba(75,31,95,.15);border:1px solid rgba(183,110,121,.2);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:.83rem;color:var(--muted)">
+          &#128161; Dimi can help with: policies, fulfillment steps, party hosting procedures, training info, scheduling questions, and brand standards. Dimi does not have access to executive-only data.
+        </div>
+        <div class="dimi-window">
+          <div class="dimi-messages" id="dimiMessages">
+            <div class="dimi-bubble dimi">
+              Hey there, Secret Keeper! I'm Dimi, your AI assistant. I can help you find company policies, walk you through fulfillment, answer training questions, and more. What do you need?
+            </div>
+          </div>
+          <div class="dimi-input-row">
+            <input type="text" id="dimiInput" placeholder="Ask me anything about DS policies, procedures, or your work…" onkeydown="if(event.key==='Enter')sendDimiMsg"/>
+            <button class="btn btn-rose btn-sm" onclick="sendDimiMsg">Send</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- KB ARTICLE DATA -->
+<script>
+const KB_ARTICLES = {
+  welcome: { title:"Welcome to Dripping Secrets", content:`<p>Welcome to the Dripping Secrets family, Secret Keeper.</p><p style="margin-top:10px">Dripping Secrets is a luxury adult lifestyle boutique dedicated to providing an elevated, discreet, and empowering shopping experience. Founded with the belief that everyone deserves to feel confident and celebrated, we curate products, experiences, and services that honor our customers&apos; journeys.</p><p style="margin-top:10px">As a Secret Keeper, you are a core part of that mission. Your role is to embody our brand values in every interaction — with customers, with your teammates, and within yourself.</p><p style="margin-top:10px"><strong style="color:#f0c040">Our Tagline:</strong> "You deserve a secret this good."</p>` },
+  values: { title:"Our Values & The Secret Keeper Standard", content:`<ul style="line-height:2"><li><strong style="color:#f0c040">Excellence:</strong> We deliver quality in every detail, every time.</li><li><strong style="color:#f0c040">Discretion:</strong> We protect our customers&apos; privacy absolutely. No supplier names, no product specifics, no brand exposure to customers.</li><li><strong style="color:#f0c040">Empowerment:</strong> We celebrate confidence, joy, and self-expression — without judgment.</li><li><strong style="color:#f0c040">Teamwork:</strong> We are an elite team. We lift each other up and hold each other accountable.</li><li><strong style="color:#f0c040">Accountability:</strong> We own our work, our mistakes, and our growth.</li><li><strong style="color:#f0c040">Customer Love:</strong> Our customers come first, always.</li></ul>` },
+  culture: { title:"Company Culture & What We Stand For", content:`<p>Dripping Secrets is more than a store — it is a lifestyle brand built on luxury, confidence, and community.</p><p style="margin-top:10px">We celebrate our team. We recognize excellence. We lift each other up. We do not tolerate gossip, negativity, or behavior that undermines the brand.</p><p style="margin-top:10px">As a Secret Keeper, you represent the brand even when you are off the clock on social media. Keep it professional, keep it on-brand, and keep it elevated.</p>` },
+  attendance: { title:"Attendance & Punctuality Policy", content:`<p>Reliability is a cornerstone of the Secret Keeper standard.</p><ul style="margin-top:10px;line-height:2"><li>Be on time — 5 minutes early is on time; on time is late.</li><li>If you will be late or absent, notify Ashley via the Requests portal at least 2 hours before your shift whenever possible.</li><li>No-call, no-show without prior notice is subject to disciplinary review.</li><li>Time off must be requested via the My Requests tab with at least 3 days notice except for emergencies.</li></ul>` },
+  conduct: { title:"Code of Conduct", content:`<p>Secret Keepers are expected to maintain a professional, positive, and brand-aligned demeanor at all times.</p><ul style="margin-top:10px;line-height:2"><li>Treat every customer with respect, warmth, and discretion.</li><li>Do not discuss supplier names, costs, or sourcing with customers or on social media.</li><li>Keep all business information confidential.</li><li>Do not share Back Office access, login credentials, or internal data.</li><li>Conflicts with teammates are resolved privately and professionally — bring issues to Ashley, not customers or social media.</li></ul>` },
+  confidentiality: { title:"Confidentiality & NDA Guidelines", content:`<p>Dripping Secrets operates with a supplier-blind model. <strong style="color:#e74c3c">Never disclose supplier names to customers.</strong></p><p style="margin-top:10px">This includes: Dear Lover, CJ Dropshipping, TopDawg, or any other supplier we use. If a customer asks where a product comes from, say: "All of our products are curated exclusively for Dripping Secrets."</p><p style="margin-top:10px">Business finances, order volumes, employee information, and platform details are all confidential. Violations are grounds for immediate termination.</p>` },
+  "social-media": { title:"Social Media & Brand Representation Policy", content:`<p>If you post about Dripping Secrets on social media, ensure all content is brand-aligned:</p><ul style="margin-top:10px;line-height:2"><li>Colors: Plum and gold only — no blue.</li><li>Tone: Luxurious, empowering, and professional.</li><li>Do not post images of products with visible supplier branding.</li><li>Do not reveal internal processes, supplier info, or company financials.</li><li>Tag us at @drippingsecrets when sharing brand-positive content.</li><li>Personal opinions must not be associated with the brand.</li></ul>` },
+  timeoff: { title:"Time Off & Scheduling Policy", content:`<p>Time off requests must be submitted via the <strong>My Requests</strong> tab with at least 3 days notice.</p><p style="margin-top:10px">Emergency time off should be reported to Ashley directly by phone or text immediately.</p><p style="margin-top:10px">Shift swaps require manager approval — do not swap shifts without Back Office confirmation. Submit a Schedule Change request and wait for approval before confirming with a teammate.</p>` },
+  "order-process": { title:"How to Process & Fulfill an Order", content:`<p>Orders assigned to you appear in <strong>My Queue</strong>. Each order card includes step-by-step fulfillment instructions based on the supplier.</p><ol style="margin-top:10px;line-height:2.2"><li>Open My Queue and locate the new order.</li><li>Log into the appropriate supplier portal using the credentials Ashley provided.</li><li>Place the order using the customer's exact shipping address. Use "drop shipping" mode — <strong>never include a supplier invoice</strong>.</li><li>Note the supplier order number for your records.</li><li>When tracking arrives, click "Add Tracking #" on the order card. The system auto-notifies the customer.</li><li>Click "Mark Fulfilled" to update the order status.</li></ol>` },
+  "party-host": { title:"How to Host a Secrets Party", content:`<p>Secrets Parties are our signature experience — intimate, elevated, and unforgettable.</p><ol style="margin-top:10px;line-height:2.2"><li>Review the booking details in My Schedule: host name, date, guest count, location, add-ons.</li><li>Confirm the booking with the host 48 hours before the event via phone or text.</li><li>Arrive 30–45 minutes early to set up the product display, atmosphere, and any add-on experiences.</li><li>Greet guests warmly — you are the face of Dripping Secrets.</li><li>Guide the shopping experience: share product knowledge, answer questions discreetly.</li><li>Process purchases through the approved checkout method.</li><li>Pack orders discreetly — no supplier branding visible.</li><li>Clean up and debrief with the host before leaving.</li><li>Update the booking status to "completed" in My Queue after the event.</li></ol>` },
+  "private-shop": { title:"How to Run a Private Shopping Session", content:`<p>Private Shopping Sessions are one-on-one experiences for VIP customers.</p><ol style="margin-top:10px;line-height:2.2"><li>Review session details in My Schedule.</li><li>Confirm 24 hours in advance.</li><li>Prepare a curated product selection based on the customer's stated interests (noted in the booking).</li><li>Create a warm, private, non-judgmental atmosphere.</li><li>Focus on the customer's needs — listen more than you speak.</li><li>Process the purchase discreetly and pack with care.</li><li>Follow up with Ashley after the session with a brief recap.</li></ol>` },
+  "supplier-guide": { title:"Supplier & Fulfillment Guide", content:`<p>Dripping Secrets uses multiple fulfillment partners. <strong style="color:#e74c3c">Never disclose supplier names to customers.</strong></p><ul style="margin-top:10px;line-height:2"><li><strong style="color:#f0c040">Physical Inventory (IDs 1–13):</strong> Items Ashley keeps in-store. Pull, pack with DS branding, and ship via UPS.</li><li><strong style="color:#f0c040">Dear Lover (IDs 14–33):</strong> Swimwear, fashion, bags. 10–21 day shipping. Order via dear-lover.com wholesale portal.</li><li><strong style="color:#f0c040">CJ Dropshipping (IDs 277–315):</strong> Lifestyle, tech, wellness. 7–15 days. Order via app.cjdropshipping.com.</li><li><strong style="color:#f0c040"> (IDs 316+):</strong> Fashion, loungewear. 5–10 days. Order via .com seller dashboard.</li></ul>` },
+  "customer-service": { title:"Customer Service Standards & Scripts", content:`<p>Every customer interaction must reflect our brand: warm, confident, discreet, and professional.</p><h4 style="color:#f0c040;margin-top:14px;margin-bottom:6px">Key Principles</h4><ul style="line-height:2"><li>Address customers by name whenever possible.</li><li>Never make a customer feel judged — we celebrate all lifestyles.</li><li>When in doubt, escalate to Ashley rather than guess.</li><li>Response time target: under 2 hours for messages during business hours.</li></ul><h4 style="color:#f0c040;margin-top:14px;margin-bottom:6px">Sample Scripts</h4><p><strong>"Where is my order?"</strong> → "Your order is on its way! Tracking info was sent to your email. Please allow [X] business days for delivery. Let me know if you need anything else!"</p><p style="margin-top:8px"><strong>"Can I return this?"</strong> → "I totally understand! Let me pull up your order and get this sorted for you right away."</p>` },
+  "brand-voice": { title:"Brand Voice & Tone Guide", content:`<p>Dripping Secrets speaks with one voice: luxurious, empowering, warm, and confidently feminine.</p><ul style="margin-top:10px;line-height:2"><li><strong style="color:#f0c040">DO:</strong> Use elevated, sophisticated language. Celebrate our customers. Be warm and inviting.</li><li><strong style="color:#f0c040">DON'T:</strong> Use slang (unless intentionally on-brand), be overly casual, or be clinical.</li><li><strong style="color:#f0c040">Tagline:</strong> "You deserve a secret this good." — use it consistently.</li><li><strong style="color:#f0c040">Emojis:</strong> In internal/employee contexts, fine. In customer-facing content, only the intentional rose 🌹 in the marquee. No other emojis in customer-facing copy.</li></ul>` },
+  "visual-brand": { title:"Visual Brand Standards", content:`<p>Every visual touchpoint must be on-brand.</p><ul style="margin-top:10px;line-height:2"><li><strong style="color:#f0c040">Colors:</strong> Plum (#4B1F5F) and Gold (#f0c040) — NO blue anywhere.</li><li><strong style="color:#f0c040">Logo:</strong> Use the official DS logo file only — no alterations, no stretching.</li><li><strong style="color:#f0c040">Typography:</strong> Elegant serif and clean sans-serif only. No novelty fonts.</li><li><strong style="color:#f0c040">Social Graphics:</strong> No borders or trim frames. Icons only for social platform logos. All text must remain readable.</li><li><strong style="color:#f0c040">Images:</strong> Lifestyle photography: luxury aesthetic, plum/gold tones. No busy backgrounds.</li></ul>` },
+  "no-supplier": { title:"Supplier Confidentiality — What Not to Say", content:`<p style="color:#e74c3c;font-weight:700">NEVER disclose supplier names to customers under any circumstances.</p><p style="margin-top:10px">If a customer asks: <em>"Where does this come from?"</em> or <em>"Is this from [supplier]?"</em> — respond:</p><p style="margin-top:8px;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.2);border-radius:8px;padding:10px;font-style:italic">"All of our products are exclusively curated for Dripping Secrets."</p><p style="margin-top:10px">Do not confirm, deny, or hint at any supplier names. This protects our pricing model and business relationships.</p>` },
+  emergency: { title:"Emergency Contacts & Escalation Guide", content:`<p>For any emergency during a DS event or fulfillment situation, escalate immediately:</p><ol style="margin-top:10px;line-height:2.2"><li>Handle what you safely can — your safety and the customer's safety come first.</li><li>Text Ashley immediately — include the situation, location, and customer name.</li><li>Document the incident using the Incident Reporting form in My Requests.</li><li>For medical/safety emergencies: call 911 first, then notify Ashley.</li></ol>` },
+  refund: { title:"Refund & Return Escalation Procedure", content:`<p>All refund and return decisions are made by Ashley. As a Secret Keeper, your role is to:</p><ol style="margin-top:10px;line-height:2.2"><li>Acknowledge the customer's concern warmly and immediately.</li><li>Let them know you are escalating to ensure they are fully taken care of.</li><li>Submit a Request (type: Question/Concern) with the full order details and the customer's issue.</li><li>Do NOT promise a refund, replacement, or resolution without Ashley's confirmation.</li></ol>` },
+  incident: { title:"Incident Reporting Guide", content:`<p>If an incident occurs (customer complaint, safety concern, fulfillment error, etc.):</p><ol style="margin-top:10px;line-height:2.2"><li>Document the full situation: date, time, what happened, who was involved, what action was taken.</li><li>Submit via My Requests → type: Concern.</li><li>Notify Ashley immediately if the situation is urgent.</li><li>Do not discuss the incident with other team members or on social media.</li></ol>` }
+};
+
+function openKBArticle(key) {
+  const art = KB_ARTICLES[key];
+  if (!art) return;
+  document.getElementById('kbModalTitle').textContent = art.title;
+  document.getElementById('kbModalContent').innerHTML = art.content;
+  document.getElementById('kbModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeKBModal {
+  document.getElementById('kbModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+function filterKB {
+  const q = document.getElementById('kbSearch').value.toLowerCase;
+  document.querySelectorAll('.kb-item').forEach(el => {
+    el.style.display = el.textContent.toLowerCase.includes(q) ? '' : 'none';
+  });
+  document.querySelectorAll('.kb-section').forEach(sec => {
+    const visible = [...sec.querySelectorAll('.kb-item')].some(el => el.style.display !== 'none');
+    sec.style.display = visible ? '' : 'none';
+  });
+}
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  DRIPPING SECRETS — Secret Keeper Hub
+//  SKOS v11.0 (Volume 4 Implementation)
+// ═══════════════════════════════════════════════════
+
+const auth = firebase.auth;
+const db   = firebase.firestore;
+
+let currentUser = null;
+let empRecord   = null;
+let allTasks    = [];
+let calYear, calMonth;
+
+// ── AUTH STATE ──
+auth.onAuthStateChanged(async (user) => {
+  if (!user) { showGate; return; }
+  try {
+    const snap = await db.collection('employees').where('email','==',user.email).limit(1).get;
+    if (snap.empty) {
+      showError('Access denied. Your email is not registered as a Secret Keeper. Contact Ashley.');
+      auth.signOut; showGate; return;
+    }
+    empRecord   = { id: snap.docs[0].id, ...snap.docs[0].data };
+    currentUser = user;
+    showPortal;
+  } catch (e) {
+    showError('Could not verify your account: ' + e.message);
+    showGate;
+  }
+});
+
+function showGate {
+  document.getElementById('loginGate').style.display = 'flex';
+  document.getElementById('portal').style.display   = 'none';
+  document.getElementById('empBadgeDisplay').style.display = 'none';
+  document.getElementById('logoutBtn').style.display       = 'none';
+}
+function showPortal {
+  document.getElementById('loginGate').style.display = 'none';
+  document.getElementById('portal').style.display    = 'block';
+  document.getElementById('empBadgeDisplay').style.display = 'flex';
+  document.getElementById('logoutBtn').style.display       = 'block';
+  document.getElementById('empNameDisplay').textContent = empRecord.name || currentUser.email;
+  initHub;
+  loadSchedule;
+  loadQueue;
+  loadProfile;
+  loadTasks;
+  loadMessages;
+  loadRecognition;
+  initCalendar;
+  loadTraining;
+  loadRequests;
+}
+
+// ── SIGN IN ──
+async function doSignIn(e) {
+  e.preventDefault;
+  const email = document.getElementById('siEmail').value.trim;
+  const pwd   = document.getElementById('siPassword').value;
+  hideError;
+  try { await auth.signInWithEmailAndPassword(email, pwd); }
+  catch (err) { showError(friendlyAuthError(err)); }
+}
+
+// ── REGISTER ──
+async function doRegister(e) {
+  e.preventDefault;
+  const email = document.getElementById('regEmail').value.trim;
+  const pwd   = document.getElementById('regPassword').value;
+  const conf  = document.getElementById('regConfirm').value;
+  hideError;
+  if (pwd !== conf) { showError('Passwords do not match.'); return; }
+  if (pwd.length < 8) { showError('Password must be at least 8 characters.'); return; }
+  try {
+    const snap = await db.collection('employees').where('email','==',email).limit(1).get;
+    if (snap.empty) { showError('That email is not registered. Check with Ashley first.'); return; }
+    await auth.createUserWithEmailAndPassword(email, pwd);
+  } catch (err) { showError(friendlyAuthError(err)); }
+}
+
+function friendlyAuthError(err) {
+  const m = { 'auth/user-not-found':'No account found with that email.','auth/wrong-password':'Incorrect password.','auth/email-already-in-use':'Account already exists — use Sign In instead.','auth/invalid-email':'Please enter a valid email address.','auth/too-many-requests':'Too many attempts. Try again in a few minutes.' };
+  return m[err.code] || err.message;
+}
+function setMode(mode) {
+  const si = mode === 'signin';
+  document.getElementById('signInForm').style.display   = si ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = si ? 'none' : 'block';
+  document.getElementById('modeSignIn').classList.toggle('active',si);
+  document.getElementById('modeRegister').classList.toggle('active',!si);
+  hideError;
+}
+function showError(msg) { const el=document.getElementById('loginError'); el.textContent=msg; el.classList.add('show'); }
+function hideError { document.getElementById('loginError').classList.remove('show'); }
+function doLogout { auth.signOut; }
+
+// ── TAB SWITCHING ──
+function switchEmpTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.emp-nav-item').forEach(n => n.classList.remove('active'));
+  const tc = document.getElementById('tab-'+tab);
+  const ni = document.getElementById('nav-'+tab);
+  if (tc) tc.classList.add('active');
+  if (ni) ni.classList.add('active');
+  closeEmpSidebar;
+}
+
+// ── MOBILE SIDEBAR ──
+function toggleEmpSidebar {
+  const sb=document.getElementById('empSidebar'),ov=document.getElementById('empSidebarOverlay'),btn=document.getElementById('empHamburger');
+  const o=sb.classList.contains('open');
+  sb.classList.toggle('open',!o); ov.classList.toggle('open',!o);
+  btn.setAttribute('aria-expanded',String(!o));
+}
+function closeEmpSidebar {
+  document.getElementById('empSidebar').classList.remove('open');
+  document.getElementById('empSidebarOverlay').classList.remove('open');
+  document.getElementById('empHamburger').setAttribute('aria-expanded','false');
+}
+
+// ═══════════════════════════════════════════════════
+//  HUB DASHBOARD
+// ═══════════════════════════════════════════════════
+function initHub {
+  const hour = new Date.getHours;
+  const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('hubGreeting').textContent = greet + ', ' + (empRecord.name ? empRecord.name.split(' ')[0] : 'Secret Keeper') + ' ✨';
+  document.getElementById('hubDate').textContent = new Date.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  const tips = [
+    '"You deserve a secret this good." — That's our promise to every customer. Carry it with you today.',
+    'Excellence is not a one-time act — it's a habit. Show up with intention today, Secret Keeper.',
+    'Every order you fulfill is a customer's experience. Make it memorable.',
+    'You are the face of Dripping Secrets. Make it luxurious. Make it warm. Make it unforgettable.',
+    'A great Secret Keeper knows the product, knows the brand, and loves the customer.',
+    'Today is another opportunity to create something extraordinary. Let's get it, Boss moves only.',
+  ];
+  document.getElementById('dimiDailyTip').textContent = tips[new Date.getDay % tips.length];
+}
+
+async function loadHubData {
+  // Stats loaded after individual data loads update them
+}
+
+// ═══════════════════════════════════════════════════
+//  SCHEDULE (Existing — preserved from v9.46)
+// ═══════════════════════════════════════════════════
+async function loadSchedule {
+  const el = document.getElementById('scheduleList');
+  el.innerHTML = '<div class="empty-state"><div class="icon">📅</div>Loading…</div>';
+  try {
+    const snap = await db.collection('parties')
+      .where('assignedEmployee.email','==',currentUser.email)
+      .orderBy('preferredDate','asc').get;
+    if (snap.empty) {
+      el.innerHTML = '<div class="empty-state"><div class="icon">📅</div>No bookings assigned to you yet. Check back after Ashley updates your schedule.</div>';
+      document.getElementById('hubStatBookings').textContent = '0';
+      return;
+    }
+    const bookings = snap.docs.map(d=>({id:d.id,...d.data}));
+    const active = bookings.filter(b=>!['completed','cancelled'].includes(b.status||'new'));
+    const badge = document.getElementById('scheduleBadge');
+    if (active.length > 0) { badge.textContent=active.length; badge.style.display='inline-block'; }
+    document.getElementById('hubStatBookings').textContent = active.length;
+    // Hub widget
+    const hw = document.getElementById('hubAnnouncement');
+    el.innerHTML = `<table><thead><tr><th>Host</th><th>Date</th><th>Type</th><th>Guests</th><th>Status</th><th>Notes</th></tr></thead><tbody>${bookings.map(b=>`</thead><tbody>${reqs.map(r=>`<tr><td><span class="pill in-progress">${r.type||'—'}</span></td><td style="font-size:.84rem">${r.subject||'—'}</td><td style="font-size:.78rem;color:var(--muted)">${fmtDate(r.createdAt)}</td><td><span class="pill ${r.status||'pending'}">${r.status||'pending'}</span></td><td style="font-size:.82rem;color:var(--muted)">${r.response||'Awaiting review'}</td></tr>`).join('')}</tbody></table>`;
+  } catch(e){el.innerHTML=`<div class="empty-state">Error: ${e.message}</div>`;}
+}
+
+// ═══════════════════════════════════════════════════
+//  CALENDAR
+// ═══════════════════════════════════════════════════
+let calEvents=[];
+function initCalendar {
+  const now=new Date;calYear=now.getFullYear;calMonth=now.getMonth;
+  loadCalendarEvents;
+}
+async function loadCalendarEvents {
+  try {
+    const snap=await db.collection('sk_calendar').orderBy('date','asc').limit(50).get;
+    calEvents=snap.docs.map(d=>({id:d.id,...d.data}));
+  } catch(e){calEvents=[];}
+  renderCalendar;
+  renderEventList;
+}
+function calNav(dir) {
+  calMonth+=dir;
+  if(calMonth>11){calMonth=0;calYear++;}
+  if(calMonth<0){calMonth=11;calYear--;}
+  renderCalendar;
+}
+function renderCalendar {
+  const label=new Date(calYear,calMonth,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  document.getElementById('calMonthLabel').textContent=label;
+  const grid=document.getElementById('calDaysGrid');
+  const firstDay=new Date(calYear,calMonth,1).getDay;
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate;
+  const today=new Date;
+  let html='';
+  for(let i=0;i<firstDay;i++){const d=new Date(calYear,calMonth,1-firstDay+i);html+=`<div class="cal-day other-month"><div class="d-num">${d.getDate}</div></div>`;}
+  for(let d=1;d<=daysInMonth;d++){
+    const isToday=today.getFullYear===calYear&&today.getMonth===calMonth&&today.getDate===d;
+    const dayStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayEvents=calEvents.filter(e=>e.date===dayStr);
+    html+=`<div class="cal-day ${isToday?'today':''}" onclick="calDayClick('${dayStr}')"><div class="d-num">${d}</div>${dayEvents.map(e=>`<div class="cal-event">${e.title||'Event'}</div>`).join('')}</div>`;
+  }
+  grid.innerHTML=html;
+}
+function renderEventList {
+  const el=document.getElementById('calEventList');
+  const today=new Date.toISOString.split('T')[0];
+  const upcoming=calEvents.filter(e=>e.date>=today).slice(0,10);
+  if(!upcoming.length){el.innerHTML='<div class="empty-state" style="padding:16px">No upcoming events. Ashley will add company events, trainings, and important dates here.</div>';return;}
+  el.innerHTML=upcoming.map(e=>`<div class="event-list-item"><div class="ev-title">${e.title||'Event'}</div><div class="ev-meta">${e.date} ${e.time?'· '+e.time:''} ${e.type?'· '+e.type:''}</div>${e.description?`<div style="font-size:.82rem;color:#ccc;margin-top:5px">${e.description}</div>`:''}</div>`).join('');
+}
+function calDayClick(date) {
+  const events=calEvents.filter(e=>e.date===date);
+  if(!events.length)return;
+  alert(events.map(e=>e.title+(e.description?'\n'+e.description:'')).join('\n\n'));
+}
+
+// ═══════════════════════════════════════════════════
+//  TRAINING
+// ═══════════════════════════════════════════════════
+const DEFAULT_TRAINING=[
+  {id:'onboarding',title:'Welcome to Dripping Secrets — Onboarding',description:'Company overview, values, culture, and your role as a Secret Keeper.',category:'Onboarding',required:true},
+  {id:'customer-service',title:'Customer Service Excellence',description:'Standards, scripts, and how to handle every customer interaction.',category:'Customer Service',required:true},
+  {id:'product-knowledge',title:'Product Knowledge Fundamentals',description:'Understanding our product catalog, categories, and how to speak about them.',category:'Product',required:true},
+  {id:'party-hosting',title:'Secrets Party Hosting Guide',description:'How to prepare, execute, and follow up on a Secrets Party.',category:'Events',required:true},
+  {id:'fulfillment',title:'Order Fulfillment & Supplier Guide',description:'Step-by-step order fulfillment for all supplier types.',category:'Operations',required:true},
+  {id:'brand-standards',title:'Brand Standards & Voice',description:'Visual brand, tone of voice, and how to represent DS in every interaction.',category:'Brand',required:true},
+  {id:'policies',title:'Company Policies & Code of Conduct',description:'Attendance, conduct, confidentiality, and social media policies.',category:'Policies',required:true},
+  {id:'technology',title:'Secret Keeper Hub & Tools Guide',description:'How to use this portal, the Back Office system, and all digital tools.',category:'Technology',required:false},
+];
+async function loadTraining {
+  const listEl=document.getElementById('trainingList');
+  const compEl=document.getElementById('trainingComplete');
+  try {
+    const snap=await db.collection('sk_training_progress').where('employeeEmail','==',currentUser.email).get;
+    const progress={};snap.docs.forEach(d=>{const data=d.data;progress[data.moduleId]={status:data.status,completedAt:data.completedAt,score:data.score};});
+    const incomplete=DEFAULT_TRAINING.filter(m=>progress[m.id]?.status!=='completed');
+    const complete=DEFAULT_TRAINING.filter(m=>progress[m.id]?.status==='completed');
+    const pct=Math.round((complete.length/DEFAULT_TRAINING.length)*100);
+    const hubTEl=document.getElementById('hubTraining');
+    hubTEl.innerHTML=`<div style="margin-bottom:8px"><div style="font-size:.8rem;color:var(--muted);margin-bottom:4px">Overall Progress</div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><div class="t-progress-text">${complete.length} of ${DEFAULT_TRAINING.length} modules completed (${pct}%)</div></div>${incomplete.slice(0,2).map(m=>`<div class="hub-item"><div class="hub-item-dot"></div><div style="font-size:.82rem">${m.title}</div></div>`).join('')}`;
+    if(!incomplete.length){listEl.innerHTML='<div class="empty-state"><div class="icon">🎉</div>You've completed all required training modules!</div>';} else {
+      listEl.innerHTML=incomplete.map(m=>`<div class="training-card"><div class="t-title">${m.required?'<span style="color:var(--red);font-size:.72rem;margin-right:5px">REQUIRED</span>':''} ${m.title}</div><div class="t-desc">${m.description}</div><div style="font-size:.75rem;color:var(--muted);margin-bottom:10px">Category: ${m.category}</div><div style="display:flex;align-items:center;gap:10px"><button class="btn btn-rose btn-sm" onclick="startTraining('${m.id}')">Start Module</button><span style="font-size:.8rem;color:var(--orange)">Not started</span></div></div>`).join('');
+    }
+    if(!complete.length){compEl.innerHTML='<div class="empty-state" style="padding:14px">No completed modules yet. Start with Onboarding!</div>';} else {
+      compEl.innerHTML=complete.map(m=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--panel2);border-radius:8px;margin-bottom:8px"><div><div style="font-size:.86rem;font-weight:500">${m.title}</div><div style="font-size:.74rem;color:var(--muted)">${m.category}</div></div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;color:var(--green)">✓ Completed</span>${progress[m.id]?.completedAt?`<span style="font-size:.72rem;color:var(--muted)">${fmtDate(progress[m.id].completedAt)}</span>`:''}</div></div>`).join('');
+    }
+  } catch(e){
+    listEl.innerHTML=DEFAULT_TRAINING.map(m=>`<div class="training-card"><div class="t-title">${m.required?'<span style="color:var(--red);font-size:.72rem;margin-right:5px">REQUIRED</span>':''} ${m.title}</div><div class="t-desc">${m.description}</div><div style="font-size:.75rem;color:var(--muted);margin-bottom:10px">Category: ${m.category}</div><button class="btn btn-rose btn-sm" onclick="startTraining('${m.id}')">Start Module</button></div>`).join('');
+    compEl.innerHTML='<div class="empty-state" style="padding:14px">Complete modules to see them here.</div>';
+  }
+}
+async function startTraining(moduleId) {
+  const module=DEFAULT_TRAINING.find(m=>m.id===moduleId);
+  if(!module)return;
+  const confirm_=window.confirm(`Start module: "${module.title}"?\n\nThis module covers:\n${module.description}\n\nClick OK to mark as completed when done.`);
+  if(!confirm_)return;
+  try {
+    const snap=await db.collection('sk_training_progress').where('employeeEmail','==',currentUser.email).where('moduleId','==',moduleId).limit(1).get;
+    if(snap.empty){await db.collection('sk_training_progress').add({employeeEmail:currentUser.email,employeeName:empRecord.name||currentUser.email,moduleId,moduleTitle:module.title,status:'completed',completedAt:firebase.firestore.FieldValue.serverTimestamp});}
+    else{await db.collection('sk_training_progress').doc(snap.docs[0].id).update({status:'completed',completedAt:firebase.firestore.FieldValue.serverTimestamp});}
+    alert('Module completed! Great work, Secret Keeper.');
+    loadTraining;
+  } catch(e){alert('Error: '+e.message);}
+}
+
+// ═══════════════════════════════════════════════════
+//  RECOGNITION
+// ═══════════════════════════════════════════════════
+const STATIC_BADGES=[
+  {icon:'🌟',title:'Secret Keeper',desc:'Joined the Dripping Secrets team',earned:true},
+  {icon:'📚',title:'Trained & Ready',desc:'Completed onboarding training',earned:false},
+  {icon:'⭐',title:'5-Star Host',desc:'Received excellent party reviews',earned:false},
+  {icon:'🚀',title:'Speed Demon',desc:'Fulfilled 10 orders in record time',earned:false},
+  {icon:'💎',title:'Diamond Secret Keeper',desc:'6 months of outstanding service',earned:false},
+];
+async function loadRecognition {
+  const badgesEl=document.getElementById('myBadges');
+  const wallEl=document.getElementById('recognitionWall');
+  const hubEl=document.getElementById('hubRecognition');
+  // Static badges + earned from Firestore
+  try {
+    const snap=await db.collection('sk_recognition').where('recipientEmail','==',currentUser.email).get;
+    const earned=snap.docs.map(d=>d.data);
+    STATIC_BADGES[0].earned=true; // Everyone gets Secret Keeper badge
+    if(empRecord.startDate){ // Check 6-month badge
+      const start=new Date(empRecord.startDate);const now=new Date;const months=(now-start)/(1000*60*60*24*30);
+      if(months>=6)STATIC_BADGES[4].earned=true;
+    }
+    badgesEl.innerHTML=STATIC_BADGES.map(b=>`<div class="recognition-card" style="${b.earned?'':' opacity:.4'}"><div class="badge-icon">${b.icon}</div><div class="badge-title">${b.title}</div><div class="badge-desc">${b.desc}</div>${b.earned?'<div style="font-size:.72rem;color:var(--green);margin-top:6px">✓ Earned</div>':'<div style="font-size:.72rem;color:var(--muted);margin-top:6px">Not yet earned</div>'}</div>`).join('');
+    // Wall — company wide
+    const wallSnap=await db.collection('sk_recognition').orderBy('createdAt','desc').limit(10).get;
+    const wallItems=wallSnap.docs.map(d=>({id:d.id,...d.data}));
+    if(wallItems.length){
+      wallEl.innerHTML=wallItems.map(r=>`<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)"><div style="font-size:1.6rem">${r.icon||'⭐'}</div><div><div style="font-size:.88rem;font-weight:600;color:var(--gold)">${r.recipientName||'Secret Keeper'}</div><div style="font-size:.84rem;color:#ccc;margin-top:2px">${r.message||r.title||'Recognition'}</div><div style="font-size:.73rem;color:var(--muted);margin-top:3px">${fmtDate(r.createdAt)}</div></div></div>`).join('');
+    } else {
+      wallEl.innerHTML='<div class="empty-state" style="padding:14px">Recognition milestones will appear here. Keep up the great work!</div>';
+    }
+    // Hub widget
+    const earnedBadges=STATIC_BADGES.filter(b=>b.earned);
+    hubEl.innerHTML=earnedBadges.map(b=>`<div class="hub-item"><div style="font-size:1.2rem">${b.icon}</div><div><div style="font-size:.84rem;font-weight:500;color:var(--gold)">${b.title}</div><div style="font-size:.73rem;color:var(--muted)">${b.desc}</div></div></div>`).join('') || '<div style="font-size:.82rem;color:var(--muted)">Complete training and milestones to earn badges!</div>';
+  } catch(e){
+    badgesEl.innerHTML=STATIC_BADGES.map(b=>`<div class="recognition-card"><div class="badge-icon">${b.icon}</div><div class="badge-title">${b.title}</div><div class="badge-desc">${b.desc}</div></div>`).join('');
+    wallEl.innerHTML='<div class="empty-state">Could not load recognition wall.</div>';
+    hubEl.innerHTML='<div class="recognition-card"><div class="badge-icon">🌟</div><div class="badge-title">Secret Keeper</div><div class="badge-desc">Welcome to the team!</div></div>';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  PROFILE (preserved from v9.46)
+// ═══════════════════════════════════════════════════
+function loadProfile {
+  const el=document.getElementById('profileContent');
+  if(!empRecord){el.innerHTML='<div class="empty-state">Loading…</div>';return;}
+  el.innerHTML=`<div class="emp-id-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3l-4 4-4-4"/></svg> ${empRecord.employeeId||'DS-000'}</div><div class="profile-grid"><div class="profile-field"><label>Full Name</label><div class="value">${empRecord.name||'—'}</div></div><div class="profile-field"><label>Title / Role</label><div class="value">${empRecord.title||'—'}</div></div><div class="profile-field"><label>Work Email</label><div class="value">${empRecord.email||currentUser.email}</div></div><div class="profile-field"><label>Phone</label><div class="value">${empRecord.phone||'—'}</div></div><div class="profile-field"><label>Start Date</label><div class="value">${empRecord.startDate||'—'}</div></div><div class="profile-field"><label>Status</label><div class="value"><span class="pill active">${empRecord.status||'active'}</span></div></div></div>`;
+}
+async function changePassword {
+  const pwd=document.getElementById('newPwdInput').value;
+  const msg=document.getElementById('pwdMsg');
+  msg.style.display='block';
+  if(pwd.length<8){msg.style.color='var(--red)';msg.textContent='Password must be at least 8 characters.';return;}
+  try{await currentUser.updatePassword(pwd);msg.style.color='var(--green)';msg.textContent='Password updated!';document.getElementById('newPwdInput').value='';}
+  catch(e){msg.style.color='var(--red)';msg.textContent=e.message;}
+}
+
+// ═══════════════════════════════════════════════════
+//  ASK DIMI (Internal SK mode)
+// ═══════════════════════════════════════════════════
+const DIMI_KB = {
+  'time off': 'Time-off requests must be submitted via My Requests → Time Off. Please give at least 3 days notice. Emergency absences should be reported to Ashley immediately by phone.',
+  'return': 'All return and refund decisions are made by Ashley. Acknowledge the customer warmly, escalate via My Requests → Concern with the full order details, and wait for Ashley\'s approval before making any promises.',
+  'supplier': 'Never disclose supplier names to customers. If asked, say: "All our products are exclusively curated for Dripping Secrets." Our suppliers include Dear Lover (IDs 14-33), CJ Dropshipping (IDs 277-315), and  (IDs 316+).',
+  'fulfill': 'Orders in My Queue include step-by-step fulfillment instructions. Once shipped, click "Add Tracking #" and then "Mark Fulfilled." The system auto-notifies the customer.',
+  'party': 'Review booking details in My Schedule. Confirm with the host 48 hours before. Arrive 30-45 minutes early. Greet guests warmly, guide the shopping experience, and process purchases discreetly.',
+  'password': 'Go to My Profile → Change Password. Enter your new password (min 8 characters) and click Update.',
+  'schedule': 'Your assigned bookings are in My Schedule. For schedule change requests, go to My Requests → Schedule Change.',
+  'training': 'Your training modules are in the Training tab. Prioritize required modules first. Click "Start Module" to complete each one.',
+  'payroll': 'Payroll and compensation questions should be submitted via My Requests → General Question and directed to Ashley.',
+  'sick': 'If you're sick, submit a Time Off request via My Requests and notify Ashley directly as soon as possible.',
+  'color': 'DS brand colors are Plum (#4B1F5F) and Gold (#f0c040). No blue. Ever.',
+  'tagline': '"You deserve a secret this good." — that's our official tagline.',
+  'hello': 'Hey there, Secret Keeper! What can I help you with today?',
+  'hi': 'Hey! I'm here to help. Ask me about policies, procedures, fulfillment, training, or anything DS-related.',
+};
+function sendDimiMsg {
+  const input=document.getElementById('dimiInput');
+  const msgs=document.getElementById('dimiMessages');
+  const text=input.value.trim;
+  if(!text)return;
+  msgs.innerHTML+=`<div class="dimi-bubble user">${text}</div>`;
+  input.value='';
+  setTimeout(=>{
+    const lower=text.toLowerCase;
+    let reply=null;
+    for(const [key,val] of Object.entries(DIMI_KB)){if(lower.includes(key)){reply=val;break;}}
+    if(!reply)reply='That's a great question! For detailed answers, check the Knowledge Base or submit a question via My Requests. I'm still learning, but Ashley's always the best source for anything I can't answer.';
+    msgs.innerHTML+=`<div class="dimi-bubble dimi">${reply}</div>`;
+    msgs.scrollTop=msgs.scrollHeight;
+  },600);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+// ── HELPERS ──
+function fmtDate(ts) {
+  if(!ts)return'—';
+  try{const d=ts.toDate?ts.toDate:new Date(ts);return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}catch{return'—';}
+}
+</script>
+</body>
+</html>

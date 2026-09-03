@@ -1,0 +1,33 @@
+{
+  "version": "1.0",
+  "updated": "2026-07-08T14:00:00.000Z",
+  "assets": [
+    {
+      "id": "cs-tiktok-the-rose-001",
+      "title": "The Rose — TikTok Slideshow",
+      "campaign_name": "The Rose Launch",
+      "campaign_id": "camp-rose-001",
+      "type": "tiktok_video",
+      "platforms": ["tiktok", "instagram"],
+      "status": "draft",
+      "created": "2026-07-08T14:06:00.000Z",
+      "brief": "POV: you finally stopped waiting for someone else to make you feel good — The Rose from Dripping Secrets",
+      "caption": "POV: you finally stopped waiting for someone else to make you feel good 🌹\n\nIt's giving ritual. It's giving unbothered. It's giving The Rose from Dripping Secrets and bestie — she never misses.\n\n📲 DrippingSecrets.com",
+      "hashtags": "#TheRose #DrippingSecrets #RoseToy #TikTokMadeMeBuyIt #IntimateWellness",
+      "video_url": null,
+      "thumbnail_url": null,
+      "source": "tasklet",
+      "favorite": false,
+      "tags": ["the rose", "product", "tiktok", "viral"]
+    }
+  ],
+  "campaigns": [
+    {
+      "id": "camp-rose-001",
+      "label": "The Rose Launch",
+      "status": "active",
+      "created": "2026-07-08T14:06:00.000Z",
+      "asset_count": 1
+    }
+  ]
+}

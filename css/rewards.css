@@ -1,0 +1,50 @@
+/* ================================================================
+   DRIPPING REWARDS — DS v9.80
+   Customer-facing rewards dashboard styles (used in account.html)
+   ================================================================ */
+
+/* Rewards tab panel */
+#tab-rewards { display: none; }
+#tab-rewards.active { display: block; }
+
+.rwd-container {
+  max-width: 860px;
+}
+
+/* Tier badge strip */
+.rwd-tier-strip {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.rwd-tier-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 30px;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.5);
+  transition: border-color 0.2s;
+}
+
+.rwd-tier-badge.active {
+  background: rgba(183,110,121,0.12);
+  border-color: rgba(183,110,121,0.4);
+  color: #B76E79;
+}
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  .rwd-tier-strip {
+    gap: 6px;
+  }
+  .rwd-tier-badge {
+    font-size: 0.72rem;
+    padding: 6px 10px;
+  }
+}

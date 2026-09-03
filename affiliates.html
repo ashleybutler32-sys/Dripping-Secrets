@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Affiliate Program — Dripping Secrets</title>
+  <meta name="description" content="Partner with Dripping Secrets. Earn commission promoting luxury intimate products curated by a Secret Keeper."/>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/images/icon-192.png"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="theme-color" content="#4B1F5F"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .affiliate-hero {
+      background: linear-gradient(135deg, #4B1F5F 0%, #2d1138 60%, #1a0a22 100%);
+      padding: 80px 20px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .affiliate-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at 60% 40%, rgba(183,110,121,.15) 0%, transparent 60%);
+    }
+    .affiliate-hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      color: #fff;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .affiliate-hero h1 span { color: #B76E79; }
+    .affiliate-hero p {
+      font-size: 1.15rem;
+      color: rgba(255,255,255,.8);
+      max-width: 600px;
+      margin: 0 auto 32px;
+      position: relative;
+    }
+    .affiliate-cta-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #B76E79, #d4899a);
+      color: #fff;
+      padding: 14px 36px;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: .5px;
+      box-shadow: 0 4px 20px rgba(183,110,121,.4);
+      transition: transform .2s, box-shadow .2s;
+      position: relative;
+    }
+    .affiliate-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(183,110,121,.55); }
+
+    .affiliate-perks {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      max-width: 1000px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+    .perk-card {
+      background: rgba(75,31,95,.12);
+      border: 1px solid rgba(183,110,121,.25);
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+      transition: transform .2s, border-color .2s;
+    }
+    .perk-card:hover { transform: translateY(-4px); border-color: #B76E79; }
+    .perk-icon { width: 48px; height: 48px; margin: 0 auto 16px; color: #B76E79; }
+    .perk-card h3 { font-size: 1.1rem; margin-bottom: 8px; color: #fff; }
+    .perk-card p { font-size: .9rem; color: rgba(255,255,255,.65); line-height: 1.5; margin: 0; }
+
+    .how-it-works {
+      max-width: 860px;
+      margin: 0 auto 60px;
+      padding: 0 20px;
+    }
+    .how-it-works h2 { text-align: center; font-size: 1.8rem; margin-bottom: 40px; }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+    }
+    .step {
+      text-align: center;
+      padding: 24px 16px;
+    }
+    .step-num {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #B76E79, #4B1F5F);
+      color: #fff;
+      font-size: 1.4rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px;
+    }
+    .step h4 { font-size: 1rem; margin-bottom: 6px; }
+    .step p { font-size: .875rem; color: rgba(255,255,255,.6); margin: 0; }
+
+    .affiliate-form-wrap {
+      max-width: 620px;
+      margin: 0 auto 80px;
+      padding: 40px 32px;
+      background: rgba(75,31,95,.15);
+      border: 1px solid rgba(183,110,121,.3);
+      border-radius: 20px;
+    }
+    .affiliate-form-wrap h2 { text-align: center; margin-bottom: 28px; font-size: 1.6rem; }
+    .aff-form-row { margin-bottom: 18px; }
+    .aff-form-row label { display: block; font-size: .85rem; color: rgba(255,255,255,.7); margin-bottom: 6px; }
+    .aff-form-row input,
+    .aff-form-row select,
+    .aff-form-row textarea {
+      width: 100%; padding: 11px 14px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(183,110,121,.3);
+      border-radius: 10px;
+      color: #fff;
+      font-size: .95rem;
+      box-sizing: border-box;
+      transition: border-color .2s;
+    }
+    .aff-form-row input:focus,
+    .aff-form-row select:focus,
+    .aff-form-row textarea:focus {
+      outline: none;
+      border-color: #B76E79;
+    }
+    .aff-form-row textarea { resize: vertical; min-height: 90px; }
+    .aff-form-row select option { background: #2d1138; }
+    .aff-submit-btn {
+      width: 100%; padding: 13px;
+      background: linear-gradient(135deg, #B76E79, #d4899a);
+      color: #fff; border: none; border-radius: 24px;
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+      margin-top: 8px;
+      transition: opacity .2s;
+    }
+    .aff-submit-btn:hover { opacity: .9; }
+    .aff-success {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      background: rgba(183,110,121,.15);
+      border: 1px solid #B76E79;
+      border-radius: 12px;
+      margin-top: 16px;
+      color: #B76E79;
+      font-weight: 600;
+    }
+
+    .commission-table {
+      max-width: 700px;
+      margin: 0 auto 60px;
+      padding: 0 20px;
+    }
+    .commission-table h2 { text-align: center; margin-bottom: 28px; }
+    .tier-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .tier-table th {
+      background: rgba(75,31,95,.4);
+      color: #B76E79;
+      padding: 12px 16px;
+      text-align: left;
+      font-size: .85rem;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+    .tier-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(183,110,121,.1);
+      font-size: .9rem;
+      color: rgba(255,255,255,.8);
+    }
+    .tier-table tr:last-child td { border-bottom: none; }
+    .tier-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: .75rem;
+      font-weight: 700;
+    }
+    .tier-rose { background: rgba(183,110,121,.25); color: #B76E79; }
+    .tier-plum { background: rgba(75,31,95,.5); color: #d4899a; }
+    .tier-gold { background: rgba(218,165,32,.2); color: #d4a017; }
+
+    @media (max-width: 600px) {
+      .affiliate-form-wrap { padding: 24px 16px; }
+      .tier-table th, .tier-table td { padding: 10px 10px; font-size: .82rem; }
+    }
+  </style>
+  <link rel="stylesheet" href="/css/affiliate-portal.css">
+</head>
+<body>
+
+<a href="#main-content" class="skip-nav">Skip to Main Content</a>
+
+<!-- NAV -->
+<nav class="main-nav" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="/index.html" class="nav-logo">
+      <img src="images/logo.png" alt="Dripping Secrets" height="38"/>
+    </a>
+    <div class="nav-links">
+      <a href="/shop.html">Shop</a>
+      <a href="/party.html">Secrets Party</a>
+      <a href="/services.html">Services</a>
+      <a href="/bundles.html">Bundles</a>
+      <a href="/boxes.html">Build a Box</a>
+      <a href="/sneaky-link-bags.html">Sneaky Link Bags</a>
+      <a href="/about.html">About</a>
+      <a href="/contact.html">Contact</a>
+      <a href="/affiliates.html" class="active">Affiliates</a>
+    </div>
+    <div class="nav-actions">
+      <a href="admin.html" class="nav-gear" title="Back Office">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </a>
+      <button class="cart-btn" onclick="openCart()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+        <span class="cart-count" aria-live="polite" aria-label="Cart items" id="cart-badge">0</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section role="main" id="main-content" class="affiliate-hero">
+  <div class="adls-panel" style="max-width:680px;margin:0 auto 28px;">
+    <div class="adls-panel-img">
+      <div data-adls="affiliate" data-adls-class="adls-img" style="width:160px;height:160px;border-radius:14px;overflow:hidden;"></div>
+    </div>
+    <div class="adls-panel-text">
+      <span class="adls-panel-label">Affiliate Program</span>
+      <h1 class="adls-panel-title" style="font-size:clamp(18px,2.5vw,28px);">Become a <span style="color:#B76E79;">Secret Keeper</span> Partner</h1>
+      <p class="adls-panel-sub">Join the Dripping Secrets affiliate program and earn commission sharing products you actually believe in. Curated. Discreet. Consistently converting.</p>
+      <a href="#apply" class="affiliate-cta-btn" style="margin-top:14px;display:inline-block;">Apply Now — It's Free</a>
+    </div>
+  </div>
+</section>
+
+<!-- PERKS -->
+<section>
+  <div class="affiliate-perks">
+    <div class="perk-card">
+      <svg class="perk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      <h3>Up to 20% Commission</h3>
+      <p>Tiered rates based on performance. The more you sell, the more you earn — every month.</p>
+    </div>
+    <div class="perk-card">
+      <svg class="perk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <h3>30-Day Cookie Window</h3>
+      <p>Get credited for every sale made within 30 days of a click on your link. More time, more earnings.</p>
+    </div>
+    <div class="perk-card">
+      <svg class="perk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <h3>Dimi Handles the Admin</h3>
+      <p>Your dedicated AI concierge handles onboarding comms, content ideas, and monthly performance reviews.</p>
+    </div>
+    <div class="perk-card">
+      <svg class="perk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <h3>Exclusive Products</h3>
+      <p>Promote a curated catalog you won't find everywhere — not another dropship-everything store.</p>
+    </div>
+    <div class="perk-card">
+      <svg class="perk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <h3>Fast Payout</h3>
+      <p>Commissions paid monthly via CashApp or PayPal. No minimum threshold under $50.</p>
+    </div>
+    <div class="perk-card">
+      <svg class="perk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <h3>Community Access</h3>
+      <p>Private group for Secret Keeper Partners. Tips, early product drops, and Secrets Party co-host opportunities.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works">
+  <h2>How It Works</h2>
+  <div class="steps-grid">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h4>Apply</h4>
+      <p>Fill out the form below. Dimi reviews all applications and responds within 48 hours.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h4>Get Your Link</h4>
+      <p>You'll receive a unique referral link and a welcome kit with content ideas from Dimi.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h4>Share</h4>
+      <p>Post, text, email, stream — whatever you do best. Your link tracks every click and sale.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <h4>Get Paid</h4>
+      <p>Commissions hit your account on the 1st of every month for the prior month's sales.</p>
+    </div>
+  </div>
+</section>
+
+<!-- COMMISSION TIERS -->
+<section class="commission-table">
+  <h2>Commission Tiers</h2>
+  <table class="tier-table">
+    <thead>
+      <tr>
+        <th>Tier</th>
+        <th>Monthly Sales</th>
+        <th>Commission Rate</th>
+        <th>Perks</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="tier-badge tier-rose">Rose</span></td>
+        <td>$0 – $499</td>
+        <td>10%</td>
+        <td>Welcome kit, referral link, monthly newsletter</td>
+      </tr>
+      <tr>
+        <td><span class="tier-badge tier-plum">Plum</span></td>
+        <td>$500 – $1,999</td>
+        <td>15%</td>
+        <td>Everything in Rose + early product access + private community</td>
+      </tr>
+      <tr>
+        <td><span class="tier-badge tier-gold">Gold</span></td>
+        <td>$2,000+</td>
+        <td>20%</td>
+        <td>Everything in Plum + co-host a Secrets Party + featured on site</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="text-align:center;margin-top:16px;font-size:.85rem;color:rgba(255,255,255,.5);">
+    Commissions apply to product sales only. Boxes, bundles, and party booking fees earn 8% flat.
+  </p>
+</section>
+
+<!-- APPLICATION FORM -->
+<section id="apply" style="padding: 0 20px 40px;">
+  <div class="affiliate-form-wrap">
+    <h2>Apply to Partner</h2>
+    <form id="affiliate-form">
+      <div class="aff-form-row">
+        <label>Full Name *</label>
+        <input type="text" id="aff-name" required placeholder="Your name"/>
+      </div>
+      <div class="aff-form-row">
+        <label>Email Address *</label>
+        <input type="email" id="aff-email" required placeholder="you@example.com"/>
+      </div>
+      <div class="aff-form-row">
+        <label>Phone (optional)</label>
+        <input type="tel" id="aff-phone" placeholder="(555) 000-0000"/>
+      </div>
+      <div class="aff-form-row">
+        <label>Primary Platform *</label>
+        <select id="aff-platform" required>
+          <option value="">Select your main platform</option>
+          <option>Instagram</option>
+          <option>TikTok</option>
+          <option>Twitter/X</option>
+          <option>Facebook</option>
+          <option>YouTube</option>
+          <option>Blog / Website</option>
+          <option>Text / SMS Marketing</option>
+          <option>Email Newsletter</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="aff-form-row">
+        <label>Your Handle / Profile URL</label>
+        <input type="text" id="aff-handle" placeholder="@yourhandle or https://..."/>
+      </div>
+      <div class="aff-form-row">
+        <label>Estimated Monthly Reach</label>
+        <select id="aff-reach">
+          <option value="">Select range</option>
+          <option>Under 1,000</option>
+          <option>1,000 – 5,000</option>
+          <option>5,000 – 25,000</option>
+          <option>25,000 – 100,000</option>
+          <option>100,000+</option>
+        </select>
+      </div>
+      <div class="aff-form-row">
+        <label>Tell us about yourself (optional)</label>
+        <textarea id="aff-bio" placeholder="Why are you a good fit for Dripping Secrets?"></textarea>
+      </div>
+      <button type="submit" class="aff-submit-btn">Submit Application</button>
+    </form>
+    <div class="aff-success" id="aff-success">
+      Application received! Dimi will reach out within 48 hours. Keep your phone close.
+    </div>
+  </div>
+</section>
+
+<!-- AFFILIATE PORTAL 2.0 — auth-gated dashboard (Sprint E · v9.81) -->
+<section id="aff-portal-section" style="display:none;padding:60px 20px 80px;background:rgba(75,31,95,.06)">
+  <div class="aff-portal-wrap">
+    <div class="aff-portal-header">
+      <div>
+        <h2 class="aff-portal-title">My Affiliate Dashboard</h2>
+        <p class="aff-portal-subtitle" id="aff-portal-username-sub">Welcome back</p>
+      </div>
+      <button onclick="firebase.auth().signOut().then(()=>location.reload())"
+        style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.55);
+        border-radius:8px;padding:8px 14px;font-size:.8rem;cursor:pointer;font-family:inherit">Sign Out</button>
+    </div>
+    <div id="aff-portal-content">
+      <div style="text-align:center;padding:60px;color:rgba(255,255,255,.45)">Loading your dashboard…</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="main-footer">
+  <div class="footer-inner">
+    <p>Dripping Secrets — <em>You deserve a secret this good.</em></p>
+    <p><a href="contact.html">Contact</a> · <a href="shop.html">Shop</a> · <a href="affiliates.html">Affiliates</a></p>
+    <p style="font-size:.8rem;opacity:.5;">&copy; 2025 Dripping Secrets. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- CART DRAWER (shared) -->
+<div id="cart-overlay" onclick="closeCart()"></div>
+<div id="cart-drawer"></div>
+
+<script src="js/firebase-config.js"></script>
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/adls.js"></script>
+<script src="js/affiliate-portal.js"></script>
+<script>
+document.getElementById('affiliate-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = this.querySelector('.aff-submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  const data = {
+    name: document.getElementById('aff-name').value.trim(),
+    email: document.getElementById('aff-email').value.trim(),
+    phone: document.getElementById('aff-phone').value.trim(),
+    platform: document.getElementById('aff-platform').value,
+    handle: document.getElementById('aff-handle').value.trim(),
+    reach: document.getElementById('aff-reach').value,
+    bio: document.getElementById('aff-bio').value.trim(),
+    submittedAt: new Date().toISOString(),
+    status: 'pending'
+  };
+
+  try {
+    if (typeof firebase !== 'undefined' && firebase.firestore) {
+      await firebase.firestore().collection('affiliate_applications').add(data);
+    }
+    document.getElementById('affiliate-form').style.display = 'none';
+    const success = document.getElementById('aff-success');
+    success.style.display = 'block';
+  } catch(err) {
+    console.error('Affiliate submit error:', err);
+    btn.disabled = false;
+    btn.textContent = 'Submit Application';
+    alert('Something went wrong. Please email us at Assistant.Manager@DrippingSecrets.com');
+  }
+});
+</script>
+<script src="js/pwa.js"></script>
+  <script src="/js/age-gate.js" defer></script>
+</body>
+</html>

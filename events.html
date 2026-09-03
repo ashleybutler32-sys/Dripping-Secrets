@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Events — Dripping Secrets</title>
+  <meta name="description" content="Upcoming events from Dripping Secrets — virtual workshops, in-person mixers, creator masterclasses, and members-only experiences."/>
+  <meta name="keywords" content="dripping secrets events, intimacy workshop, date night event, self love workshop, couples event dallas"/>
+  <link rel="canonical" href="https://drippingsecrets.com/events.html"/>
+  <meta property="og:title" content="Events — Dripping Secrets"/>
+  <meta property="og:description" content="Virtual workshops, in-person mixers, creator masterclasses, and members-only experiences."/>
+  <meta property="og:url" content="https://drippingsecrets.com/events.html"/>
+  <meta property="og:type" content="website"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/images/icon-192.png"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="theme-color" content="#4B1F5F"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/events.css"/>
+  <link rel="stylesheet" href="css/dimi-actor.css"/>
+</head>
+<body>
+
+<a href="#main-content" class="skip-nav">Skip to Main Content</a>
+
+<!-- NAV -->
+<nav class="main-nav" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="/index.html" class="nav-logo">
+      <img src="images/logo.png" alt="Dripping Secrets" height="38"/>
+    </a>
+    <div class="nav-links">
+      <a href="/shop.html">Shop</a>
+      <a href="/party.html">Secrets Party</a>
+      <a href="/services.html">Services</a>
+      <a href="/bundles.html">Bundles</a>
+      <a href="/boxes.html">Build a Box</a>
+      <a href="/sneaky-link-bags.html">Sneaky Link Bags</a>
+      <a href="/about.html">About</a>
+      <a href="/contact.html">Contact</a>
+      <a href="/events.html" class="active">Events</a>
+    </div>
+    <div class="nav-actions">
+      <a href="admin.html" class="nav-gear" title="Back Office" aria-label="Back Office">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </a>
+      <button class="cart-btn" onclick="openCart()" aria-label="Open cart">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+        <span class="cart-count" id="cart-badge" aria-live="polite" aria-label="Cart items">0</span>
+      </button>
+      <button class="nav-account-btn" onclick="location.href='/account.html'" aria-label="Account">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<main id="main-content">
+<section class="ev-hero">
+  <div class="adls-hero-banner" style="margin-bottom:28px;">
+    <div data-adls="event-hq" data-adls-class="adls-img" style="height:340px;"></div>
+    <div class="adls-hero-banner-overlay">
+      <div class="adls-hero-banner-text">
+        <h2>Events &amp; Experiences</h2>
+        <p>Virtual workshops, in-person mixers, members-only experiences, and creator masterclasses — curated by Dripping Secrets.</p>
+      </div>
+    </div>
+  </div>
+  <div class="ev-hero-actions">
+    <a href="#upcoming" class="ev-btn-primary">View Upcoming Events</a>
+    <a href="#host" class="ev-btn-ghost">Host an Event</a>
+  </div>
+</section>
+
+<!-- FILTER BAR -->
+<div class="ev-filter-bar" role="toolbar" aria-label="Event filters">
+  <button class="ev-filter-btn active" data-filter="all">All Events</button>
+  <button class="ev-filter-btn" data-filter="virtual">Virtual</button>
+  <button class="ev-filter-btn" data-filter="in-person">In-Person</button>
+  <button class="ev-filter-btn" data-filter="couples">Couples</button>
+  <button class="ev-filter-btn" data-filter="wellness">Wellness</button>
+  <button class="ev-filter-btn" data-filter="social">Social</button>
+  <button class="ev-filter-btn" data-filter="creators">Creators</button>
+</div>
+
+<!-- CALENDAR -->
+<section class="ev-section">
+  <h2 class="ev-section-title">Event Calendar <span class="ev-badge">Live</span></h2>
+  <div class="ev-calendar" aria-label="Event calendar">
+    <div class="ev-cal-header">
+      <h3 id="ev-cal-title">Loading...</h3>
+      <div class="ev-cal-nav">
+        <button onclick="DSEvents.prevMonth()" aria-label="Previous month">‹</button>
+        <button onclick="DSEvents.nextMonth()" aria-label="Next month">›</button>
+      </div>
+    </div>
+    <div class="ev-cal-grid" id="ev-calendar-grid" style="display:grid;grid-template-columns:repeat(7,1fr)">
+      <div class="ev-cal-day-name">Sun</div>
+      <div class="ev-cal-day-name">Mon</div>
+      <div class="ev-cal-day-name">Tue</div>
+      <div class="ev-cal-day-name">Wed</div>
+      <div class="ev-cal-day-name">Thu</div>
+      <div class="ev-cal-day-name">Fri</div>
+      <div class="ev-cal-day-name">Sat</div>
+    </div>
+  </div>
+</section>
+
+<!-- UPCOMING EVENTS -->
+<section class="ev-section" id="upcoming">
+  <h2 class="ev-section-title">Upcoming Events</h2>
+  <div class="ev-grid" id="ev-grid">
+    <div class="ev-empty" style="grid-column:1/-1"><div class="ev-empty-icon">⏳</div><p>Loading events...</p></div>
+  </div>
+</section>
+
+<!-- HOST AN EVENT -->
+<section class="ev-section" id="host">
+  <div class="ev-host-section">
+    <h2>Host an Event</h2>
+    <p>Have an idea for a workshop, mixer, or experience? Partner with Dripping Secrets to bring it to life.</p>
+    <div class="ev-host-perks">
+      <div class="ev-host-perk"><div class="ev-host-perk-icon">📣</div><div class="ev-host-perk-label">Promotion to<br>our community</div></div>
+      <div class="ev-host-perk"><div class="ev-host-perk-icon">🎁</div><div class="ev-host-perk-label">DS gift bags<br>for attendees</div></div>
+      <div class="ev-host-perk"><div class="ev-host-perk-icon">💰</div><div class="ev-host-perk-label">Revenue share<br>on tickets</div></div>
+      <div class="ev-host-perk"><div class="ev-host-perk-icon">✨</div><div class="ev-host-perk-label">Brand collab<br>opportunities</div></div>
+    </div>
+    <div style="max-width:480px;margin:0 auto;text-align:left">
+      <div class="ev-form-row">
+        <label for="ev-host-name">Your Name</label>
+        <input type="text" id="ev-host-name" placeholder="Full name"/>
+      </div>
+      <div class="ev-form-row">
+        <label for="ev-host-email">Email Address</label>
+        <input type="email" id="ev-host-email" placeholder="you@email.com"/>
+      </div>
+      <div class="ev-form-row">
+        <label for="ev-host-concept">Event Concept</label>
+        <textarea id="ev-host-concept" placeholder="Describe your event idea..." rows="4" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#fff;padding:12px 14px;font-size:.95rem;box-sizing:border-box;resize:vertical"></textarea>
+      </div>
+      <button class="ev-btn-primary" onclick="DSEvents.submitHostApp()" style="width:100%;margin-top:8px">Submit Concept</button>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- RSVP MODAL -->
+<div class="ev-modal-overlay" id="ev-modal" role="dialog" aria-modal="true" aria-labelledby="ev-modal-title" onclick="if(event.target===this)DSEvents.closeRSVP()">
+  <div class="ev-modal">
+    <h3 id="ev-modal-title">RSVP</h3>
+    <p class="ev-modal-sub" id="ev-modal-date"></p>
+    <div class="ev-form-row">
+      <label for="ev-rsvp-name">Full Name</label>
+      <input type="text" id="ev-rsvp-name" placeholder="Your name"/>
+    </div>
+    <div class="ev-form-row">
+      <label for="ev-rsvp-email">Email Address</label>
+      <input type="email" id="ev-rsvp-email" placeholder="you@email.com"/>
+    </div>
+    <div class="ev-form-row">
+      <label for="ev-rsvp-guests">Number of Guests</label>
+      <select id="ev-rsvp-guests">
+        <option value="1">Just me</option>
+        <option value="2">2 people</option>
+        <option value="3">3 people</option>
+        <option value="4">4 people</option>
+      </select>
+    </div>
+    <div class="ev-form-row">
+      <label for="ev-rsvp-note">Note (optional)</label>
+      <input type="text" id="ev-rsvp-note" placeholder="Any special requests?"/>
+    </div>
+    <div class="ev-modal-actions">
+      <button class="ev-modal-close" onclick="DSEvents.closeRSVP()">Cancel</button>
+      <button class="ev-btn-primary" id="ev-rsvp-submit" onclick="DSEvents.submitRSVP()">Confirm RSVP</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-col">
+      <a href="/index.html" class="footer-logo">
+        <img src="images/logo.png" alt="Dripping Secrets" height="34"/>
+      </a>
+      <p class="footer-tagline">Curated with love. Delivered with discretion.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="/shop.html">Shop</a></li>
+        <li><a href="/events.html">Events</a></li>
+        <li><a href="/party.html">Secrets Party</a></li>
+        <li><a href="/account.html">My Account</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="/contact.html">Contact Us</a></li>
+        <li><a href="/privacy.html">Privacy Policy</a></li>
+        <li><a href="/about.html">About Us</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 Dripping Secrets. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- CART DRAWER -->
+<div id="cart-overlay" onclick="closeCart()"></div>
+<div id="cart-drawer"></div>
+
+<script src="js/firebase-config.js"></script>
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/adls.js"></script>
+<script src="js/events.js"></script>
+<script src="js/pwa.js"></script>
+<script>window.dimiContext = { page: 'events' };</script>
+<script src="js/dimi-actor.js"></script>
+<script src="js/dimi-memory.js"></script>
+<script src="js/dimi.js"></script>
+  <script src="/js/age-gate.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Careers — Dripping Secrets</title>
+<meta name="description" content="Join the Dripping Secrets team. We're hiring luxury lifestyle professionals who are passionate about creating unforgettable experiences."/>
+<link rel="icon" href="images/ds-circle-logo-official.png"/>
+<link rel="stylesheet" href="css/style.css"/>
+<script src="js/firebase-config.js" defer></script>
+<script src="js/jobs.js"></script>
+<style>
+  :root {
+    --plum:#4B1F5F;
+    --plum-dark:#2d1240;
+    --plum-deep:#1a0b2e;
+    --gold:#D4AF37;
+    --gold-light:#f0d060;
+    --rose:#B76E79;
+    --text:#f0e8ff;
+    --muted:#9b8cb0;
+    --border:rgba(212,175,55,.18);
+    --card-bg:rgba(75,31,95,.18);
+    --glass:rgba(255,255,255,.04);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:#0d0617;
+    color:var(--text);
+    font-family:'Segoe UI',system-ui,sans-serif;
+    line-height:1.6;
+    min-height:100vh;
+  }
+
+  /* ── NAV ── */
+  .careers-nav{
+    position:sticky;top:0;z-index:100;
+    background:rgba(13,6,23,.92);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    padding:14px 24px;
+    display:flex;align-items:center;gap:16px;
+  }
+  .careers-nav img{height:38px;width:38px;border-radius:50%;object-fit:cover}
+  .careers-nav .brand{font-size:.95rem;font-weight:700;color:var(--gold);letter-spacing:.04em}
+  .careers-nav .back{margin-left:auto;color:var(--muted);text-decoration:none;font-size:.82rem;transition:color .2s}
+  .careers-nav .back:hover{color:var(--gold)}
+
+  /* ── HERO ── */
+  .hero{
+    position:relative;
+    min-height:70vh;
+    display:flex;align-items:center;justify-content:center;
+    text-align:center;
+    overflow:hidden;
+    padding:80px 24px 60px;
+  }
+  .hero-bg{
+    position:absolute;inset:0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(75,31,95,.85) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(183,110,121,.25) 0%, transparent 60%),
+      linear-gradient(180deg,#0d0617 0%,#1a0b2e 50%,#0d0617 100%);
+  }
+  .hero-shimmer{
+    position:absolute;inset:0;
+    background:
+      radial-gradient(circle 1px at 20% 30%, rgba(212,175,55,.6) 0%, transparent 1px),
+      radial-gradient(circle 1px at 75% 20%, rgba(212,175,55,.4) 0%, transparent 1px),
+      radial-gradient(circle 1px at 50% 70%, rgba(183,110,121,.5) 0%, transparent 1px),
+      radial-gradient(circle 1px at 85% 60%, rgba(212,175,55,.3) 0%, transparent 1px),
+      radial-gradient(circle 1px at 10% 80%, rgba(212,175,55,.5) 0%, transparent 1px);
+    background-size:100% 100%;
+    opacity:.7;
+  }
+  .hero-content{position:relative;z-index:1;max-width:760px}
+  .hero-eyebrow{
+    display:inline-block;
+    background:rgba(212,175,55,.12);
+    border:1px solid rgba(212,175,55,.35);
+    color:var(--gold);
+    font-size:.72rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+    padding:6px 18px;border-radius:20px;margin-bottom:24px;
+  }
+  .hero h1{
+    font-size:clamp(2.2rem,6vw,4rem);
+    font-weight:800;
+    line-height:1.1;
+    color:#fff;
+    margin-bottom:12px;
+  }
+  .hero h1 span{color:var(--gold)}
+  .hero .hero-sub{
+    font-size:clamp(1rem,2.5vw,1.25rem);
+    color:rgba(240,232,255,.7);
+    margin-bottom:8px;
+    font-style:italic;
+  }
+  .hero .hero-tagline{
+    font-size:.9rem;
+    color:var(--muted);
+    margin-bottom:32px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+  }
+  .hero-cta{
+    display:inline-flex;align-items:center;gap:10px;
+    background:linear-gradient(135deg,var(--gold),#b8952a);
+    color:#000;font-weight:700;font-size:.95rem;
+    padding:14px 32px;border-radius:30px;
+    text-decoration:none;
+    box-shadow:0 4px 24px rgba(212,175,55,.35);
+    transition:transform .2s,box-shadow .2s;
+  }
+  .hero-cta:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(212,175,55,.5)}
+
+  /* ── VALUE PROPS ── */
+  .values{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:16px;max-width:1000px;margin:0 auto;padding:48px 24px;
+  }
+  .value-card{
+    background:var(--card-bg);
+    border:1px solid var(--border);
+    border-radius:14px;padding:24px 20px;
+    text-align:center;
+  }
+  .value-card .vi{font-size:1.8rem;margin-bottom:10px}
+  .value-card strong{display:block;color:var(--gold);font-size:.82rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+  .value-card p{font-size:.82rem;color:var(--muted)}
+
+  /* ── SECTION HEADERS ── */
+  .section-header{text-align:center;padding:0 24px 40px;max-width:700px;margin:0 auto}
+  .section-header h2{
+    font-size:clamp(1.5rem,3.5vw,2.2rem);font-weight:800;
+    color:#fff;margin-bottom:8px;
+  }
+  .section-header h2 span{color:var(--gold)}
+  .section-header p{color:var(--muted);font-size:.92rem}
+  .gold-rule{width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:16px auto}
+
+  /* ── POSITIONS ── */
+  #positions-section{padding:20px 24px 60px;max-width:1100px;margin:0 auto}
+  .positions-filter{
+    display:flex;gap:10px;flex-wrap:wrap;justify-content:center;
+    margin-bottom:32px;
+  }
+  .filter-pill{
+    padding:8px 18px;border-radius:20px;cursor:pointer;font-size:.78rem;font-weight:600;
+    border:1px solid var(--border);background:var(--glass);color:var(--muted);
+    transition:all .2s;
+  }
+  .filter-pill.active,.filter-pill:hover{
+    background:rgba(212,175,55,.15);border-color:var(--gold);color:var(--gold);
+  }
+
+  .positions-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+    gap:20px;
+  }
+  .job-card{
+    background:var(--card-bg);
+    border:1px solid var(--border);
+    border-radius:16px;
+    overflow:hidden;
+    transition:border-color .2s,transform .2s,box-shadow .2s;
+    cursor:pointer;
+  }
+  .job-card:hover{
+    border-color:rgba(212,175,55,.5);
+    transform:translateY(-3px);
+    box-shadow:0 8px 32px rgba(75,31,95,.4);
+  }
+  .job-card-header{
+    padding:24px 22px 18px;
+    border-bottom:1px solid var(--border);
+  }
+  .job-card-top{display:flex;align-items:flex-start;gap:14px}
+  .job-icon{
+    width:46px;height:46px;border-radius:12px;
+    background:rgba(212,175,55,.12);
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.4rem;flex-shrink:0;
+    border:1px solid rgba(212,175,55,.25);
+  }
+  .job-meta{flex:1}
+  .job-category{font-size:.68rem;color:var(--rose);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+  .job-title{font-size:1rem;font-weight:700;color:#fff;margin-bottom:4px;line-height:1.3}
+  .job-type{font-size:.74rem;color:var(--muted)}
+  .job-tagline{
+    margin-top:12px;font-size:.82rem;font-style:italic;
+    color:var(--gold);opacity:.9;
+  }
+  .job-card-body{
+    padding:18px 22px;
+    display:none;
+  }
+  .job-card-body.open{display:block}
+  .job-summary{font-size:.85rem;color:rgba(240,232,255,.75);margin-bottom:16px;line-height:1.65}
+  .job-section-title{
+    font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:8px;
+  }
+  .job-list{list-style:none;margin-bottom:16px}
+  .job-list li{
+    font-size:.82rem;color:rgba(240,232,255,.72);
+    padding:4px 0 4px 18px;position:relative;
+    border-bottom:1px solid rgba(255,255,255,.04);
+  }
+  .job-list li::before{
+    content:'◆';position:absolute;left:0;
+    color:var(--gold);font-size:.5rem;top:8px;
+  }
+  .job-disclaimer{
+    font-size:.72rem;color:var(--muted);
+    background:rgba(75,31,95,.2);
+    border:1px solid rgba(75,31,95,.4);
+    border-radius:8px;padding:10px 12px;
+    margin-bottom:14px;
+    line-height:1.5;
+  }
+  .job-apply-btn{
+    width:100%;padding:12px;
+    background:linear-gradient(135deg,var(--gold),#b8952a);
+    color:#000;font-weight:700;font-size:.88rem;
+    border:none;border-radius:10px;cursor:pointer;
+    transition:opacity .2s,transform .2s;
+  }
+  .job-apply-btn:hover{opacity:.9;transform:translateY(-1px)}
+  .job-card-footer{
+    padding:12px 22px;
+    display:flex;align-items:center;justify-content:space-between;
+    border-top:1px solid var(--border);
+  }
+  .toggle-details{
+    font-size:.78rem;color:var(--gold);cursor:pointer;
+    background:none;border:none;
+    display:flex;align-items:center;gap:6px;
+  }
+  .toggle-icon{transition:transform .3s;display:inline-block}
+  .job-card.expanded .toggle-icon{transform:rotate(180deg)}
+
+  /* ── NO POSITIONS ── */
+  #no-positions{
+    text-align:center;padding:80px 24px;
+    display:none;
+  }
+  #no-positions h3{color:var(--gold);font-size:1.2rem;margin-bottom:8px}
+  #no-positions p{color:var(--muted);font-size:.88rem}
+
+  /* ── APPLY MODAL ── */
+  .modal-overlay{
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,.82);z-index:9999;
+    align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-overlay.open{display:flex}
+  .modal-box{
+    background:#140824;
+    border:1px solid var(--gold);
+    border-radius:18px;
+    padding:36px;
+    width:min(600px,100%);
+    max-height:90vh;overflow-y:auto;
+    position:relative;
+  }
+  .modal-close{
+    position:absolute;top:16px;right:18px;
+    background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;
+    transition:color .2s;
+  }
+  .modal-close:hover{color:#fff}
+  .modal-title{font-size:1.15rem;font-weight:800;color:var(--gold);margin-bottom:4px}
+  .modal-sub{font-size:.8rem;color:var(--muted);margin-bottom:24px}
+  .form-group{margin-bottom:16px}
+  .form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+  .form-group input,
+  .form-group select,
+  .form-group textarea{
+    width:100%;padding:12px 14px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:10px;
+    color:#fff;font-size:.9rem;
+    outline:none;transition:border-color .2s;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus{border-color:var(--gold)}
+  .form-group select option{background:#1a0b2e;color:#fff}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:480px){.form-grid{grid-template-columns:1fr}}
+  .form-row-full{grid-column:1/-1}
+  .submit-btn{
+    width:100%;padding:14px;
+    background:linear-gradient(135deg,var(--gold),#b8952a);
+    color:#000;font-weight:800;font-size:.95rem;
+    border:none;border-radius:12px;cursor:pointer;
+    margin-top:8px;
+    transition:opacity .2s,transform .2s;
+  }
+  .submit-btn:hover{opacity:.9;transform:translateY(-1px)}
+  .submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+  .form-status{
+    text-align:center;padding:12px;border-radius:10px;
+    font-size:.85rem;margin-top:12px;display:none;
+  }
+  .form-status.success{background:rgba(102,187,106,.12);border:1px solid rgba(102,187,106,.3);color:#66bb6a}
+  .form-status.error{background:rgba(239,83,80,.12);border:1px solid rgba(239,83,80,.3);color:#ef5350}
+
+  /* ── BOTTOM BAND ── */
+  .bottom-band{
+    text-align:center;padding:60px 24px 40px;
+    border-top:1px solid var(--border);
+    margin-top:40px;
+  }
+  .bottom-band .email-link{
+    display:inline-flex;align-items:center;gap:8px;
+    color:var(--gold);text-decoration:none;font-size:.9rem;font-weight:600;
+    transition:opacity .2s;margin-top:12px;
+  }
+  .bottom-band .email-link:hover{opacity:.75}
+  .bottom-band p{color:var(--muted);font-size:.82rem;margin-top:8px}
+  .eoe{font-size:.72rem;color:rgba(155,140,176,.5);margin-top:20px;letter-spacing:.04em}
+
+  /* ── FOOTER NAV ── */
+  .footer-links{
+    display:flex;gap:20px;justify-content:center;flex-wrap:wrap;
+    padding:20px 24px 40px;
+    border-top:1px solid var(--border);
+  }
+  .footer-links a{color:var(--muted);text-decoration:none;font-size:.78rem;transition:color .2s}
+  .footer-links a:hover{color:var(--gold)}
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:600px){
+    .modal-box{padding:24px 20px}
+    .positions-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="careers-nav">
+  <img src="images/ds-circle-logo-official.png" alt="Dripping Secrets"/>
+  <span class="brand">Dripping Secrets</span>
+  <a href="index.html" class="back">← Back to Site</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-shimmer"></div>
+  <div class="hero-content">
+    <span class="hero-eyebrow">Now Hiring</span>
+    <h1>We Are <span>Building</span> Something Dripping.</h1>
+    <p class="hero-sub">Come Build It With Us.</p>
+    <p class="hero-tagline">Luxury · Discretion · Confidence · Connection</p>
+    <a href="#positions-section" class="hero-cta">View Open Positions ↓</a>
+  </div>
+</section>
+
+<!-- VALUE PROPS -->
+<div class="values">
+  <div class="value-card">
+    <div class="vi">👑</div>
+    <strong>Luxury Culture</strong>
+    <p>Work for a brand built on excellence, hospitality, and premium experiences.</p>
+  </div>
+  <div class="value-card">
+    <div class="vi">📈</div>
+    <strong>Grow With Us</strong>
+    <p>Opportunities for advancement, mentorship, and leadership as we scale.</p>
+  </div>
+  <div class="value-card">
+    <div class="vi">🔒</div>
+    <strong>Discretion Always</strong>
+    <p>A professional, respectful environment where privacy and boundaries are honored.</p>
+  </div>
+  <div class="value-card">
+    <div class="vi">💰</div>
+    <strong>Competitive Pay</strong>
+    <p>Competitive compensation plus performance rewards and exclusive employee perks.</p>
+  </div>
+  <div class="value-card">
+    <div class="vi">💜</div>
+    <strong>Real Impact</strong>
+    <p>Every role contributes to creating experiences our clients remember forever.</p>
+  </div>
+</div>
+
+<!-- OPEN POSITIONS -->
+<section id="positions-section">
+  <div class="section-header">
+    <h2>Open <span>Positions</span></h2>
+    <div class="gold-rule"></div>
+    <p>Select a position to learn more. Click Apply to submit your application.</p>
+  </div>
+
+  <div class="positions-filter" id="positions-filter"></div>
+
+  <div class="positions-grid" id="positions-grid"></div>
+
+  <div id="no-positions">
+    <h3>No Open Positions Right Now</h3>
+    <p>We're always looking for exceptional people. Send your resume to <strong>careers@drippingsecrets.com</strong> and we'll keep you in mind.</p>
+  </div>
+</section>
+
+<!-- BOTTOM BAND -->
+<div class="bottom-band">
+  <div class="section-header" style="padding-bottom:16px">
+    <h2>People Remember How You Make Them Feel.</h2>
+    <p style="font-style:italic;color:var(--gold);font-size:.95rem">That's the Dripping Secrets Experience.</p>
+  </div>
+  <a href="mailto:careers@drippingsecrets.com" class="email-link">✉ careers@drippingsecrets.com</a>
+  <p>Questions? Email us and we'll get back to you.</p>
+  <p class="eoe">Dripping Secrets is an Equal Opportunity Employer. We celebrate diversity and are committed to creating an inclusive environment for all.</p>
+</div>
+
+<div class="footer-links">
+  <a href="index.html">Home</a>
+  <a href="about.html">About</a>
+  <a href="contact.html">Contact</a>
+  <a href="privacy.html">Privacy Policy</a>
+</div>
+
+<!-- APPLICATION MODAL -->
+<div class="modal-overlay" id="apply-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeApplyModal()" aria-label="Close">✕</button>
+    <div class="modal-title">Apply Now</div>
+    <div class="modal-sub" id="apply-modal-role-label">Dripping Secrets — Position Application</div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>First Name *</label>
+        <input type="text" id="app-fname" placeholder="First name" autocomplete="given-name"/>
+      </div>
+      <div class="form-group">
+        <label>Last Name *</label>
+        <input type="text" id="app-lname" placeholder="Last name" autocomplete="family-name"/>
+      </div>
+      <div class="form-group">
+        <label>Email Address *</label>
+        <input type="email" id="app-email" placeholder="you@email.com" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" id="app-phone" placeholder="(214) 555-0000" autocomplete="tel"/>
+      </div>
+      <div class="form-group form-row-full">
+        <label>Position Applying For *</label>
+        <select id="app-position">
+          <option value="">Select a position…</option>
+        </select>
+      </div>
+      <div class="form-group form-row-full">
+        <label>City / Location</label>
+        <input type="text" id="app-city" placeholder="Dallas, TX" autocomplete="address-level2"/>
+      </div>
+      <div class="form-group form-row-full">
+        <label>Why do you want to join Dripping Secrets? *</label>
+        <textarea id="app-why" rows="4" placeholder="Tell us what makes you a great fit and why you're passionate about this role…"></textarea>
+      </div>
+      <div class="form-group form-row-full">
+        <label>How did you hear about us?</label>
+        <select id="app-source">
+          <option value="">Select one…</option>
+          <option>Instagram</option>
+          <option>TikTok</option>
+          <option>Facebook</option>
+          <option>Friend / Referral</option>
+          <option>Job Board</option>
+          <option>Dripping Secrets Website</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="app-submit-btn" onclick="submitApplication()">Submit Application</button>
+    <div class="form-status" id="app-status"></div>
+  </div>
+</div>
+
+<script>
+// ── Jobs rendering ───────────────────────────────────────────────
+(function() {
+
+  // Fetch live job statuses from Firestore if Firebase is ready
+  async function fetchJobStatuses() {
+    try {
+      if (typeof firebase === 'undefined') return null;
+      const db = firebase.firestore();
+      const snap = await db.collection('jobs').get();
+      if (snap.empty) return null;
+      const statusMap = {};
+      snap.forEach(doc => { statusMap[doc.id] = doc.data(); });
+      return statusMap;
+    } catch(e) { return null; }
+  }
+
+  async function renderJobs() {
+    const grid = document.getElementById('positions-grid');
+    const filterBar = document.getElementById('positions-filter');
+    const noPosts = document.getElementById('no-positions');
+
+    // Merge Firestore status overrides with static data
+    const statusMap = await fetchJobStatuses();
+    const jobs = DS_JOBS.map(j => {
+      const override = statusMap && statusMap[j.id];
+      return { ...j, status: override ? (override.status || j.status) : j.status };
+    });
+
+    const openJobs = jobs.filter(j => j.status === 'open');
+
+    if (openJobs.length === 0) {
+      grid.style.display = 'none';
+      filterBar.style.display = 'none';
+      noPosts.style.display = 'block';
+      return;
+    }
+
+    // Build category filter pills
+    const categories = ['All', ...new Set(openJobs.map(j => j.category))];
+    filterBar.innerHTML = categories.map((c, i) =>
+      `<button class="filter-pill${i===0?' active':''}" data-cat="${c}" onclick="setFilter(this,'${c}')">${c}</button>`
+    ).join('');
+
+    // Build job cards
+    grid.innerHTML = openJobs.map(job => buildJobCard(job)).join('');
+
+    // Populate position dropdown in modal
+    const sel = document.getElementById('app-position');
+    sel.innerHTML = '<option value="">Select a position…</option>' +
+      openJobs.map(j => `<option value="${j.id}">${j.title}</option>`).join('');
+  }
+
+  function buildJobCard(job) {
+    const resp = job.responsibilities.map(r => `<li>${r}</li>`).join('');
+    const quals = job.qualifications.map(q => `<li>${q}</li>`).join('');
+    const disclaimer = job.disclaimer
+      ? `<div class="job-disclaimer">⚠️ ${job.disclaimer}</div>` : '';
+
+    return `
+    <div class="job-card" id="jc-${job.id}" data-category="${job.category}">
+      <div class="job-card-header">
+        <div class="job-card-top">
+          <div class="job-icon">${job.icon}</div>
+          <div class="job-meta">
+            <div class="job-category">${job.category}</div>
+            <div class="job-title">${job.title}</div>
+            <div class="job-type">${job.type}</div>
+          </div>
+        </div>
+        <div class="job-tagline">"${job.tagline}"</div>
+      </div>
+      <div class="job-card-body" id="jb-${job.id}">
+        <p class="job-summary">${job.summary}</p>
+        <div class="job-section-title">What You'll Do</div>
+        <ul class="job-list">${resp}</ul>
+        <div class="job-section-title">What We're Looking For</div>
+        <ul class="job-list">${quals}</ul>
+        <div class="job-section-title">Why Join Dripping Secrets?</div>
+        <p class="job-summary">${job.whyUs}</p>
+        ${disclaimer}
+        <button class="job-apply-btn" onclick="openApplyModal('${job.id}','${job.title.replace(/'/g,"\\'")}')">Apply for This Position</button>
+      </div>
+      <div class="job-card-footer">
+        <span style="font-size:.74rem;color:var(--muted)">${job.type}</span>
+        <button class="toggle-details" onclick="toggleCard('${job.id}')">
+          View Details <span class="toggle-icon">▼</span>
+        </button>
+      </div>
+    </div>`;
+  }
+
+  window.toggleCard = function(id) {
+    const card = document.getElementById('jc-' + id);
+    const body = document.getElementById('jb-' + id);
+    const isOpen = card.classList.contains('expanded');
+    // Close all
+    document.querySelectorAll('.job-card').forEach(c => c.classList.remove('expanded'));
+    document.querySelectorAll('.job-card-body').forEach(b => b.classList.remove('open'));
+    // Open this one if it was closed
+    if (!isOpen) {
+      card.classList.add('expanded');
+      body.classList.add('open');
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  };
+
+  window.setFilter = function(el, cat) {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.job-card').forEach(c => {
+      c.style.display = (cat === 'All' || c.dataset.category === cat) ? '' : 'none';
+    });
+  };
+
+  // Init on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      // Wait a tick for Firebase to potentially init
+      setTimeout(renderJobs, 500);
+    });
+  } else {
+    setTimeout(renderJobs, 500);
+  }
+})();
+
+
+// ── Apply Modal ─────────────────────────────────────────────────
+window.openApplyModal = function(jobId, jobTitle) {
+  const modal = document.getElementById('apply-modal');
+  document.getElementById('apply-modal-role-label').textContent = 'Applying for: ' + jobTitle;
+  document.getElementById('app-position').value = jobId;
+  document.getElementById('app-status').style.display = 'none';
+  document.getElementById('app-status').className = 'form-status';
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeApplyModal = function() {
+  document.getElementById('apply-modal').classList.remove('open');
+  document.body.style.overflow = '';
+};
+
+document.getElementById('apply-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeApplyModal();
+});
+
+window.submitApplication = async function() {
+  const fname = document.getElementById('app-fname').value.trim();
+  const lname = document.getElementById('app-lname').value.trim();
+  const email = document.getElementById('app-email').value.trim();
+  const phone = document.getElementById('app-phone').value.trim();
+  const position = document.getElementById('app-position').value;
+  const city   = document.getElementById('app-city').value.trim();
+  const why    = document.getElementById('app-why').value.trim();
+  const source = document.getElementById('app-source').value;
+
+  const statusEl = document.getElementById('app-status');
+  const btn      = document.getElementById('app-submit-btn');
+
+  function showStatus(msg, type) {
+    statusEl.textContent = msg;
+    statusEl.className = 'form-status ' + type;
+    statusEl.style.display = 'block';
+  }
+
+  if (!fname || !lname || !email || !position || !why) {
+    showStatus('Please fill in all required fields.', 'error');
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showStatus('Please enter a valid email address.', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
+  // Find job title from DS_JOBS
+  const jobDef = DS_JOBS.find(j => j.id === position);
+  const positionTitle = jobDef ? jobDef.title : position;
+
+  const record = {
+    name: fname + ' ' + lname,
+    firstName: fname,
+    lastName: lname,
+    email,
+    phone: phone || '',
+    role: positionTitle,
+    roleId: position,
+    city: city || '',
+    whyJoin: why,
+    source: source || '',
+    stage: 'applied',
+    appliedDate: new Date().toISOString().split('T')[0],
+    appliedAt: Date.now(),
+    notes: '',
+    channel: 'careers-page'
+  };
+
+  try {
+    if (typeof firebase !== 'undefined') {
+      const db = firebase.firestore();
+      await db.collection('candidates').add(record);
+    }
+    showStatus('✓ Application submitted! We\'ll be in touch soon. Thank you for your interest in Dripping Secrets.', 'success');
+    btn.textContent = 'Submitted ✓';
+    // Clear form after delay
+    setTimeout(() => {
+      ['app-fname','app-lname','app-email','app-phone','app-city','app-why'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('app-source').value = '';
+      document.getElementById('app-position').value = '';
+      btn.disabled = false;
+      btn.textContent = 'Submit Application';
+    }, 3000);
+  } catch(err) {
+    console.error('Application submission error:', err);
+    showStatus('Something went wrong. Please email careers@drippingsecrets.com directly.', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Submit Application';
+  }
+};
+</script>
+</body>
+</html>

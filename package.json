@@ -1,0 +1,9 @@
+{
+  "name": "dripping-secrets",
+  "version": "18.2.0",
+  "description": "Dripping Secrets — root package for Netlify function dependencies",
+  "private": true,
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  }
+}

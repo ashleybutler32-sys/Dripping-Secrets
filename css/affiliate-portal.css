@@ -1,0 +1,61 @@
+/* ================================================================
+   AFFILIATE PORTAL 2.0 — DS v9.81
+   Customer-facing affiliate portal styles (used in affiliates.html)
+   ================================================================ */
+
+/* Auth gate */
+.aff-auth-gate {
+  max-width: 480px;
+  margin: 60px auto;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.aff-auth-gate h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.8rem;
+  color: #fff;
+  margin: 0 0 10px;
+}
+
+.aff-auth-gate p {
+  color: rgba(255,255,255,0.6);
+  font-size: 0.88rem;
+  margin: 0 0 28px;
+  line-height: 1.6;
+}
+
+/* Portal container */
+.aff-portal-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+}
+
+.aff-portal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.aff-portal-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.8rem;
+  color: #fff;
+  margin: 0;
+}
+
+.aff-portal-subtitle {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.45);
+  margin: 4px 0 0;
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .aff-portal-wrap { padding: 24px 16px 60px; }
+  .aff-portal-title { font-size: 1.5rem; }
+}

@@ -1,0 +1,44 @@
+<svg width="120" height="140" viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Half-body Dimi — chat button & mini icon -->
+  <!-- Head -->
+  <circle cx="60" cy="50" r="34" fill="#D8A7A7"/>
+  <!-- Hair -->
+  <path d="M28 46 Q60 8 92 46 Q82 20 60 20 Q38 20 28 46Z" fill="#1A1A1A"/>
+  <!-- Left eye -->
+  <ellipse cx="49" cy="52" rx="5" ry="5.5" fill="#111"/>
+  <circle cx="51" cy="50" r="1.5" fill="white"/>
+  <!-- Right eye -->
+  <ellipse cx="71" cy="52" rx="5" ry="5.5" fill="#111"/>
+  <circle cx="73" cy="50" r="1.5" fill="white"/>
+  <!-- Brows -->
+  <path d="M42 42 Q49 37 56 42" stroke="#1A1A1A" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <path d="M64 42 Q71 37 78 42" stroke="#1A1A1A" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <!-- Smile -->
+  <path d="M47 64 Q60 76 73 64" stroke="#1A1A1A" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <!-- Body / blazer -->
+  <path d="M22 140 Q60 95 98 140 Z" fill="#4B1F5F"/>
+  <!-- Shirt -->
+  <rect x="48" y="88" width="24" height="52" fill="#111111"/>
+  <!-- Rose gold lapel pin -->
+  <circle cx="82" cy="108" r="5" fill="#B76E79"/>
+  <!-- Left arm / tablet side -->
+  <rect x="14" y="95" width="12" height="28" rx="5" fill="#D8A7A7"/>
+  <!-- Smartwatch -->
+  <rect x="13" y="103" width="14" height="10" rx="3" fill="#B76E79"/>
+  <!-- Tablet -->
+  <rect x="86" y="90" width="26" height="34" rx="5" fill="#222"/>
+  <rect x="89" y="93" width="20" height="25" rx="3" fill="#333"/>
+  <!-- Right arm holding tablet -->
+  <path d="M92 105 Q98 98 86 92" stroke="#D8A7A7" stroke-width="10" stroke-linecap="round" fill="none"/>
+
+  <!-- Blink overlay (animated) -->
+  <ellipse cx="49" cy="52" rx="5" ry="0" fill="#D8A7A7" id="blink-l">
+    <animate attributeName="ry" values="0;5.5;0" dur="0.18s" begin="4s;8.5s;14s;20s" fill="freeze" restart="always"/>
+  </ellipse>
+  <ellipse cx="71" cy="52" rx="5" ry="0" fill="#D8A7A7" id="blink-r">
+    <animate attributeName="ry" values="0;5.5;0" dur="0.18s" begin="4s;8.5s;14s;20s" fill="freeze" restart="always"/>
+  </ellipse>
+
+  <!-- Breathing float -->
+  <animateTransform attributeName="transform" type="translate" values="0,0;0,-2;0,0" dur="3s" repeatCount="indefinite" additive="sum"/>
+</svg>

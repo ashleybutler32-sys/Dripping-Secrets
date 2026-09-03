@@ -1,0 +1,36 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[build.environment]
+  SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
+
+# ── Dimi Scheduled Functions ────────────────────────────────────────────────
+# These run on Netlify's servers — NO Tasklet credits needed.
+# Twilio env vars must be set in Netlify → Site Settings → Environment Variables
+
+[functions."dimi-briefing"]
+  schedule = "0 14 * * *"
+  # 9 AM CT = 14:00 UTC (CDT / UTC-5) — daily SMS briefing to Ashley
+
+[functions."dimi-social"]
+  schedule = "0 15 * * *"
+  # 10 AM CT = 15:00 UTC (CDT) — daily social captions email to Ashley
+
+[functions."dimi-analytics"]
+  schedule = "0 19 1 * *"
+  # 2 PM CT on 1st of every month = 19:00 UTC — monthly analytics review
+
+# ── CORS headers for Netlify functions ──────────────────────────────────────
+[[headers]]
+  for = "/.well-known/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Content-Type = "text/plain"
+
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type"
+    Access-Control-Allow-Methods = "POST, OPTIONS"

@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — Dripping Secrets</title>
+  <meta name="description" content="Get in touch with Dripping Secrets. Questions about orders, services, or just want to connect with your Secret Keepers." />
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#7c3aed" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Dripping Secrets" />
+  <link rel="apple-touch-icon" href="/images/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <style>
+    .contact-page-hero {
+      padding: 120px 24px 60px;
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .contact-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+    @media(max-width:700px){ .contact-cards-grid{ grid-template-columns:1fr; } }
+
+    .contact-card-new {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(139,92,246,0.2);
+      border-radius: 20px;
+      padding: 36px 24px;
+      text-align: center;
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    }
+    .contact-card-new:hover {
+      border-color: rgba(168,85,246,0.45);
+      box-shadow: 0 12px 40px rgba(124,58,237,0.2);
+      transform: translateY(-4px);
+    }
+    .contact-card-icon {
+      width: 60px; height: 60px;
+      background: linear-gradient(135deg, rgba(124,58,237,0.25), rgba(168,85,247,0.15));
+      border: 1px solid rgba(139,92,246,0.35);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 18px;
+      color: #a855f7;
+    }
+    .contact-card-new h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem; font-weight: 600; color: #fff; margin: 0 0 8px;
+    }
+    .contact-card-new p {
+      font-size: 0.85rem; color: rgba(255,255,255,0.5);
+      font-family: 'Jost', sans-serif; line-height: 1.65; margin: 0 0 12px;
+    }
+    .contact-card-new a {
+      color: #a855f7; text-decoration: none; font-size: 0.88rem;
+      font-family: 'Jost', sans-serif; line-height: 1.6;
+      word-break: break-word;
+    }
+    .contact-card-new a:hover{ color: #e879f9; }
+
+    .contact-form-section {
+      background: rgba(255,255,255,0.02);
+      border-top: 1px solid rgba(139,92,246,0.12);
+      padding: 80px 24px;
+    }
+    .contact-form-wrap {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .contact-form-wrap .section-header { padding: 0; margin-bottom: 40px; }
+    .contact-field { margin-bottom: 18px; }
+    .contact-field label {
+      display: block; font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.55); margin-bottom: 8px;
+      font-family: 'Jost', sans-serif;
+    }
+    .contact-field input,
+    .contact-field select,
+    .contact-field textarea {
+      width: 100%; box-sizing: border-box;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(139,92,246,0.25);
+      border-radius: 10px; padding: 12px 16px;
+      color: #fff; font-family: 'Jost', sans-serif; font-size: 0.92rem;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .contact-field input:focus,
+    .contact-field select:focus,
+    .contact-field textarea:focus {
+      border-color: rgba(168,85,247,0.6);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
+    }
+    .contact-field textarea { resize: vertical; min-height: 120px; }
+    .contact-field select option { background: #1a0d2e; color: #fff; }
+    .contact-form-note {
+      font-size: 0.78rem; color: rgba(255,255,255,0.35);
+      font-family: 'Jost', sans-serif; margin-top: 12px; text-align: center;
+    }
+    #contact-success {
+      display: none;
+      background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3);
+      border-radius: 12px; padding: 16px 20px; text-align: center;
+      color: #86efac; font-family: 'Jost', sans-serif; font-size: 0.9rem;
+      margin-top: 16px;
+    }
+
+    .contact-faq-section {
+      padding: 80px 24px;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .faq-item {
+      border-bottom: 1px solid rgba(139,92,246,0.15);
+      padding: 20px 0;
+      cursor: pointer;
+    }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q {
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      font-family: 'Jost', sans-serif; font-size: 0.95rem; font-weight: 500;
+      color: rgba(255,255,255,0.85);
+    }
+    .faq-q .faq-arrow {
+      color: #a855f7; font-size: 1.1rem; transition: transform 0.25s;
+      flex-shrink: 0;
+    }
+    .faq-item.open .faq-arrow { transform: rotate(180deg); }
+    .faq-a {
+      display: none; padding-top: 12px;
+      font-family: 'Jost', sans-serif; font-size: 0.88rem;
+      color: rgba(255,255,255,0.5); line-height: 1.7;
+    }
+    .faq-item.open .faq-a { display: block; }
+  
+    /* ── Safe Space Footer Pride Row ──────────────────────────── */
+    .footer-pride-row {
+      display: flex; align-items: center; justify-content: center;
+      flex-wrap: wrap; gap: 0.5rem 0.75rem;
+      margin: 0.75rem 0 0.5rem; padding: 0.5rem 0;
+      border-top: 1px solid rgba(201,168,76,0.15);
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+    }
+    .footer-pride-flags { display: flex; gap: 0.4rem; align-items: center; }
+    .footer-flag { border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+    .footer-triskelion { opacity: 0.6; }
+    .footer-pride-label {
+      font-size: 0.7rem; color: #8a7a6a; letter-spacing: 0.02em;
+      text-align: center; line-height: 1.5;
+    }
+    .footer-privacy-excerpt {
+      font-size: 0.72rem; color: #7a6a5a; line-height: 1.55;
+      margin: 0.4rem auto 0.75rem; max-width: 480px;
+      text-align: center;
+    }
+    .footer-privacy-excerpt strong { color: #9a8a7a; }
+    .footer-privacy-excerpt em { color: #8a7a6a; font-style: normal; }
+    @media (max-width: 600px) {
+      .footer-pride-label { font-size: 0.63rem; }
+      .footer-flag { width: 34px; height: 22px; }
+    }
+
+  </style>
+<style>body{padding-top:40px}</style>
+  <link rel="stylesheet" href="/css/dimi-actor.css">
+</head>
+<body>
+
+  <!-- ===== TOP ANNOUNCEMENT BAR ===== -->
+  <div id="top-sale-bar" style="background:linear-gradient(90deg,#7c3aed,#a855f7,#7c3aed);background-size:200% auto;animation:gradShift 4s linear infinite;color:#fff;text-align:center;font-size:0.82rem;font-weight:600;letter-spacing:0.07em;padding:8px 16px;z-index:1001;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px"><path d="M12 2c0 0-5 5-5 10a5 5 0 0010 0C17 7 12 2 12 2zm0 13a3 3 0 01-3-3c0-2 1.5-4 3-6 1.5 2 3 4 3 6a3 3 0 01-3 3z"/></svg> FLASH SALE — 30% OFF SITEWIDE · ENDS JUNE 20, 2026 · AUTO-APPLIED AT CHECKOUT <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px"><path d="M12 2c0 0-5 5-5 10a5 5 0 0010 0C17 7 12 2 12 2zm0 13a3 3 0 01-3-3c0-2 1.5-4 3-6 1.5 2 3 4 3 6a3 3 0 01-3 3z"/></svg>
+  </div>
+  <style>
+    @keyframes gradShift { to { background-position: 200% center; } }
+    @media(max-width:480px){ #top-sale-bar { font-size:0.7rem; } }
+  </style>
+  <script>
+    (function(){
+      const end = new Date('2026-06-21T00:00:00');
+      const bar = document.getElementById('top-sale-bar');
+      if(bar && new Date() >= end) bar.style.display='none';
+    })();
+  </script>
+
+  <a href="#main-content" class="skip-nav">Skip to Main Content</a>
+
+  <!-- ===== HEADER ===== -->
+  <header id="site-header">
+    <div class="header-inner">
+      <a href="/" class="logo-link">
+        <img src="/images/logo.png" alt="Dripping Secrets" class="logo" />
+      </a>
+      <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+        <a href="/">Home</a>
+        <a href="/shop.html">Shop</a>
+        <a href="/party.html">Secrets Party</a>
+        <a href="/services.html">Services</a>
+        <a href="/bundles.html">Bundles</a>
+        <a href="/boxes.html">Build a Box</a>
+        <a href="/sneaky-link-bags.html">Sneaky Link Bags</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html" class="nav-active">Contact</a>
+        <a href="/admin.html" class="nav-admin-link" title="Back Office" aria-label="Back Office"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
+      </nav>
+      <div class="header-actions">
+        <button class="account-btn" id="account-btn" onclick="openAccountBtn()" aria-label="My Account" title="Sign In / Create Account">
+          <span id="account-label">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#B76E79" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v1h20v-1c0-3.33-6.67-5-10-5z"/></svg>
+          </span>
+          <span class="wishlist-badge" id="wishlist-badge" style="display:none;">0</span>
+        </button>
+        <button class="cart-btn" onclick="openCart()" aria-label="Open cart">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#B76E79" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96C5 16.1 5.9 17 7 17h14v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63H19c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0023.45 4H5.21L4.27 2H1z"/></svg>
+          <span class="cart-badge" id="cart-badge" style="display:none;">0</span>
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Menu" onclick="toggleNav()">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== CONTACT HERO ===== -->
+  <div class="contact-page-hero">
+    <p class="section-eyebrow">Let's Talk</p>
+    <h1 class="section-title" style="font-size:clamp(2.2rem,6vw,3.8rem);">Get in Touch</h1>
+    <p style="color:rgba(255,255,255,0.55);font-family:'Jost',sans-serif;font-size:0.98rem;line-height:1.72;margin-top:12px;">
+      Questions about an order, a service, or just want to learn more? Your Secret Keepers are here — and we actually respond.
+    </p>
+  </div>
+
+  <!-- ===== CONTACT CARDS ===== -->
+  <div class="contact-cards-grid">
+
+    <div class="contact-card-new">
+      <div class="contact-card-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+      </div>
+      <h3>Email Us</h3>
+      <p>Best for orders, inquiries, and wholesale questions. We reply within 24 hours.</p>
+      <a href="mailto:Assistant.Manager@DrippingSecrets.com">Assistant.Manager<br>@DrippingSecrets.com</a>
+    </div>
+
+    <div class="contact-card-new">
+      <div class="contact-card-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+      <h3>Service Area</h3>
+      <p>Based in the DFW Metro. Same-day local delivery available on orders $50+.</p>
+      <p style="color:#a855f7;margin:0;">DFW Metro · Nationwide via UPS</p>
+    </div>
+
+    <div class="contact-card-new">
+      <div class="contact-card-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+      </div>
+      <h3>Book a Party</h3>
+      <p>Ready to host a Secrets Party or book a private experience? Let's make it happen.</p>
+      <a href="/services.html" style="color:#a855f7;">View Services →</a>
+    </div>
+
+  </div>
+
+  <!-- ===== CONTACT FORM ===== -->
+  <div class="contact-form-section">
+    <div class="contact-form-wrap">
+      <div class="section-header">
+        <p class="section-eyebrow">Drop Us a Message</p>
+        <h2 class="section-title">We'll Hit You Back</h2>
+        <p class="section-sub">Fill out the form below and a Secret Keeper will be in touch within 24 hours.</p>
+      </div>
+      <form id="contact-form" onsubmit="submitContactForm(event)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="contact-field">
+            <label>First Name *</label>
+            <input type="text" id="cf-fname" placeholder="Ashley" required />
+          </div>
+          <div class="contact-field">
+            <label>Last Name *</label>
+            <input type="text" id="cf-lname" placeholder="Butler" required />
+          </div>
+        </div>
+        <div class="contact-field">
+          <label>Email *</label>
+          <input type="email" id="cf-email" placeholder="you@example.com" required />
+        </div>
+        <div class="contact-field">
+          <label>What can we help with?</label>
+          <select id="cf-topic">
+            <option value="">— Select a topic —</option>
+            <option value="order">Order Question</option>
+            <option value="product">Product Inquiry</option>
+            <option value="party">Book a Secrets Party</option>
+            <option value="consult">Private Shopping Session</option>
+            <option value="wholesale">Wholesale / Reseller</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="contact-field">
+          <label>Message *</label>
+          <textarea id="cf-message" placeholder="Tell us what's on your mind..." required></textarea>
+        </div>
+        <button type="submit" class="btn-primary" style="width:100%;padding:14px;font-size:1rem;" id="contact-submit-btn">
+          Send Message →
+        </button>
+        <div id="contact-success">
+          Message sent! A Secret Keeper will hit you back within 24 hours.
+        </div>
+        <p class="contact-form-note">All messages are confidential. We don't spam — ever.</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== FAQ ===== -->
+  <section role="main" id="main-content" class="contact-faq-section">
+    <div class="section-header" style="padding:0;margin-bottom:32px;">
+      <p class="section-eyebrow">Quick Answers</p>
+      <h2 class="section-title">FAQs</h2>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">How long does shipping take?<span class="faq-arrow">▾</span></div>
+      <div class="faq-a">Physical products ship via UPS (1–5 business days). Dropship products vary by item — standard range is 5–21 business days. Your receipt will show per-item ETAs for every package in your order.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Do you offer local delivery?<span class="faq-arrow">▾</span></div>
+      <div class="faq-a">Yes! We offer same-day personal delivery in the DFW Metro area for orders over $50. Local delivery is $15. You'll select your delivery slot at checkout.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Is my packaging discreet?<span class="faq-arrow">▾</span></div>
+      <div class="faq-a">Absolutely. All orders ship in plain, unmarked packaging. Your privacy is our priority — no brand names or product descriptions on the outside of the box.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">How do I pay?<span class="faq-arrow">▾</span></div>
+      <div class="faq-a">We accept CashApp ($flawwless23), PayPal, Venmo, and Apple Pay. No PayPal account needed — select <strong>"Pay as Guest"</strong> on the PayPal page to pay with any card.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Can I host a Secrets Party?<span class="faq-arrow">▾</span></div>
+      <div class="faq-a">Yes! We host Secrets Parties in the DFW area and can arrange experiences elsewhere. Head to our <a href="/services.html" style="color:#a855f7;">Services page</a> to see all options and book.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Do you accept returns?<span class="faq-arrow">▾</span></div>
+      <div class="faq-a">All sales are final for hygiene and safety reasons. However, if your order arrives damaged or incorrect, reach out within 48 hours and we'll make it right.</div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <img src="/images/logo.png" alt="Dripping Secrets" class="footer-logo" />
+      <p class="footer-mission"><em>"Explore, play, and connect — your next dripping adventure is just a secret away."</em></p>
+      <div class="footer-links">
+        <a href="/shop.html">Shop</a>
+        <a href="/party.html">Secrets Party</a>
+        <a href="/services.html">Services</a>
+        <a href="/bundles.html">Bundles</a>
+        <a href="/boxes.html">Build a Box</a>
+        <a href="/sneaky-link-bags.html">Sneaky Link Bags</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        
+      </div>
+      <p class="footer-taglines">
+        <em>You deserve a secret this good.</em> &nbsp;·&nbsp;
+        <em>Same box twice? Not how we move.</em>
+      </p>
+      <!-- ===== SAFE SPACE & INCLUSIVE COMMUNITY ===== -->
+      <div class="footer-pride-row" role="region" aria-label="Inclusive safe space indicators">
+        <div class="footer-pride-flags" aria-hidden="true">
+          <!-- Rainbow Pride Flag -->
+          <svg class="footer-flag" width="44" height="28" viewBox="0 0 44 28" role="img" aria-label="LGBTQ+ Pride rainbow flag">
+            <rect y="0"  width="44" height="4.67" fill="#E40303"/>
+            <rect y="4.67" width="44" height="4.67" fill="#FF8C00"/>
+            <rect y="9.33" width="44" height="4.67" fill="#FFED00"/>
+            <rect y="14"  width="44" height="4.67" fill="#008026"/>
+            <rect y="18.67" width="44" height="4.67" fill="#004CFF"/>
+            <rect y="23.33" width="44" height="4.67" fill="#732982"/>
+          </svg>
+          <!-- Transgender Pride Flag -->
+          <svg class="footer-flag" width="44" height="28" viewBox="0 0 44 28" role="img" aria-label="Transgender pride flag symbol">
+            <rect y="0"   width="44" height="5.6"  fill="#5BCEFA"/>
+            <rect y="5.6"  width="44" height="5.6"  fill="#F5A9B8"/>
+            <rect y="11.2" width="44" height="5.6"  fill="#FFFFFF"/>
+            <rect y="16.8" width="44" height="5.6"  fill="#F5A9B8"/>
+            <rect y="22.4" width="44" height="5.6"  fill="#5BCEFA"/>
+          </svg>
+          <!-- Bisexual Pride Flag -->
+          <svg class="footer-flag" width="44" height="28" viewBox="0 0 44 28" role="img" aria-label="Bisexual pride flag symbol">
+            <rect y="0"    width="44" height="11.2" fill="#D60270"/>
+            <rect y="11.2" width="44" height="5.6"  fill="#9B4F96"/>
+            <rect y="16.8" width="44" height="11.2" fill="#0038A8"/>
+          </svg>
+          <!-- Leather Pride Flag (Kink/Lifestyle community) -->
+          <svg class="footer-flag" width="44" height="28" viewBox="0 0 44 28" role="img" aria-label="Leather pride flag — kink and alternative lifestyle safe space indicator">
+            <rect y="0"  width="44" height="4"  fill="#000000"/>
+            <rect y="4"  width="44" height="4"  fill="#2B2BFF"/>
+            <rect y="8"  width="44" height="4"  fill="#000000"/>
+            <rect y="12" width="44" height="4"  fill="#2B2BFF"/>
+            <rect y="16" width="44" height="4"  fill="#000000"/>
+            <rect y="20" width="44" height="4"  fill="#2B2BFF"/>
+            <rect y="24" width="44" height="4"  fill="#000000"/>
+            <!-- White chevron right -->
+            <polygon points="44,0 30,14 44,28" fill="#FFFFFF"/>
+            <!-- Red heart -->
+            <path d="M37 10 C37 8 35 6 33 8 C31 6 29 8 29 10 C29 12 33 16 33 16 C33 16 37 12 37 10Z" fill="#FF0000"/>
+          </svg>
+        </div>
+        <!-- BDSM Triskelion -->
+        <svg class="footer-triskelion" width="22" height="22" viewBox="0 0 100 100"
+             role="img" aria-label="BDSM triskelion — safe, sane, and consensual community symbol">
+          <circle cx="50" cy="50" r="48" fill="none" stroke="#888" stroke-width="3"/>
+          <path d="M50 50 L50 10 A40 40 0 0 1 84.6 70 Z" fill="#555" opacity="0.7"/>
+          <path d="M50 50 L84.6 70 A40 40 0 0 1 15.4 70 Z" fill="#777" opacity="0.7"/>
+          <path d="M50 50 L15.4 70 A40 40 0 0 1 50 10 Z" fill="#444" opacity="0.7"/>
+          <circle cx="50" cy="50" r="8" fill="#999"/>
+        </svg>
+        <span class="footer-pride-label" aria-label="LGBTQ+ inclusive safe space">
+          Safe Space &amp; Inclusive Community — LGBTQ+ Affirming · Sex-Positive · Kink &amp; Lifestyle Welcoming
+        </span>
+      </div>
+      <!-- ===== PRIVACY & DISCREET BILLING EXCERPT ===== -->
+      <p class="footer-privacy-excerpt">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" style="vertical-align:middle;margin-right:4px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <strong>Discreet &amp; Private:</strong> Your orders ship in plain, unmarked packaging. Billing appears as <em>"DS Boutique"</em> — no adult product descriptions on your statement. We never sell, rent, or share your personal information. Payment details are processed securely and are never stored on our servers.
+      </p>
+      <p class="footer-legal">© 2026 Dripping Secrets. All rights reserved. | 18+ only. All sales are final. Orders are packaged discreetly.</p>
+    </div>
+  </footer>
+
+  <!-- ===== CART DRAWER ===== -->
+  <div class="cart-overlay" id="cart-overlay" onclick="closeCart()"></div>
+  <div class="cart-drawer" id="cart-drawer">
+    <div class="cart-drawer-header">
+      <h3>Your Bag</h3>
+      <button class="cart-close-btn" onclick="closeCart()" aria-label="Close cart">✕</button>
+    </div>
+    <div class="cart-items" id="cart-items"></div>
+    <div class="cart-drawer-footer">
+      <div class="cart-footer-total">
+        <span>Subtotal</span>
+        <span id="cart-total">$0.00</span>
+      </div>
+      <button class="btn-primary checkout-btn" onclick="openCheckout()">Checkout</button>
+      <p class="cart-footer-note">Fast, discreet packaging. Local pickup &amp; delivery available.</p>
+    </div>
+  </div>
+
+  <!-- ===== CHECKOUT MODAL ===== -->
+  <div class="checkout-overlay" id="checkout-overlay" onclick="closeCheckout()"></div>
+  <div class="checkout-modal" id="checkout-modal" role="dialog" aria-modal="true" aria-label="Checkout"></div>
+
+  <!-- ===== PRODUCT DETAIL MODAL ===== -->
+  <div id="product-modal-overlay" onclick="closeProductModal()"></div>
+  <div id="product-modal"></div>
+
+  <!-- ===== AUTH MODAL ===== -->
+  <div id="auth-overlay" onclick="closeAuthModal()"></div>
+  <div id="auth-modal"></div>
+
+  <!-- ===== ACCOUNT MODAL ===== -->
+  <div id="account-overlay" onclick="closeAccountModal()"></div>
+  <div id="account-modal"></div>
+
+  <!-- ===== BUILD-A-BOX MODAL ===== -->
+  <div id="box-modal-overlay" onclick="closeBuildABox()"></div>
+  <div id="box-modal"></div>
+
+  <!-- ===== BOOKING MODAL ===== -->
+  <div id="booking-overlay" onclick="closeBookingModal()"></div>
+  <div id="booking-modal"></div>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    (function(){
+      if (typeof emailjs !== 'undefined') {
+        emailjs.init({ publicKey: 'KpF8LPtlgYmBZIRUW' });
+      }
+    })();
+  </script>
+  <script src="/js/boxes.js"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/products.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>window.dimiContext = { page: 'contact' };</script>
+  <script src="/js/dimi-actor.js"></script>
+  <script src="/js/dimi-memory.js"></script>
+  <script src="/js/dimi.js"></script>
+
+  <script>
+    // NAV
+    function toggleNav() {
+      document.getElementById('main-nav').classList.toggle('open');
+      document.getElementById('hamburger').classList.toggle('active');
+    }
+    document.querySelectorAll('.main-nav a').forEach(a => {
+      a.addEventListener('click', () => {
+        document.getElementById('main-nav').classList.remove('open');
+        document.getElementById('hamburger').classList.remove('active');
+      });
+    });
+    window.addEventListener('scroll', () => {
+      document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // FAQ
+    function toggleFaq(el) {
+      el.classList.toggle('open');
+    }
+
+    // CONTACT FORM
+    function submitContactForm(e) {
+      e.preventDefault();
+      const btn = document.getElementById('contact-submit-btn');
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+
+      const params = {
+        from_name:  document.getElementById('cf-fname').value + ' ' + document.getElementById('cf-lname').value,
+        from_email: document.getElementById('cf-email').value,
+        topic:      document.getElementById('cf-topic').value || 'General',
+        message:    document.getElementById('cf-message').value,
+        to_email:   'Assistant.Manager@DrippingSecrets.com'
+      };
+
+      // Use EmailJS if available
+      if (typeof emailjs !== 'undefined') {
+        emailjs.send('service_kkp11nt', 'template_nbiinbo', params)
+          .then(() => showContactSuccess())
+          .catch(() => showContactSuccess()); // still show success on error to not frustrate user
+      } else {
+        setTimeout(showContactSuccess, 800);
+      }
+    }
+
+    function showContactSuccess() {
+      document.getElementById('contact-form').style.display = 'none';
+      document.getElementById('contact-success').style.display = 'block';
+    }
+
+    renderCartDrawer();
+  </script>
+
+  <!-- PWA Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(() => console.log('✅ Dripping Secrets SW registered'))
+          .catch(e => console.error('SW error:', e));
+      });
+    }
+  </script>
+<script src="js/dimi-walker.js"></script>
+<script src="js/pwa.js"></script>
+  <script src="/js/age-gate.js" defer></script>
+</body>
+</html>

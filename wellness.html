@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wellness Hub — Dripping Secrets</title>
+  <meta name="description" content="The Dripping Secrets Wellness Hub — guides, articles, and expert insight on intimacy, self-care, relationships, and sensual wellness. Shame-free education for every level."/>
+  <meta name="keywords" content="intimacy wellness, self care guides, couples wellness, sensual education, sexual wellness articles, relationship tips"/>
+  <link rel="canonical" href="https://drippingsecrets.com/wellness.html"/>
+  <meta property="og:title" content="Wellness Hub — Dripping Secrets"/>
+  <meta property="og:description" content="Shame-free guides, articles, and expert insight on intimacy, self-care, and sensual wellness."/>
+  <meta property="og:url" content="https://drippingsecrets.com/wellness.html"/>
+  <meta property="og:type" content="website"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/images/icon-192.png"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="theme-color" content="#4B1F5F"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/wellness.css"/>
+  <link rel="stylesheet" href="css/dimi-actor.css"/>
+</head>
+<body>
+
+<a href="#main-content" class="skip-nav">Skip to Main Content</a>
+
+<!-- NAV -->
+<nav class="main-nav" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="/index.html" class="nav-logo">
+      <img src="images/logo.png" alt="Dripping Secrets" height="38"/>
+    </a>
+    <div class="nav-links">
+      <a href="/shop.html">Shop</a>
+      <a href="/party.html">Secrets Party</a>
+      <a href="/services.html">Services</a>
+      <a href="/bundles.html">Bundles</a>
+      <a href="/boxes.html">Build a Box</a>
+      <a href="/wellness.html" class="active">Wellness</a>
+      <a href="/about.html">About</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="nav-actions">
+      <a href="admin.html" class="nav-gear" title="Back Office" aria-label="Back Office">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </a>
+      <button class="cart-btn" onclick="openCart()" aria-label="Open cart">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+        <span class="cart-count" id="cart-badge" aria-live="polite" aria-label="Cart items">0</span>
+      </button>
+      <button class="nav-account-btn" onclick="location.href='/account.html'" aria-label="Account">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<main id="main-content">
+
+<!-- HERO -->
+<section class="wl-hero">
+  <div class="adls-hero-banner" style="max-width:860px;margin:0 auto 28px;">
+    <div data-adls="luxury" data-adls-class="adls-img" style="height:320px;"></div>
+    <div class="adls-hero-banner-overlay">
+      <div class="adls-hero-banner-text">
+        <h2>Wellness Hub</h2>
+        <p>Shame-free guides, expert insight, and real talk on intimacy, self-care, and sensual wellness.</p>
+      </div>
+    </div>
+  </div>
+  <h1 class="sr-only">Wellness Hub</h1>
+  <p>Shame-free guides, expert insight, and real talk on intimacy, self-care, and sensual wellness — written for you, by people who get it.</p>
+  <div class="wl-search-bar" role="search">
+    <input type="search" id="wl-search-input" placeholder="Search guides, articles, topics..." aria-label="Search wellness content"/>
+    <button onclick="DSWellness.searchFromBar()" aria-label="Search">Search</button>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<div class="wl-cats" role="toolbar" aria-label="Content categories">
+  <button class="wl-cat-btn active" data-cat="all">All</button>
+  <button class="wl-cat-btn" data-cat="selfcare">Self-Care</button>
+  <button class="wl-cat-btn" data-cat="couples">Couples</button>
+  <button class="wl-cat-btn" data-cat="relationships">Relationships</button>
+  <button class="wl-cat-btn" data-cat="education">Education</button>
+  <button class="wl-cat-btn" data-cat="health">Cycle &amp; Health</button>
+  <button class="wl-cat-btn" data-cat="saved">Saved</button>
+</div>
+
+<!-- FEATURED -->
+<section class="wl-section">
+  <div class="wl-featured" role="article" onclick="DSWellness.openArticle('wl1')" style="cursor:pointer" tabindex="0" aria-label="Featured article">
+    <div class="wl-featured-banner">🌙</div>
+    <div class="wl-featured-body">
+      <span class="wl-featured-tag">Featured Guide</span>
+      <h2>7 Self-Care Rituals That Actually Work</h2>
+      <p>Transform your evening routine with these evidence-based practices that nourish mind, body, and connection. Written for real people with real lives.</p>
+      <button class="wl-read-btn" onclick="event.stopPropagation();DSWellness.openArticle('wl1')">Read the Guide</button>
+    </div>
+  </div>
+</section>
+
+<!-- SERIES -->
+<section class="wl-section" style="padding-top:0">
+  <div class="wl-section-header">
+    <h2>Content Series</h2>
+  </div>
+  <div class="wl-series-grid" id="wl-series-grid"></div>
+</section>
+
+<!-- CONTENT GRID -->
+<section class="wl-section" style="padding-top:0">
+  <div class="wl-section-header">
+    <h2>All Content</h2>
+  </div>
+  <div class="wl-grid" id="wl-grid">
+    <div class="wl-fav-empty" style="grid-column:1/-1"><p>Loading...</p></div>
+  </div>
+</section>
+
+</main>
+
+<!-- ARTICLE MODAL -->
+<div class="wl-article-overlay" id="wl-article-overlay" role="dialog" aria-modal="true" aria-label="Article" onclick="if(event.target===this)DSWellness.closeArticle()">
+  <div class="wl-article">
+    <button class="wl-article-close" onclick="DSWellness.closeArticle()" aria-label="Close article">✕</button>
+    <div id="wl-article-content"></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-col">
+      <a href="/index.html" class="footer-logo"><img src="images/logo.png" alt="Dripping Secrets" height="34"/></a>
+      <p class="footer-tagline">Curated with love. Delivered with discretion.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="/shop.html">Shop</a></li>
+        <li><a href="/wellness.html">Wellness Hub</a></li>
+        <li><a href="/events.html">Events</a></li>
+        <li><a href="/account.html">My Account</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="/contact.html">Contact Us</a></li>
+        <li><a href="/privacy.html">Privacy Policy</a></li>
+        <li><a href="/about.html">About Us</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom"><p>&copy; 2026 Dripping Secrets. All rights reserved.</p></div>
+</footer>
+
+<div id="cart-overlay" onclick="closeCart()"></div>
+<div id="cart-drawer"></div>
+
+<script src="js/firebase-config.js"></script>
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/adls.js"></script>
+<script src="js/wellness.js"></script>
+<script src="js/pwa.js"></script>
+<script>window.dimiContext = { page: 'wellness' };</script>
+<script src="js/dimi-actor.js"></script>
+<script src="js/dimi-memory.js"></script>
+<script src="js/dimi.js"></script>
+  <script src="/js/age-gate.js" defer></script>
+</body>
+</html>

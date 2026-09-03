@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 380">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%" stop-color="#0F0622"/>
+      <stop offset="100%" stop-color="#1E0A3C"/>
+    </linearGradient>
+    <linearGradient id="blazerGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7B35B8"/>
+      <stop offset="100%" stop-color="#541F82"/>
+    </linearGradient>
+  </defs>
+
+  <!-- BG -->
+  <rect width="280" height="380" fill="url(#bgGrad)"/>
+  <!-- Subtle glow behind figure -->
+  <ellipse cx="140" cy="280" rx="130" ry="80" fill="#6B2FA0" opacity="0.18"/>
+
+  <!-- ── BODY ── -->
+
+  <!-- Torso / blazer main -->
+  <path d="M30,380 L30,230 Q60,210 140,218 Q220,210 250,230 L250,380 Z" fill="url(#blazerGrad)"/>
+
+  <!-- Fuchsia shirt chest panel -->
+  <path d="M116,222 L140,242 L164,222 L164,380 L116,380 Z" fill="#D92B87"/>
+
+  <!-- Left lapel -->
+  <path d="M30,230 L116,222 L140,380 L30,380 Z" fill="#471A6E"/>
+  <!-- Right lapel -->
+  <path d="M250,230 L164,222 L140,380 L250,380 Z" fill="#471A6E"/>
+
+  <!-- Left sleeve hint -->
+  <path d="M30,230 L30,300 Q20,305 18,310 L18,380 L30,380 Z" fill="#6B2FA0"/>
+  <!-- Right sleeve hint -->
+  <path d="M250,230 L250,300 Q260,305 262,310 L262,380 L250,380 Z" fill="#6B2FA0"/>
+
+  <!-- Blazer buttons (faux) -->
+  <circle cx="140" cy="268" r="3.5" fill="#F5C518" opacity="0.7"/>
+  <circle cx="140" cy="290" r="3.5" fill="#F5C518" opacity="0.7"/>
+
+  <!-- Gold pocket square -->
+  <path d="M196,236 L208,230 L213,242 L200,246 Z" fill="#F5C518" opacity="0.9"/>
+  <!-- Pocket square fold lines -->
+  <path d="M196,236 L202,232" stroke="#D4A810" stroke-width="1" fill="none"/>
+  <path d="M202,232 L208,230" stroke="#D4A810" stroke-width="1" fill="none"/>
+
+  <!-- Shirt collar points -->
+  <path d="M116,222 L128,210 L140,224 Z" fill="#E03090"/>
+  <path d="M164,222 L152,210 L140,224 Z" fill="#E03090"/>
+
+  <!-- Neck -->
+  <rect x="122" y="198" width="36" height="28" rx="14" fill="#C4915A"/>
+
+  <!-- ── HEAD ── -->
+
+  <!-- Face -->
+  <ellipse cx="140" cy="148" rx="62" ry="68" fill="#C4915A"/>
+  <!-- Jaw shadow -->
+  <path d="M96,170 Q96,208 140,214 Q184,208 184,170" fill="#A87040" opacity="0.28"/>
+  <!-- Temple shadow left -->
+  <path d="M80,138 Q82,148 88,158 Q84,148 82,138 Z" fill="#A87040" opacity="0.2"/>
+
+  <!-- ── HAIR ── -->
+
+  <!-- Main hair block -->
+  <path d="M78,136 Q82,68 140,64 Q198,68 202,136 Q196,90 140,88 Q84,90 78,136 Z" fill="#16112A"/>
+  <!-- Left side fall -->
+  <path d="M78,136 Q79,110 94,96 Q90,116 88,138 Z" fill="#16112A"/>
+  <!-- Right side tight -->
+  <path d="M202,136 Q201,112 188,98 Q192,116 192,136 Z" fill="#1C1730"/>
+  <!-- Top sweep -->
+  <path d="M108,70 Q140,56 170,70 Q156,62 140,62 Q124,62 108,70 Z" fill="#221A3A" opacity="0.9"/>
+  <!-- Front strand sweep over forehead -->
+  <path d="M102,90 Q116,76 132,80 Q120,88 112,104 Z" fill="#1E193A"/>
+  <!-- Hair sheen line -->
+  <path d="M118,68 Q140,60 162,70" stroke="#2E2450" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- ── EARS ── -->
+  <!-- Left ear -->
+  <ellipse cx="79" cy="152" rx="9" ry="11" fill="#C4915A"/>
+  <path d="M82,144 Q88,152 82,160" stroke="#A87040" stroke-width="2" fill="none" opacity="0.5"/>
+  <!-- Right ear -->
+  <ellipse cx="201" cy="152" rx="9" ry="11" fill="#C4915A"/>
+  <!-- Gold hoop right ear -->
+  <circle cx="207" cy="156" r="10" fill="none" stroke="#F5C518" stroke-width="4"/>
+
+  <!-- ── EYEBROWS ── -->
+  <!-- Left brow — strong, slight arch -->
+  <path d="M100,116 Q117,106 133,112" stroke="#16112A" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <!-- Right brow — one tick higher, the Dimi look -->
+  <path d="M147,110 Q164,100 182,108" stroke="#16112A" stroke-width="5" stroke-linecap="round" fill="none"/>
+
+  <!-- ── EYES ── -->
+  <!-- Left eye -->
+  <path d="M98,132 Q117,120 136,132 Q117,146 98,132 Z" fill="#F5F0E8"/>
+  <ellipse cx="117" cy="132" rx="8.5" ry="8.5" fill="#22100A"/>
+  <ellipse cx="117" cy="132" rx="5.5" ry="5.5" fill="#150800"/>
+  <circle cx="120.5" cy="128.5" r="2.8" fill="white" opacity="0.9"/>
+  <!-- Lid crease -->
+  <path d="M98,130 Q117,120 136,130" stroke="#16112A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Lower lash hint -->
+  <path d="M100,134 Q117,140 134,134" stroke="#A87040" stroke-width="1" fill="none" opacity="0.4"/>
+
+  <!-- Right eye -->
+  <path d="M144,132 Q163,120 182,132 Q163,146 144,132 Z" fill="#F5F0E8"/>
+  <ellipse cx="163" cy="132" rx="8.5" ry="8.5" fill="#22100A"/>
+  <ellipse cx="163" cy="132" rx="5.5" ry="5.5" fill="#150800"/>
+  <circle cx="166.5" cy="128.5" r="2.8" fill="white" opacity="0.9"/>
+  <!-- Lid crease -->
+  <path d="M144,130 Q163,120 182,130" stroke="#16112A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Lower lash hint -->
+  <path d="M146,134 Q163,140 180,134" stroke="#A87040" stroke-width="1" fill="none" opacity="0.4"/>
+
+  <!-- ── NOSE ── -->
+  <path d="M137,158 Q133,172 124,175 Q132,179 140,178 Q148,179 156,175 Q147,172 143,158 Z" fill="#A06830" opacity="0.38"/>
+  <!-- Nostril hints -->
+  <ellipse cx="128" cy="175" rx="4" ry="2.5" fill="#8B4020" opacity="0.35"/>
+  <ellipse cx="152" cy="175" rx="4" ry="2.5" fill="#8B4020" opacity="0.35"/>
+
+  <!-- ── MOUTH / SMIRK ── -->
+  <!-- Upper lip -->
+  <path d="M116,188 Q128,182 140,185 Q152,182 164,188" stroke="#8B4020" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Main smirk curve — pulled to the right, confident -->
+  <path d="M116,188 Q130,200 164,190" stroke="#8B4020" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- Lip fill hint -->
+  <path d="M116,188 Q140,186 164,188 Q164,190 140,191 Q116,190 116,188 Z" fill="#C4623A" opacity="0.35"/>
+
+  <!-- Cheek warmth -->
+  <ellipse cx="96" cy="162" rx="18" ry="13" fill="#D4704A" opacity="0.1"/>
+  <ellipse cx="184" cy="162" rx="18" ry="13" fill="#D4704A" opacity="0.1"/>
+
+  <!-- ── JEWEL ACCENT — subtle gem at collar ── -->
+  <circle cx="140" cy="205" r="4" fill="#2D8EC9" opacity="0.85"/>
+  <circle cx="140" cy="205" r="2" fill="#A8E0FF" opacity="0.9"/>
+
+</svg>

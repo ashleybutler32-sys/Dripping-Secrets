@@ -1,0 +1,534 @@
+/**
+ * DSFlyerGen v2.0 — Dripping Secrets Social Flyer Generator
+ * High-fidelity branded graphics engine. Matches the quality of the hand-crafted DS flyer:
+ *   — Real hero product image fills the frame (blurred, dimmed overlay)
+ *   — DS circle logo top-center, crisp
+ *   — Playfair Display headline, Inter body
+ *   — Product cards with real product photos
+ *   — Deep Plum + Rose Gold palette
+ *
+ * Platforms: twitter(1200×675) · fb-post(1200×628) · ig-feed(1080×1080)
+ *            ig-story / ig-reel / fb-story / fb-reel (1080×1920)
+ */
+
+const DSFlyerGen = (() => {
+  /* ── Brand colors ─────────────────────────────────────────── */
+  const PLUM      = '#4B1F5F';
+  const PLUM_DARK = '#0D0008';
+  const PLUM_MID  = '#1A0020';
+  const ROSE      = '#B76E79';
+  const ROSE_LT   = '#D4909A';
+  const WHITE     = '#FFFFFF';
+  const CREAM     = '#E8C8C8';
+  const MUTED     = '#886677';
+
+  /* ── Platform sizes ───────────────────────────────────────── */
+  const SIZES = {
+    'twitter':   { w: 1200, h: 675,  layout: 'wide'   },
+    'fb-post':   { w: 1200, h: 628,  layout: 'wide'   },
+    'ig-feed':   { w: 1080, h: 1080, layout: 'square' },
+    'ig-story':  { w: 1080, h: 1920, layout: 'tall'   },
+    'ig-reel':   { w: 1080, h: 1920, layout: 'tall'   },
+    'fb-story':  { w: 1080, h: 1920, layout: 'tall'   },
+    'fb-reel':   { w: 1080, h: 1920, layout: 'tall'   },
+  };
+
+  /* ── Font loading ─────────────────────────────────────────── */
+  let _fontsLoaded = false;
+  async function _ensureFonts() {
+    if (_fontsLoaded) return;
+    try {
+      // Load Playfair Display (headlines) + Inter (body) from Google Fonts
+      const link = document.createElement('link');
+      link.rel  = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600;700&display=swap';
+      document.head.appendChild(link);
+      // Wait for fonts to be ready
+      await document.fonts.ready;
+      _fontsLoaded = true;
+    } catch {}
+  }
+
+  const HEADLINE_FONT = (size) => `900 ${size}px 'Playfair Display', Georgia, serif`;
+  const BODY_FONT     = (size) => `600 ${size}px 'Inter', Arial, sans-serif`;
+  const SMALL_FONT    = (size) => `400 ${size}px 'Inter', Arial, sans-serif`;
+
+  /* ── Flash sale check ─────────────────────────────────────── */
+  function _flashActive() {
+    return new Date() < new Date('2026-06-21T00:00:00-05:00');
+  }
+
+  /* ── Image loader ─────────────────────────────────────────── */
+  function _loadImg(src) {
+    return new Promise(res => {
+      if (!src) return res(null);
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload  = () => res(img);
+      img.onerror = () => res(null);
+      img.src = src;
+    });
+  }
+
+  /* ── Rounded rect ─────────────────────────────────────────── */
+  function _rr(ctx, x, y, w, h, r) {
+    r = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  /* ── Text wrap ─────────────────────────────────────────────── */
+  function _wrap(ctx, text, maxW) {
+    const words = String(text).split(' ');
+    const lines = []; let line = '';
+    for (const w of words) {
+      const test = line ? line + ' ' + w : w;
+      if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = w; }
+      else line = test;
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  /* ── Draw glowing text with shadow ───────────────────────── */
+  function _glowText(ctx, text, x, y, color = WHITE, glowColor = ROSE, glowBlur = 18) {
+    ctx.save();
+    ctx.shadowColor = glowColor;
+    ctx.shadowBlur  = glowBlur;
+    ctx.fillStyle   = color;
+    ctx.fillText(text, x, y);
+    ctx.shadowBlur  = 0;
+    ctx.restore();
+  }
+
+  /* ── Fill canvas with hero image (cover mode) + dark overlay */
+  function _heroBg(ctx, W, H, heroImg, overlayOpacity = 0.72) {
+    // Background gradient (always drawn — fallback if no hero)
+    const bg = ctx.createLinearGradient(0, 0, W * 0.3, H);
+    bg.addColorStop(0, PLUM_DARK);
+    bg.addColorStop(0.5, PLUM_MID);
+    bg.addColorStop(1, '#0A0010');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    if (heroImg) {
+      // Cover-fit the hero image
+      const imgAR   = heroImg.width / heroImg.height;
+      const canvAR  = W / H;
+      let sx, sy, sw, sh;
+      if (imgAR > canvAR) {
+        sh = heroImg.height; sw = sh * canvAR;
+        sx = (heroImg.width - sw) / 2; sy = 0;
+      } else {
+        sw = heroImg.width; sh = sw / canvAR;
+        sx = 0; sy = (heroImg.height - sh) / 2;
+      }
+      // Draw image full-bleed (blurred via filter)
+      ctx.save();
+      ctx.filter = 'blur(3px) saturate(1.2)';
+      ctx.drawImage(heroImg, sx, sy, sw, sh, 0, 0, W, H);
+      ctx.filter = 'none';
+      ctx.restore();
+
+      // Dark overlay so text is always readable
+      const ov = ctx.createLinearGradient(0, 0, 0, H);
+      ov.addColorStop(0,   `rgba(13,0,8,${overlayOpacity})`);
+      ov.addColorStop(0.4, `rgba(26,0,32,${overlayOpacity - 0.1})`);
+      ov.addColorStop(1,   `rgba(13,0,8,${overlayOpacity + 0.1})`);
+      ctx.fillStyle = ov;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    // Diagonal stripe texture
+    ctx.save();
+    ctx.strokeStyle = 'rgba(183,110,121,0.06)';
+    ctx.lineWidth = 1;
+    const step = W > 1000 ? 60 : 40;
+    for (let i = -H; i < W + H; i += step) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i + H, H);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  /* ── Draw DS logo ─────────────────────────────────────────── */
+  function _logo(ctx, logoImg, cx, cy, size) {
+    if (!logoImg) {
+      // Fallback text badge
+      _rr(ctx, cx - size/2, cy - size/2, size, size, size/2);
+      ctx.fillStyle = ROSE; ctx.fill();
+      ctx.font = BODY_FONT(size * 0.35);
+      ctx.textAlign = 'center';
+      ctx.fillStyle = WHITE;
+      ctx.fillText('DS', cx, cy + size * 0.12);
+      return;
+    }
+    // Circular clip
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, size / 2, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(logoImg, cx - size / 2, cy - size / 2, size, size);
+    ctx.restore();
+    // Subtle ring
+    ctx.beginPath();
+    ctx.arc(cx, cy, size / 2 + 3, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(183,110,121,0.5)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  /* ── Product card ─────────────────────────────────────────── */
+  function _card(ctx, x, y, w, h, img, name, price, r = 20) {
+    // Glass card bg
+    _rr(ctx, x, y, w, h, r);
+    ctx.fillStyle = 'rgba(26,0,32,0.88)'; ctx.fill();
+    _rr(ctx, x, y, w, h, r);
+    ctx.strokeStyle = 'rgba(183,110,121,0.6)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+    const imgH = h * 0.58;
+    const pad  = 8;
+
+    if (img) {
+      ctx.save();
+      _rr(ctx, x + pad, y + pad, w - pad * 2, imgH - pad, r - 4);
+      ctx.clip();
+      // Cover-fit product image
+      const iAR  = img.width / img.height;
+      const cAR  = (w - pad * 2) / (imgH - pad);
+      let sx, sy, sw, sh;
+      if (iAR > cAR) { sh = img.height; sw = sh * cAR; sx = (img.width - sw) / 2; sy = 0; }
+      else            { sw = img.width; sh = sw / cAR;  sx = 0; sy = (img.height - sh) / 2; }
+      ctx.drawImage(img, sx, sy, sw, sh, x + pad, y + pad, w - pad * 2, imgH - pad);
+      ctx.restore();
+    } else {
+      _rr(ctx, x + pad, y + pad, w - pad * 2, imgH - pad, r - 4);
+      ctx.fillStyle = 'rgba(75,31,95,0.5)'; ctx.fill();
+    }
+
+    // Name
+    const fs    = Math.max(16, w * 0.07);
+    const nameY = y + imgH + fs + 4;
+    ctx.font      = BODY_FONT(fs);
+    ctx.textAlign = 'center';
+    const nameLine = _wrap(ctx, name, w - 20)[0] || name;
+    ctx.fillStyle = WHITE;
+    ctx.fillText(nameLine, x + w / 2, nameY);
+
+    // Price pill
+    const pH = Math.max(28, h * 0.115);
+    const pW = w * 0.64;
+    const pX = x + (w - pW) / 2;
+    const pY = y + h - pH - 10;
+    _rr(ctx, pX, pY, pW, pH, pH / 2);
+    ctx.fillStyle = ROSE; ctx.fill();
+    ctx.font      = BODY_FONT(Math.max(14, pH * 0.55));
+    ctx.textAlign = 'center';
+    ctx.fillStyle = WHITE;
+    ctx.fillText(`$${parseFloat(price || 0).toFixed(2)}`, x + w / 2, pY + pH * 0.71);
+  }
+
+  /* ── Flash sale bar ───────────────────────────────────────── */
+  function _saleBar(ctx, W, y, h) {
+    if (!_flashActive()) return;
+    ctx.fillStyle = ROSE; ctx.fillRect(0, y, W, h);
+    ctx.font      = HEADLINE_FONT(Math.max(22, h * 0.52));
+    ctx.textAlign = 'center';
+    ctx.fillStyle = WHITE;
+    ctx.fillText('FLASH SALE — 30% OFF SITEWIDE', W / 2, y + h * 0.71);
+  }
+
+  /* ── POV bar ──────────────────────────────────────────────── */
+  function _povBar(ctx, W, y, h, text = 'POV: you found the plug') {
+    _rr(ctx, 0, y, W, h, 0);
+    ctx.fillStyle = 'rgba(183,110,121,0.92)'; ctx.fill();
+    ctx.font      = BODY_FONT(Math.max(18, h * 0.48));
+    ctx.textAlign = 'center';
+    ctx.fillStyle = WHITE;
+    ctx.fillText(text, W / 2, y + h * 0.69);
+  }
+
+  /* ── Pick safe products (exclude visually explicit for public) */
+  function _safeProducts(n = 3) {
+    const blockedCats  = ['machines', 'dildos', 'anal', 'strap', 'masturbators'];
+    const blockedWords = ['dildo', 'machine', 'thrusting', 'suction cup', 'double ended',
+                          'anal', 'masturbat', 'sex doll', 'cock ring', 'strap-on'];
+    const pool = (window.PRODUCTS || []).filter(p => {
+      if (!p || p.soldOut || p.outOfStock) return false;
+      const name = (p.name || '').toLowerCase();
+      const cat  = (p.category || '').toLowerCase();
+      if (blockedCats.some(c => cat.includes(c)))   return false;
+      if (blockedWords.some(k => name.includes(k))) return false;
+      return true;
+    });
+    return pool.slice().sort(() => Math.random() - 0.5).slice(0, n);
+  }
+
+  /* ── Resolve product image path ───────────────────────────── */
+  function _imgPath(p) {
+    if (!p?.image) return null;
+    // image field already contains the full relative path (e.g. "images/products/...")
+    // or an absolute CDN URL
+    return p.image.startsWith('http') ? p.image : p.image;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TALL layout — Stories & Reels (1080×1920)
+  ══════════════════════════════════════════════════════════ */
+  async function _tall(ctx, W, H, headline, caption, logoImg, products, prodImgs) {
+    // Hero = first product image fills full frame
+    _heroBg(ctx, W, H, prodImgs[0] || null, 0.75);
+
+    // TOP BAR
+    _povBar(ctx, W, 0, 110);
+
+    // LOGO
+    _logo(ctx, logoImg, W / 2, 220, 160);
+
+    // Rose gold accent line under logo
+    ctx.fillStyle = ROSE;
+    ctx.fillRect(W / 2 - 60, 308, 120, 3);
+
+    // HEADLINE — split by \n or period
+    const lines = headline.replace(/\.$/, '').split(/\n|(?<=\w)\.\s/).map(s => s.trim()).filter(Boolean).slice(0, 3);
+    const sizes = [120, 88, 70];
+    lines.forEach((line, i) => {
+      ctx.font      = HEADLINE_FONT(sizes[i] || 60);
+      ctx.textAlign = 'center';
+      _glowText(ctx, line, W / 2, 390 + i * (sizes[i] || 60) + (i === 0 ? 0 : 12), i % 2 ? CREAM : WHITE, ROSE, 22);
+    });
+
+    // SUB caption
+    ctx.font      = SMALL_FONT(38);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = CREAM;
+    const subY = lines.length >= 3 ? 740 : 640;
+    const subLines = _wrap(ctx, caption || 'New look. Easier shop. Same secrets.', W - 120).slice(0, 2);
+    subLines.forEach((l, i) => ctx.fillText(l, W / 2, subY + i * 50));
+
+    // PRODUCT CARDS (3 across)
+    const cardW = 320, cardH = 400, gap = 20;
+    const totalW = 3 * cardW + 2 * gap;
+    const startX = (W - totalW) / 2;
+    const cardY  = Math.max(subY + 100, 820);
+    products.slice(0, 3).forEach((p, i) => {
+      _card(ctx, startX + i * (cardW + gap), cardY, cardW, cardH,
+        prodImgs[i], p.name || 'Featured', p.salePrice || p.price || 29.99);
+    });
+
+    // "& more" badge
+    const badgeY = cardY + cardH + 28;
+    _rr(ctx, W / 2 - 230, badgeY, 460, 58, 29);
+    ctx.fillStyle = 'rgba(75,31,95,0.85)'; ctx.fill();
+    _rr(ctx, W / 2 - 230, badgeY, 460, 58, 29);
+    ctx.strokeStyle = ROSE; ctx.lineWidth = 1; ctx.stroke();
+    ctx.font = SMALL_FONT(26); ctx.textAlign = 'center'; ctx.fillStyle = ROSE_LT;
+    ctx.fillText('+ lingerie, boxes & more at DrippingSecrets.com', W / 2, badgeY + 38);
+
+    // FLASH SALE BAR
+    const flashY = badgeY + 80;
+    _saleBar(ctx, W, flashY, 96);
+
+    // CTA URL
+    const ctaY = _flashActive() ? flashY + 130 : flashY + 40;
+    ctx.font = HEADLINE_FONT(62); ctx.textAlign = 'center';
+    _glowText(ctx, 'DrippingSecrets.com', W / 2, ctaY, ROSE_LT, PLUM, 30);
+
+    // Tagline footer
+    ctx.font = SMALL_FONT(28); ctx.textAlign = 'center'; ctx.fillStyle = MUTED;
+    ctx.fillText('You deserve a secret this good.', W / 2, H - 48);
+
+    // Bottom logo mark
+    if (logoImg) _logo(ctx, logoImg, W / 2, H - 100, 64);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     SQUARE layout — IG Feed (1080×1080)
+  ══════════════════════════════════════════════════════════ */
+  async function _square(ctx, W, H, headline, caption, logoImg, products, prodImgs) {
+    _heroBg(ctx, W, H, prodImgs[0] || null, 0.74);
+
+    // TOP BAR
+    _povBar(ctx, W, 0, 86);
+
+    // LOGO
+    _logo(ctx, logoImg, W / 2, 175, 120);
+
+    // HEADLINE
+    const lines = headline.replace(/\.$/, '').split(/\n/).map(s => s.trim()).filter(Boolean).slice(0, 3);
+    const sizes = [100, 76, 60];
+    lines.forEach((line, i) => {
+      ctx.font = HEADLINE_FONT(sizes[i] || 56);
+      ctx.textAlign = 'center';
+      _glowText(ctx, line, W / 2, 320 + i * (sizes[i] || 60), i % 2 ? CREAM : WHITE, ROSE, 18);
+    });
+
+    // Caption
+    ctx.font = SMALL_FONT(30); ctx.textAlign = 'center'; ctx.fillStyle = CREAM;
+    const subY = lines.length >= 3 ? 580 : 510;
+    _wrap(ctx, caption || 'New look. Easier shop. Same secrets.', W - 120).slice(0, 2)
+      .forEach((l, i) => ctx.fillText(l, W / 2, subY + i * 42));
+
+    // PRODUCT CARDS
+    const cardW = 318, cardH = 318, gap = 18;
+    const startX = (W - (3 * cardW + 2 * gap)) / 2;
+    const cardY  = Math.max(subY + 80, 630);
+    products.slice(0, 3).forEach((p, i) => {
+      _card(ctx, startX + i * (cardW + gap), cardY, cardW, cardH,
+        prodImgs[i], p.name || 'Featured', p.salePrice || p.price || 29.99);
+    });
+
+    // Bottom bar
+    const botY = cardY + cardH + 20;
+    if (_flashActive()) {
+      ctx.fillStyle = ROSE; ctx.fillRect(0, botY, W, 72);
+      ctx.font = BODY_FONT(30); ctx.textAlign = 'center'; ctx.fillStyle = WHITE;
+      ctx.fillText('FLASH SALE — 30% OFF SITEWIDE', W / 2, botY + 47);
+      ctx.font = HEADLINE_FONT(38); ctx.textAlign = 'center';
+      _glowText(ctx, 'DrippingSecrets.com', W / 2, botY + 108, ROSE_LT, PLUM, 20);
+    } else {
+      ctx.font = HEADLINE_FONT(42); ctx.textAlign = 'center';
+      _glowText(ctx, 'DrippingSecrets.com', W / 2, botY + 52, ROSE_LT, PLUM, 20);
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     WIDE layout — Twitter & FB Post
+  ══════════════════════════════════════════════════════════ */
+  async function _wide(ctx, W, H, headline, caption, logoImg, products, prodImgs) {
+    // Split: left = brand/text (52%), right = product visual (48%)
+    const leftW  = Math.floor(W * 0.52);
+    const rightX = leftW;
+    const rightW = W - rightX;
+
+    // Full canvas background
+    const bg = ctx.createLinearGradient(0, 0, leftW, H);
+    bg.addColorStop(0, PLUM_DARK);
+    bg.addColorStop(1, '#0A0010');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+    // Right-side hero product image
+    if (prodImgs[0]) {
+      ctx.save();
+      _rr(ctx, rightX, 0, rightW, H, 0);
+      ctx.clip();
+      const img = prodImgs[0];
+      const iAR = img.width / img.height;
+      const cAR = rightW / H;
+      let sx, sy, sw, sh;
+      if (iAR > cAR) { sh = img.height; sw = sh * cAR; sx = (img.width-sw)/2; sy = 0; }
+      else            { sw = img.width; sh = sw/cAR; sx = 0; sy = (img.height-sh)/2; }
+      ctx.drawImage(img, sx, sy, sw, sh, rightX, 0, rightW, H);
+      // Gradient fade left edge of image into left panel
+      const fade = ctx.createLinearGradient(rightX, 0, rightX + 80, 0);
+      fade.addColorStop(0, PLUM_DARK);
+      fade.addColorStop(1, 'rgba(13,0,8,0)');
+      ctx.fillStyle = fade; ctx.fillRect(rightX, 0, 80, H);
+      ctx.restore();
+    }
+
+    // Diagonal stripes on left panel
+    ctx.save();
+    ctx.strokeStyle = 'rgba(183,110,121,0.05)'; ctx.lineWidth = 1;
+    for (let i = -H; i < leftW + H; i += 50) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + H, H); ctx.stroke();
+    }
+    ctx.restore();
+
+    // Top accent line
+    ctx.fillStyle = ROSE; ctx.fillRect(0, 0, leftW, 8);
+
+    // LOGO (top-left)
+    _logo(ctx, logoImg, 80, H * 0.2, 100);
+
+    // POV badge
+    _rr(ctx, 20, H * 0.38, leftW - 40, 54, 27);
+    ctx.fillStyle = 'rgba(183,110,121,0.88)'; ctx.fill();
+    ctx.font = BODY_FONT(24); ctx.textAlign = 'center'; ctx.fillStyle = WHITE;
+    ctx.fillText('POV: you found the plug', 20 + (leftW - 40) / 2, H * 0.38 + 36);
+
+    // HEADLINE
+    const lines = headline.split(/\n/).map(s => s.trim()).filter(Boolean).slice(0, 3);
+    lines.forEach((line, i) => {
+      ctx.font = HEADLINE_FONT(i === 0 ? 82 : 60);
+      ctx.textAlign = 'left';
+      _glowText(ctx, line, 28, H * 0.52 + i * 72, i % 2 ? CREAM : WHITE, ROSE, 16);
+    });
+
+    // Caption
+    const subY = H * 0.76;
+    ctx.font = SMALL_FONT(24); ctx.textAlign = 'left'; ctx.fillStyle = CREAM;
+    _wrap(ctx, caption || 'New look. Easier shop. Same secrets.', leftW - 56).slice(0, 2)
+      .forEach((l, i) => ctx.fillText(l, 28, subY + i * 34));
+
+    // Bottom left
+    if (_flashActive()) {
+      _rr(ctx, 20, H - 108, leftW - 40, 48, 24);
+      ctx.fillStyle = ROSE; ctx.fill();
+      ctx.font = BODY_FONT(20); ctx.textAlign = 'center'; ctx.fillStyle = WHITE;
+      ctx.fillText('FLASH SALE — 30% OFF SITEWIDE', 20 + (leftW-40)/2, H - 76);
+    }
+    ctx.font = HEADLINE_FONT(34); ctx.textAlign = 'left';
+    _glowText(ctx, 'DrippingSecrets.com', 28, H - 28, ROSE_LT, PLUM, 16);
+
+    // Right panel: 2 stacked product cards
+    if (products.length >= 2 && rightW > 200) {
+      const cW = rightW - 32; const cH = H / 2 - 16;
+      [0, 1].forEach((idx, j) => {
+        _card(ctx, rightX + 16, 8 + j * (cH + 8), cW, cH,
+          prodImgs[idx], products[idx]?.name || 'Featured',
+          products[idx]?.salePrice || products[idx]?.price || 29.99, 14);
+      });
+    }
+
+    // Bottom accent line
+    ctx.fillStyle = ROSE; ctx.fillRect(0, H - 8, W, 8);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PUBLIC API
+  ══════════════════════════════════════════════════════════ */
+  async function _render(canvasEl, platform, headline, caption) {
+    await _ensureFonts();
+
+    const size = SIZES[platform] || SIZES['ig-feed'];
+    const { w: W, h: H, layout } = size;
+    canvasEl.width = W; canvasEl.height = H;
+    const ctx = canvasEl.getContext('2d');
+
+    const products = _safeProducts(3);
+    const logoSrc  = 'images/logo.png';
+
+    // Load logo + up to 3 product images in parallel
+    const [logoImg, ...prodImgs] = await Promise.all([
+      _loadImg(logoSrc),
+      ...products.map(p => _loadImg(_imgPath(p))),
+    ]);
+
+    const hl  = headline || 'WE\nLEVELED\nUP.';
+    const cap = caption  || '';
+
+    if      (layout === 'tall')   await _tall  (ctx, W, H, hl, cap, logoImg, products, prodImgs);
+    else if (layout === 'square') await _square(ctx, W, H, hl, cap, logoImg, products, prodImgs);
+    else                          await _wide  (ctx, W, H, hl, cap, logoImg, products, prodImgs);
+  }
+
+  async function draw(platform, headline, caption) {
+    const canvas = document.createElement('canvas');
+    await _render(canvas, platform, headline, caption);
+    return canvas.toDataURL('image/png');
+  }
+
+  async function drawToCanvas(canvasEl, platform, headline, caption) {
+    await _render(canvasEl, platform, headline, caption);
+  }
+
+  return { draw, drawToCanvas };
+})();

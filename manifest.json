@@ -1,0 +1,50 @@
+{
+  "name": "Dripping Secrets",
+  "short_name": "DS",
+  "description": "You deserve a secret this good. Shop, explore, and connect.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#1a0a24",
+  "theme_color": "#4B1F5F",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "categories": ["shopping", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Shop",
+      "short_name": "Shop",
+      "description": "Browse the Dripping Secrets store",
+      "url": "/shop.html",
+      "icons": [{ "src": "/images/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Account",
+      "short_name": "Account",
+      "description": "View your account and orders",
+      "url": "/account.html",
+      "icons": [{ "src": "/images/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Events",
+      "short_name": "Events",
+      "description": "Upcoming events and experiences",
+      "url": "/events.html",
+      "icons": [{ "src": "/images/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "icons": [
+    {
+      "src": "/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

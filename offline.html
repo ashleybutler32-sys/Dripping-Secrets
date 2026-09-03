@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>You're Offline — Dripping Secrets</title>
+  <meta name="theme-color" content="#4B1F5F"/>
+  <link rel="apple-touch-icon" href="/images/icon-192.png"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #1a0a24;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .container {
+      text-align: center;
+      max-width: 420px;
+    }
+    .logo { margin-bottom: 32px; }
+    .logo img { height: 48px; }
+    .icon { font-size: 4rem; margin-bottom: 20px; opacity: .6; }
+    h1 { font-size: 1.8rem; margin-bottom: 12px; }
+    p { color: rgba(255,255,255,.6); line-height: 1.6; margin-bottom: 28px; font-size: 1rem; }
+    .retry-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #E91E8C, #c2185b);
+      color: #fff;
+      border: none;
+      padding: 14px 36px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity .2s;
+      margin-bottom: 16px;
+    }
+    .retry-btn:hover { opacity: .85; }
+    .home-link {
+      display: block;
+      color: rgba(255,255,255,.4);
+      font-size: .9rem;
+      text-decoration: none;
+    }
+    .home-link:hover { color: rgba(255,255,255,.7); }
+    .tips {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 32px;
+      text-align: left;
+    }
+    .tips h3 { font-size: .95rem; margin-bottom: 10px; color: rgba(255,255,255,.7); }
+    .tips li { color: rgba(255,255,255,.5); font-size: .88rem; line-height: 1.8; list-style: none; padding-left: 0; }
+    .tips li::before { content: '• '; color: #E91E8C; }
+    .pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: .4; }
+      50%       { opacity: .8; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo"><img src="/images/logo.png" alt="Dripping Secrets" onerror="this.style.display='none'"/></div>
+    <div class="icon pulse">📡</div>
+    <h1>You're Offline</h1>
+    <p>It looks like you've lost your connection. Dripping Secrets requires an internet connection to shop and explore. Check your signal and try again.</p>
+    <button class="retry-btn" onclick="window.location.reload()">Try Again</button>
+    <a href="/" class="home-link">← Back to homepage</a>
+    <div class="tips">
+      <h3>While you wait:</h3>
+      <ul>
+        <li>Check your Wi-Fi or mobile data</li>
+        <li>Your cart is saved — your items will be waiting</li>
+        <li>Any pages you've visited are available from cache</li>
+      </ul>
+    </div>
+  </div>
+  <script>
+    // Auto-retry when connection restores
+    window.addEventListener('online', () => window.location.reload());
+  </script>
+  <script src="/js/age-gate.js" defer></script>
+</body>
+</html>

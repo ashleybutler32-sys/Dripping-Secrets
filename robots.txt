@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Block portals and admin from crawlers
+Disallow: /admin.html
+Disallow: /employee.html
+Disallow: /account.html
+Disallow: /affiliates.html
+
+# Block checkout and cart states
+Disallow: /?cart=
+Disallow: /?checkout=
+
+Sitemap: https://drippingsecrets.com/sitemap.xml

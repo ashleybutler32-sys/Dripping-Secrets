@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book a Secret Party — Dripping Secrets</title>
+  <meta name="description" content="Book a Secrets Party or Private Shopping Session with Dripping Secrets. A Secret Keeper will reach out within 24 hours." />
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#7c3aed" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Dripping Secrets" />
+  <link rel="apple-touch-icon" href="/images/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <style>
+    body { padding-top: 40px; }
+
+    /* ── HERO ── */
+    .book-hero {
+      position: relative; padding: 100px 24px 60px;
+      text-align: center; overflow: hidden;
+    }
+    .book-hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 55% at 25% 35%, rgba(183,110,121,0.28) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 45% at 75% 65%, rgba(124,58,237,0.22) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(236,72,153,0.1) 0%, transparent 60%);
+      animation: bookGlow 12s ease-in-out infinite alternate;
+    }
+    @keyframes bookGlow {
+      0%   { opacity: 0.8; transform: scale(1); }
+      100% { opacity: 1; transform: scale(1.04); }
+    }
+    .book-hero-content { position: relative; z-index: 2; max-width: 680px; margin: 0 auto; }
+    .book-eyebrow {
+      font-family: 'Jost', sans-serif; font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(183,110,121,0.95); margin-bottom: 18px;
+    }
+    .book-hero-title {
+      font-family: 'Cormorant Garamond', serif; font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 600; color: #fff; line-height: 1.12; margin: 0 0 20px;
+    }
+    .book-hero-title em { font-style: italic; color: #e879f9; }
+    .book-hero-sub {
+      font-family: 'Jost', sans-serif; font-size: 1rem; font-weight: 300;
+      color: rgba(255,255,255,0.6); line-height: 1.7; max-width: 500px; margin: 0 auto;
+    }
+
+    /* ── TAB SWITCHER ── */
+    .book-tabs-wrap {
+      max-width: 800px; margin: 0 auto; padding: 0 24px 0;
+    }
+    .book-tabs {
+      display: flex; gap: 0; border-radius: 14px; overflow: hidden;
+      border: 1px solid rgba(139,92,246,0.25); margin-bottom: 40px;
+    }
+    .book-tab-btn {
+      flex: 1; padding: 16px 24px; background: rgba(255,255,255,0.03);
+      border: none; cursor: pointer; font-family: 'Jost', sans-serif;
+      font-size: 0.9rem; font-weight: 500; color: rgba(255,255,255,0.5);
+      transition: background 0.25s, color 0.25s;
+      text-align: center; line-height: 1.3;
+    }
+    .book-tab-btn:first-child { border-right: 1px solid rgba(139,92,246,0.2); }
+    .book-tab-btn.active {
+      background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(168,85,247,0.2));
+      color: #fff;
+    }
+    .book-tab-btn .tab-icon { font-size: 1.3rem; display: block; margin-bottom: 4px; }
+
+    /* ── FORM SECTIONS ── */
+    .book-section { display: none; }
+    .book-section.active { display: block; }
+
+    /* ── FORM CARD ── */
+    .book-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(139,92,246,0.2);
+      border-radius: 24px; padding: 40px 36px;
+      max-width: 800px; margin: 0 auto 80px;
+    }
+    @media(max-width:600px) { .book-card { padding: 28px 20px; } }
+
+    .book-card-title {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.9rem;
+      font-weight: 600; color: #fff; margin: 0 0 8px;
+    }
+    .book-card-sub {
+      font-family: 'Jost', sans-serif; font-size: 0.88rem;
+      color: rgba(255,255,255,0.5); line-height: 1.65; margin: 0 0 32px;
+    }
+
+    .book-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media(max-width:580px) { .book-fields { grid-template-columns: 1fr; } }
+    .book-field-full { grid-column: 1 / -1; }
+
+    .book-label {
+      display: block; font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.5); margin-bottom: 7px;
+      font-family: 'Jost', sans-serif;
+    }
+    .book-label .book-hint {
+      font-weight: 400; text-transform: none; letter-spacing: 0;
+      color: rgba(168,85,247,0.7); font-size: 0.78rem;
+    }
+
+    .book-input, .book-select, .book-textarea {
+      width: 100%; box-sizing: border-box;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(139,92,246,0.25);
+      border-radius: 10px; padding: 12px 16px;
+      color: #fff; font-family: 'Jost', sans-serif;
+      font-size: 0.9rem; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .book-input:focus, .book-select:focus, .book-textarea:focus {
+      border-color: rgba(168,85,247,0.6);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
+    }
+    .book-input::placeholder { color: rgba(255,255,255,0.28); }
+    .book-textarea { resize: vertical; min-height: 110px; }
+    .book-select option { background: #1a0d2e; color: #fff; }
+
+    /* ── INFO BLOCK (consultation) ── */
+    .book-info-block {
+      background: rgba(124,58,237,0.1);
+      border: 1px solid rgba(139,92,246,0.25);
+      border-radius: 16px; padding: 24px 24px 20px;
+      margin-bottom: 28px;
+    }
+    .book-info-heading {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.15rem;
+      font-weight: 600; color: #a855f7; margin: 0 0 10px;
+    }
+    .book-info-body {
+      font-family: 'Jost', sans-serif; font-size: 0.86rem;
+      color: rgba(255,255,255,0.6); line-height: 1.7; margin: 0 0 8px;
+    }
+    .book-fee-badge {
+      display: inline-block; margin-top: 10px;
+      background: rgba(183,110,121,0.15); border: 1px solid rgba(183,110,121,0.3);
+      border-radius: 10px; padding: 8px 16px;
+      font-family: 'Jost', sans-serif; font-size: 0.82rem;
+      color: #f9a8d4; font-weight: 500;
+    }
+
+    /* ── SHIPPING SUB-BLOCK ── */
+    .book-ship-block {
+      background: rgba(168,85,247,0.07);
+      border: 1px solid rgba(139,92,246,0.2);
+      border-radius: 14px; padding: 20px;
+      margin-top: 8px;
+    }
+    .book-ship-block p {
+      font-family: 'Jost', sans-serif; font-size: 0.78rem;
+      color: rgba(168,85,247,0.8); margin: 0 0 12px; line-height: 1.5;
+    }
+    .book-ship-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    @media(max-width:480px) { .book-ship-grid { grid-template-columns: 1fr; } }
+
+    /* ── SUBMIT ── */
+    .book-submit-btn {
+      width: 100%; margin-top: 28px;
+      padding: 16px; font-size: 1rem; font-weight: 600;
+      border-radius: 12px; cursor: pointer;
+    }
+    .book-footer-note {
+      text-align: center; margin-top: 14px;
+      font-family: 'Jost', sans-serif; font-size: 0.78rem;
+      color: rgba(255,255,255,0.3);
+    }
+
+    /* ── SUCCESS ── */
+    .book-success {
+      display: none;
+      background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3);
+      border-radius: 14px; padding: 20px 24px; text-align: center;
+      color: #86efac; font-family: 'Jost', sans-serif; font-size: 0.9rem;
+      margin-top: 20px;
+    }
+
+    /* ── PERKS STRIP ── */
+    .book-perks {
+      max-width: 800px; margin: 0 auto 48px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+      padding: 0 24px;
+    }
+    @media(max-width:600px) { .book-perks { grid-template-columns: 1fr; } }
+    .book-perk {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(139,92,246,0.15);
+      border-radius: 16px; padding: 24px 20px; text-align: center;
+    }
+    .book-perk-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, rgba(183,110,121,0.2), rgba(124,58,237,0.15));
+      border: 1px solid rgba(183,110,121,0.25);
+      border-radius: 12px; display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px; color: #B76E79;
+    }
+    .book-perk h4 {
+      font-family: 'Cormorant Garamond', serif; font-size: 1rem;
+      font-weight: 600; color: #fff; margin: 0 0 6px;
+    }
+    .book-perk p {
+      font-family: 'Jost', sans-serif; font-size: 0.78rem;
+      color: rgba(255,255,255,0.42); line-height: 1.6; margin: 0;
+    }
+  
+    /* ── Safe Space Footer Pride Row ──────────────────────────── */
+    .footer-pride-row {
+      display: flex; align-items: center; justify-content: center;
+      flex-wrap: wrap; gap: 0.5rem 0.75rem;
+      margin: 0.75rem 0 0.5rem; padding: 0.5rem 0;
+      border-top: 1px solid rgba(201,168,76,0.15);
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+    }
+    .footer-pride-flags { display: flex; gap: 0.4rem; align-items: center; }
+    .footer-flag { border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+    .footer-triskelion { opacity: 0.6; }
+    .footer-pride-label {
+      font-size: 0.7rem; color: #8a7a6a; letter-spacing: 0.02em;
+      text-align: center; line-height: 1.5;
+    }
+    .footer-privacy-excerpt {
+      font-size: 0.72rem; color: #7a6a5a; line-height: 1.55;
+      margin: 0.4rem auto 0.75rem; max-width: 480px;
+      text-align: center;
+    }
+    .footer-privacy-excerpt strong { color: #9a8a7a; }
+    .footer-privacy-excerpt em { color: #8a7a6a; font-style: normal; }
+    @media (max-width: 600px) {
+      .footer-pride-label { font-size: 0.63rem; }
+      .footer-flag { width: 34px; height: 22px; }
+    }
+
+  </style>
+  <link rel="stylesheet" href="/css/dimi-actor.css">
+</head>
+<body>
+
+  <!-- ===== TOP ANNOUNCEMENT BAR ===== -->
+  <div id="top-sale-bar" style="background:linear-gradient(90deg,#7c3aed,#a855f7,#7c3aed);background-size:200% auto;animation:gradShift 4s linear infinite;color:#fff;text-align:center;font-size:0.82rem;font-weight:600;letter-spacing:0.07em;padding:8px 16px;z-index:1001;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px"><path d="M12 2c0 0-5 5-5 10a5 5 0 0010 0C17 7 12 2 12 2zm0 13a3 3 0 01-3-3c0-2 1.5-4 3-6 1.5 2 3 4 3 6a3 3 0 01-3 3z"/></svg> FLASH SALE — 30% OFF SITEWIDE · ENDS JUNE 20, 2026 · AUTO-APPLIED AT CHECKOUT <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px"><path d="M12 2c0 0-5 5-5 10a5 5 0 0010 0C17 7 12 2 12 2zm0 13a3 3 0 01-3-3c0-2 1.5-4 3-6 1.5 2 3 4 3 6a3 3 0 01-3 3z"/></svg>
+  </div>
+  <style>
+    @keyframes gradShift { to { background-position: 200% center; } }
+    @media(max-width:480px){ #top-sale-bar { font-size:0.7rem; } }
+  </style>
+  <script>
+    (function(){
+      const end = new Date('2026-06-21T00:00:00');
+      const bar = document.getElementById('top-sale-bar');
+      if(bar && new Date() >= end) bar.style.display='none';
+    })();
+  </script>
+
+  <a href="#main-content" class="skip-nav">Skip to Main Content</a>
+
+  <!-- ===== HEADER ===== -->
+  <header id="site-header">
+    <div class="header-inner">
+      <a href="/" class="logo-link">
+        <img src="/images/logo.png" alt="Dripping Secrets" class="logo" />
+      </a>
+      <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+        <a href="/">Home</a>
+        <a href="/shop.html">Shop</a>
+        <a href="/party.html">Secrets Party</a>
+        <a href="/machines.html">Machines</a>
+        <a href="/services.html">Services</a>
+        <a href="/bundles.html">Bundles</a>
+        <a href="/boxes.html">Build a Box</a>
+        <a href="/sneaky-link-bags.html">Sneaky Link Bags</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/admin.html" class="nav-admin-link" title="Back Office" aria-label="Back Office"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
+      </nav>
+      <div class="header-actions">
+        <button class="account-btn" id="account-btn" onclick="openAccountBtn()" aria-label="My Account" title="Sign In / Create Account">
+          <span id="account-label"><svg width="20" height="20" viewBox="0 0 24 24" fill="#B76E79" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v1h20v-1c0-3.33-6.67-5-10-5z"/></svg></span>
+          <span class="wishlist-badge" id="wishlist-badge" style="display:none;">0</span>
+        </button>
+        <button class="cart-btn" onclick="openCart()" aria-label="Open cart">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#B76E79" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96C5 16.1 5.9 17 7 17h14v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63H19c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0023.45 4H5.21L4.27 2H1z"/></svg>
+          <span class="cart-badge" id="cart-badge" style="display:none;">0</span>
+        </button>
+        <button class="hamburger-btn" id="hamburger-btn" aria-label="Menu" onclick="document.getElementById('main-nav').classList.toggle('open');">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section role="main" id="main-content" class="book-hero">
+    <div class="book-hero-bg"></div>
+    <div class="book-hero-content">
+      <p class="book-eyebrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="vertical-align:-2px;margin-right:5px;"><circle cx="12" cy="12" r="10" fill="#B76E79" opacity=".18"/><path d="M12 7c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 10c-2.7 0-5.8-1.29-6-2v-1c0-.67 1.3-2 6-2s6 1.33 6 2v1c-.2.71-3.3 2-6 2z" fill="#B76E79"/></svg>Book With Us</p>
+      <h1 class="book-hero-title">Plan Your<br/><em>Secret Party</em></h1>
+      <p class="book-hero-sub">An intimate event experience curated by a Secret Keeper — or book a Private Shopping Session with Dimi, just for you.</p>
+    </div>
+  </section>
+
+  <!-- ===== PERKS ===== -->
+  <div class="book-perks">
+    <div class="book-perk">
+      <div class="book-perk-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <h4>Intimate & Curated</h4>
+      <p>Every party is tailored to your vibe — a Secret Keeper handles the details.</p>
+    </div>
+    <div class="book-perk">
+      <div class="book-perk-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      </div>
+      <h4>Goodies Shipped to Host</h4>
+      <p>We ship a curated welcome package to the host's door before the party starts.</p>
+    </div>
+    <div class="book-perk">
+      <div class="book-perk-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.6 1.23h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.8a16 16 0 0 0 6.29 6.29l1.26-1.26a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
+      <h4>Response Within 24 hrs</h4>
+      <p>A Secret Keeper reaches out personally to confirm your booking details.</p>
+    </div>
+  </div>
+
+  <!-- ===== TABS ===== -->
+  <div class="book-tabs-wrap">
+    <div class="book-tabs">
+      <button class="book-tab-btn active" id="tab-party-btn" onclick="switchBookTab('party')">
+        <span class="tab-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#B76E79" opacity=".18"/><path d="M17 8h-1V6a4 4 0 00-8 0v2H7a2 2 0 00-2 2v9a2 2 0 002 2h10a2 2 0 002-2v-9a2 2 0 00-2-2zm-6 8.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm3.1-8.5H9.9V6a2.1 2.1 0 014.2 0v2z" fill="#B76E79"/></svg></span>
+        Book a Secret Party
+      </button>
+      <button class="book-tab-btn" id="tab-consult-btn" onclick="switchBookTab('consult')">
+        
+        Private Shopping Session
+      </button>
+    </div>
+
+    <!-- ── PARTY FORM ── -->
+    <div class="book-section active" id="section-party">
+      <div class="book-card">
+        <h2 class="book-card-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px;margin-right:6px;"><circle cx="12" cy="12" r="10" fill="#B76E79" opacity=".18"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" fill="#B76E79"/></svg>Book a Secret Party</h2>
+        <p class="book-card-sub">Tell us about your event and a Secret Keeper will reach out within 24 hours with everything you need to know.</p>
+
+        <div class="book-fields">
+          <div>
+            <label class="book-label" for="p-name">Your Name <span style="color:#ef4444">*</span></label>
+            <input class="book-input" type="text" id="p-name" placeholder="Your full name" required />
+          </div>
+          <div>
+            <label class="book-label" for="p-email">Email Address <span style="color:#ef4444">*</span></label>
+            <input class="book-input" type="email" id="p-email" placeholder="your@email.com" required />
+          </div>
+          <div>
+            <label class="book-label" for="p-phone">Phone Number</label>
+            <input class="book-input" type="tel" id="p-phone" placeholder="(555) 555-5555" />
+          </div>
+          <div>
+            <label class="book-label" for="p-guests">Estimated Guest Count</label>
+            <select class="book-select" id="p-guests">
+              <option value="">Select guest count</option>
+              <option>Under 10</option>
+              <option>10–20</option>
+              <option>20–40</option>
+              <option>40+</option>
+            </select>
+          </div>
+          <div class="book-field-full">
+            <label class="book-label" for="p-date">
+              Party Date <span class="book-hint">— your expected or preferred event date</span>
+            </label>
+            <input class="book-input" type="date" id="p-date" />
+          </div>
+          <div class="book-field-full">
+            <label class="book-label" for="p-loc">Party Location</label>
+            <input class="book-input" type="text" id="p-loc" placeholder="City / neighborhood (e.g. Dallas, Frisco, Plano)" />
+          </div>
+
+          <!-- Shipping block -->
+          <div class="book-field-full">
+            <label class="book-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="10" fill="#B76E79" opacity=".18"/><path d="M20 8h-3V6c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v5c0 1.1.9 2 2 2h1v1a1 1 0 002 0v-1h10v1a1 1 0 002 0v-1h1c1.1 0 2-.9 2-2v-5c0-1.1-.9-2-2-2zm-5-2v2H9V6h6z" fill="#B76E79"/></svg>Ship Party Goodies to the Host?</label>
+            <div class="book-ship-block">
+              <p>When you book, we ship a curated welcome package to the host's door. Drop the address below!</p>
+              <input class="book-input" type="text" id="p-addr" placeholder="Shipping Address" />
+              <div class="book-ship-grid" style="margin-top:10px;">
+                <input class="book-input" type="text" id="p-city" placeholder="City" />
+                <input class="book-input" type="text" id="p-state" placeholder="State" />
+              </div>
+              <input class="book-input" type="text" id="p-zip" placeholder="ZIP Code" style="margin-top:10px;" />
+            </div>
+          </div>
+
+          <div class="book-field-full">
+            <label class="book-label" for="p-notes">Tell Us Your Vision</label>
+            <textarea class="book-textarea" id="p-notes" placeholder="Theme, vibe, must-haves, special requests — spill it all. A Secret Keeper will give you a whisper back with how we make it happen. "></textarea>
+          </div>
+        </div>
+
+        <button class="btn-primary book-submit-btn" onclick="submitPartyBooking()">
+          Send My Vision
+        </button>
+        <div class="book-success" id="party-success">
+          Your vision is in! A Secret Keeper will reach out within 24 hours. Can't wait to make this happen for you.
+        </div>
+        <p class="book-footer-note">A Secret Keeper will respond within 24 hours.</p>
+      </div>
+    </div>
+
+    <!-- ── CONSULTATION FORM ── -->
+    <div class="book-section" id="section-consult">
+      <div class="book-card">
+        <h2 class="book-card-title">Private Shopping Session with Dimi</h2>
+        <p class="book-card-sub">Your personal Secret Keeper guide — here to help you find exactly what you need, no awkwardness required.</p>
+
+        <div class="book-info-block">
+          <p class="book-info-heading">What is a Private Shopping Session?</p>
+          <p class="book-info-body">
+            Our sessions are a safe, judgment-free space for real conversations about bodies, intimacy, and wellness.
+            We offer <strong>Coming of Age sessions</strong> — with a parent or guardian's initiation and full consent —
+            where young people (preteen and up) learn about their bodies, the changes they're experiencing, the urges
+            that come with them, and healthy, age-appropriate options. Think of it as Sex Ed with a PhD. Not literally,
+            but yeah.
+          </p>
+          <p class="book-info-body" style="margin-top:10px;">
+            Consultations are also available for adults seeking in-depth product guidance, serious event planning,
+            or any conversation that needs more than a quick chat — whether that's a phone call, video session,
+            or meeting for coffee in DFW.
+          </p>
+          <div class="book-fee-badge" style="background:rgba(75,31,95,0.4);border-color:rgba(183,110,121,0.5);color:#e8b4ba;"> Completely Free — Private Shopping Sessions with Dimi are always complimentary</div>
+        </div>
+
+        <div class="book-fields">
+          <div>
+            <label class="book-label" for="c-name">Your Name <span style="color:#ef4444">*</span></label>
+            <input class="book-input" type="text" id="c-name" placeholder="Your full name" required />
+          </div>
+          <div>
+            <label class="book-label" for="c-email">Email Address <span style="color:#ef4444">*</span></label>
+            <input class="book-input" type="email" id="c-email" placeholder="your@email.com" required />
+          </div>
+          <div>
+            <label class="book-label" for="c-phone">Phone Number</label>
+            <input class="book-input" type="tel" id="c-phone" placeholder="(555) 555-5555" />
+          </div>
+          <div>
+            <label class="book-label" for="c-format">Session Type</label>
+            <select class="book-select" id="c-format">
+              <option value="">Select session type</option>
+              <option>Phone Call (30+ min deep dive)</option>
+              <option>Video Call (Zoom / FaceTime)</option>
+              <option>In-Person — Coffee / Drinks (DFW Metro)</option>
+              <option>Event Planning Session (phone or video)</option>
+              <option>Coming of Age Session (parent-initiated, in-person)</option>
+            </select>
+          </div>
+          <div class="book-field-full">
+            <label class="book-label" for="c-date">
+              Preferred Date <span class="book-hint">— your preferred or expected date</span>
+            </label>
+            <input class="book-input" type="date" id="c-date" />
+          </div>
+          <div class="book-field-full">
+            <label class="book-label" for="c-time">Preferred Time Window</label>
+            <select class="book-select" id="c-time">
+              <option value="">Select a time window</option>
+              <option>Morning (9am – 12pm)</option>
+              <option>Early Afternoon (12pm – 3pm)</option>
+              <option>Late Afternoon (3pm – 6pm)</option>
+              <option>Evening (6pm – 9pm)</option>
+            </select>
+          </div>
+          <div class="book-field-full">
+            <label class="book-label" for="c-notes">What Would You Like to Cover?</label>
+            <textarea class="book-textarea" id="c-notes" placeholder="The more you share, the better we can prepare your session."></textarea>
+          </div>
+        </div>
+
+        <button class="btn-primary book-submit-btn" onclick="submitConsultBooking()">
+          Request My Session
+        </button>
+        <div class="book-success" id="consult-success">
+          Request received! A Secret Keeper will confirm your time slot within 24 hours. Payment link sent before your session.
+        </div>
+        <p class="book-footer-note">A Secret Keeper will confirm your time slot within 24 hours. Payment link sent before session.</p>
+      </div>
+    </div>
+
+  </div><!-- /book-tabs-wrap -->
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <img src="/images/logo.png" alt="Dripping Secrets" class="footer-logo" />
+      <p class="footer-mission"><em>"Explore, play, and connect — your next dripping adventure is just a secret away."</em></p>
+      <div class="footer-links">
+        <a href="/shop.html">Shop</a>
+        <a href="/party.html">Secrets Party</a>
+        <a href="/machines.html">Machines</a>
+        <a href="/services.html">Services</a>
+        <a href="/bundles.html">Bundles</a>
+        <a href="/boxes.html">Build a Box</a>
+        <a href="/sneaky-link-bags.html">Sneaky Link Bags</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+      </div>
+      <p class="footer-taglines">
+        <em>You deserve a secret this good.</em> &nbsp;·&nbsp;
+        <em>Same box twice? Not how we move.</em>
+      </p>
+      <!-- ===== SAFE SPACE & INCLUSIVE COMMUNITY ===== -->
+      <div class="footer-pride-row" role="region" aria-label="Inclusive safe space indicators">
+        <div class="footer-pride-flags" aria-hidden="true">
+          <!-- Rainbow Pride Flag -->
+          <svg class="footer-flag" width="44" height="28" viewBox="0 0 44 28" role="img" aria-label="LGBTQ+ Pride rainbow flag">
+            <rect y="0"  width="44" height="4.67" fill="#E40303"/>
+            <rect y="4.67" width="44" height="4.67" fill="#FF8C00"/>
+            <rect y="9.33" width="44" height="4.67" fill="#FFED00"/>
+            <rect y="14"  width="44" height="4.67" fill="#008026"/>
+            <rect y="18.67" width="44" height="4.67" fill="#004CFF"/>
+            <rect y="23.33" width="44" height="4.67" fill="#732982"/>
+          </svg>
+          <!-- Transgender Pride Flag -->
+          <svg class="footer-flag" width="44" height="28" viewBox="0 0 44 28" role="img" aria-label="Transgender pride flag symbol">
+            <rect y="0"   width="44" height="5.6"  fill="#5BCEFA"/>
+            <rect y="5.6"  width="44" height="5.6"  fill="#F5A9B8"/>
+            <rect y="11.2" width="44" height="5.6"  fill="#FFFFFF"/>
+            <rect y="16.8" width="44" height="5.6"  fill="#F5A9B8"/>
+            <rect y="22.4" width="44" height="5.6"  fill="#5BCEFA"/>
+          </svg>
+          <!-- Bisexual Pride Flag -->
+          <svg class="footer-flag" width="44" height="28" viewBox="0 0 44 28" role="img" aria-label="Bisexual pride flag symbol">
+            <rect y="0"    width="44" height="11.2" fill="#D60270"/>
+            <rect y="11.2" width="44" height="5.6"  fill="#9B4F96"/>
+            <rect y="16.8" width="44" height="11.2" fill="#0038A8"/>
+          </svg>
+          <!-- Leather Pride Flag (Kink/Lifestyle community) -->
+          <svg class="footer-flag" width="44" height="28" viewBox="0 0 44 28" role="img" aria-label="Leather pride flag — kink and alternative lifestyle safe space indicator">
+            <rect y="0"  width="44" height="4"  fill="#000000"/>
+            <rect y="4"  width="44" height="4"  fill="#2B2BFF"/>
+            <rect y="8"  width="44" height="4"  fill="#000000"/>
+            <rect y="12" width="44" height="4"  fill="#2B2BFF"/>
+            <rect y="16" width="44" height="4"  fill="#000000"/>
+            <rect y="20" width="44" height="4"  fill="#2B2BFF"/>
+            <rect y="24" width="44" height="4"  fill="#000000"/>
+            <!-- White chevron right -->
+            <polygon points="44,0 30,14 44,28" fill="#FFFFFF"/>
+            <!-- Red heart -->
+            <path d="M37 10 C37 8 35 6 33 8 C31 6 29 8 29 10 C29 12 33 16 33 16 C33 16 37 12 37 10Z" fill="#FF0000"/>
+          </svg>
+        </div>
+        <!-- BDSM Triskelion -->
+        <svg class="footer-triskelion" width="22" height="22" viewBox="0 0 100 100"
+             role="img" aria-label="BDSM triskelion — safe, sane, and consensual community symbol">
+          <circle cx="50" cy="50" r="48" fill="none" stroke="#888" stroke-width="3"/>
+          <path d="M50 50 L50 10 A40 40 0 0 1 84.6 70 Z" fill="#555" opacity="0.7"/>
+          <path d="M50 50 L84.6 70 A40 40 0 0 1 15.4 70 Z" fill="#777" opacity="0.7"/>
+          <path d="M50 50 L15.4 70 A40 40 0 0 1 50 10 Z" fill="#444" opacity="0.7"/>
+          <circle cx="50" cy="50" r="8" fill="#999"/>
+        </svg>
+        <span class="footer-pride-label" aria-label="LGBTQ+ inclusive safe space">
+          Safe Space &amp; Inclusive Community — LGBTQ+ Affirming · Sex-Positive · Kink &amp; Lifestyle Welcoming
+        </span>
+      </div>
+      <!-- ===== PRIVACY & DISCREET BILLING EXCERPT ===== -->
+      <p class="footer-privacy-excerpt">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" style="vertical-align:middle;margin-right:4px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <strong>Discreet &amp; Private:</strong> Your orders ship in plain, unmarked packaging. Billing appears as <em>"DS Boutique"</em> — no adult product descriptions on your statement. We never sell, rent, or share your personal information. Payment details are processed securely and are never stored on our servers.
+      </p>
+      <p class="footer-legal">© 2026 Dripping Secrets. All rights reserved. | 18+ only. All sales are final. Orders are packaged discreetly.</p>
+    </div>
+  </footer>
+
+  <!-- ===== CART DRAWER ===== -->
+  <div class="cart-overlay" id="cart-overlay" onclick="closeCart()"></div>
+  <div class="cart-drawer" id="cart-drawer">
+    <div class="cart-drawer-header">
+      <h3>Your Bag</h3>
+      <button class="cart-close-btn" onclick="closeCart()" aria-label="Close cart">✕</button>
+    </div>
+    <div class="cart-items" id="cart-items"></div>
+    <div class="cart-drawer-footer">
+      <div class="cart-footer-total">
+        <span>Subtotal</span>
+        <span id="cart-total">$0.00</span>
+      </div>
+      <button class="btn-primary checkout-btn" onclick="openCheckout()">Checkout</button>
+      <p class="cart-footer-note">Fast, discreet packaging. Local pickup &amp; delivery available.</p>
+    </div>
+  </div>
+
+  <!-- ===== CHECKOUT MODAL ===== -->
+  <div class="checkout-overlay" id="checkout-overlay" onclick="closeCheckout()"></div>
+  <div class="checkout-modal" id="checkout-modal" role="dialog" aria-modal="true" aria-label="Checkout"></div>
+
+  <!-- ===== PRODUCT DETAIL MODAL ===== -->
+  <div id="product-modal-overlay" onclick="closeProductModal()"></div>
+  <div id="product-modal"></div>
+
+  <!-- ===== AUTH MODAL ===== -->
+  <div id="auth-overlay" onclick="closeAuthModal()"></div>
+  <div id="auth-modal"></div>
+
+  <!-- ===== ACCOUNT MODAL ===== -->
+  <div id="account-overlay" onclick="closeAccountModal()"></div>
+  <div id="account-modal"></div>
+
+  <!-- ===== BUILD-A-BOX MODAL ===== -->
+  <div id="box-modal-overlay" onclick="closeBuildABox()"></div>
+  <div id="box-modal"></div>
+
+  <!-- ===== BOOKING MODAL (for other pages' cross-links) ===== -->
+  <div id="booking-overlay" onclick="closeBookingModal()"></div>
+  <div id="booking-modal"></div>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    (function(){
+      if (typeof emailjs !== 'undefined') {
+        emailjs.init({ publicKey: 'KpF8LPtlgYmBZIRUW' });
+      }
+    })();
+  </script>
+  <script src="/js/boxes.js"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/products.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>window.dimiContext = { page: 'booking' };</script>
+  <script src="/js/dimi-actor.js"></script>
+  <script src="/js/dimi-memory.js"></script>
+  <script src="/js/dimi.js"></script>
+  <script src="/js/dimi-walker.js"></script>
+
+  <script>
+    // ── Tab switcher ──
+    function switchBookTab(tab) {
+      document.getElementById('section-party').classList.toggle('active', tab === 'party');
+      document.getElementById('section-consult').classList.toggle('active', tab === 'consult');
+      document.getElementById('tab-party-btn').classList.toggle('active', tab === 'party');
+      document.getElementById('tab-consult-btn').classList.toggle('active', tab === 'consult');
+    }
+
+    // Pre-fill date inputs with today as min
+    (function(){
+      const today = new Date().toISOString().split('T')[0];
+      ['p-date','c-date'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.min = today;
+      });
+    })();
+
+    // Check URL param to open consult tab
+    (function(){
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('type') === 'consult') switchBookTab('consult');
+    })();
+
+    // ── Submit party booking ──
+    function submitPartyBooking() {
+      const name  = document.getElementById('p-name').value.trim();
+      const email = document.getElementById('p-email').value.trim();
+      if (!name || !email) { alert('Please enter your name and email.'); return; }
+
+      const phone  = document.getElementById('p-phone').value.trim() || 'Not provided';
+      const date   = document.getElementById('p-date').value || 'Flexible';
+      const loc    = document.getElementById('p-loc').value.trim() || 'Not provided';
+      const guests = document.getElementById('p-guests').value || 'Not specified';
+      const notes  = document.getElementById('p-notes').value.trim() || 'No notes';
+      const addr   = document.getElementById('p-addr').value.trim();
+      const city   = document.getElementById('p-city').value.trim();
+      const state  = document.getElementById('p-state').value.trim();
+      const zip    = document.getElementById('p-zip').value.trim();
+      const hostShip = [addr, city, state, zip].filter(Boolean).join(', ') || 'Not provided';
+
+      const params = {
+        booking_type: 'Secret Party',
+        name, email, phone, date,
+        location: loc,
+        guest_count: guests,
+        host_shipping: hostShip,
+        notes,
+        to_email: 'Assistant.Manager@DrippingSecrets.com'
+      };
+
+      // Save to Firestore if available
+      if (typeof db !== 'undefined') {
+        db.collection('bookings').add({
+          ...params, type: 'party',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(console.error);
+      }
+
+      // EmailJS notification
+      if (typeof emailjs !== 'undefined') {
+        emailjs.send('service_kkp11nt', 'template_nbiinbo', params).catch(console.error);
+      }
+
+      document.getElementById('party-success').style.display = 'block';
+      document.getElementById('party-success').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // ── Submit consultation booking ──
+    function submitConsultBooking() {
+      const name  = document.getElementById('c-name').value.trim();
+      const email = document.getElementById('c-email').value.trim();
+      if (!name || !email) { alert('Please enter your name and email.'); return; }
+
+      const phone  = document.getElementById('c-phone').value.trim() || 'Not provided';
+      const date   = document.getElementById('c-date').value || 'Flexible';
+      const time   = document.getElementById('c-time').value || 'Flexible';
+      const format = document.getElementById('c-format').value || 'Not specified';
+      const notes  = document.getElementById('c-notes').value.trim() || 'No notes';
+
+      const params = {
+        booking_type: 'Private Shopping Session',
+        name, email, phone, date,
+        time_window: time,
+        session_type: format,
+        notes,
+        to_email: 'Assistant.Manager@DrippingSecrets.com'
+      };
+
+      if (typeof db !== 'undefined') {
+        db.collection('bookings').add({
+          ...params, type: 'consult',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(console.error);
+      }
+
+      if (typeof emailjs !== 'undefined') {
+        emailjs.send('service_kkp11nt', 'template_nbiinbo', params).catch(console.error);
+      }
+
+      document.getElementById('consult-success').style.display = 'block';
+      document.getElementById('consult-success').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Mobile nav close
+    document.querySelectorAll('.main-nav a').forEach(a => {
+      a.addEventListener('click', () => {
+        document.getElementById('main-nav').classList.remove('open');
+      });
+    });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(r => console.log('SW registered', r.scope))
+          .catch(e => console.warn('SW failed', e));
+      });
+    }
+  </script>
+<script src="js/pwa.js"></script>
+  <script src="/js/age-gate.js" defer></script>
+</body>
+</html>

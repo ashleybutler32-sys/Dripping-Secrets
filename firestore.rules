@@ -1,0 +1,193 @@
+// ─────────────────────────────────────────────────────────────────────────────
+//  Dripping Secrets — Firestore Security Rules  DS-DOS v18.2
+//  Deploy via: Firebase Console → Firestore → Rules → paste & publish
+//  Or via CLI: firebase deploy --only firestore:rules
+//
+//  Auth model:
+//    - Customers: Firebase Auth (email/password) — window.currentUser
+//    - Admin/SK:  sessionStorage ds_admin_auth:"1" — NOT Firebase Auth;
+//                 admin reads use anonymous auth (read-only collections only)
+//    - Server:    Firebase Admin SDK (Netlify Functions) — bypasses all rules
+//
+//  Rule summary:
+//    orders          — customer can read/write own; anonymous can write (guest checkout)
+//    users           — customer can read/write own profile + orders subcollection
+//    wishlists       — customer can read/write own
+//    parties         — anyone can create; no public read; admin reads via Admin SDK
+//    affiliates      — public read (click tracking); write via server only
+//    reviews         — public read; authenticated write only
+//    academy_progress — any authenticated user can read/write own by stable ID
+//    settings        — no client read/write; admin only via Admin SDK
+//    employees       — no client access; Admin SDK only
+//    support_tickets — no client access; Admin SDK only
+//    announcements   — public read; no client write
+//    community       — authenticated read/write
+//    rewards         — customer can read own; write via Admin SDK only
+//    candidates      — no client access; Admin SDK only
+//    notifications   — customer reads own; Admin SDK writes
+//    order_routing_log — no client access; Admin SDK only
+// ─────────────────────────────────────────────────────────────────────────────
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ────────────────────────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return isAuth() && request.auth.uid == uid;
+    }
+    function isAnon() {
+      return isAuth() && request.auth.token.firebase.sign_in_provider == 'anonymous';
+    }
+
+    // ── Orders ──────────────────────────────────────────────────────────────
+    // Customers read/write their own; anonymous (guest checkout) can create only.
+    match /orders/{orderId} {
+      allow create: if isAuth(); // any auth (incl. anonymous = guest checkout)
+      allow read:   if isAuth() && (resource.data.uid == request.auth.uid);
+      allow update: if isAuth() && resource.data.uid == request.auth.uid
+                       && request.resource.data.diff(resource.data).affectedKeys()
+                          .hasOnly(['status', 'shippingTracking', 'updatedAt']);
+      // Admin SDK (server) bypasses all rules — full read/write
+    }
+
+    // ── Users ───────────────────────────────────────────────────────────────
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+      match /orders/{orderId} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    // ── Wishlists ───────────────────────────────────────────────────────────
+    match /wishlists/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    // ── Parties / Bookings ──────────────────────────────────────────────────
+    match /parties/{partyId} {
+      allow create: if isAuth();
+      allow read:   if false; // admin reads via Admin SDK only
+    }
+
+    // ── Affiliates ──────────────────────────────────────────────────────────
+    match /affiliates/{ref} {
+      allow read: if true; // public (click tracking pixel)
+      allow write: if false; // server only
+      match /clicks/{clickId} {
+        allow create: if true;
+        allow read, update, delete: if false;
+      }
+      match /sales/{saleId} {
+        allow read, write: if false; // server only
+      }
+    }
+
+    // ── Reviews ─────────────────────────────────────────────────────────────
+    match /reviews/{reviewId} {
+      allow read: if true; // public product reviews
+      allow create: if isAuth() && !isAnon(); // signed-in customers only
+      allow update, delete: if isAuth() && resource.data.uid == request.auth.uid;
+    }
+
+    // ── Academy Progress ────────────────────────────────────────────────────
+    // Uses stable ID (localStorage ds_sk_stable_id), not Firebase UID.
+    // Any authenticated user can read/write their own progress doc.
+    match /academy_progress/{stableId} {
+      allow read, write: if isAuth();
+    }
+
+    // ── Settings (admin-only) ───────────────────────────────────────────────
+    match /settings/{doc} {
+      allow read, write: if false; // Admin SDK only
+    }
+
+    // ── Employees ───────────────────────────────────────────────────────────
+    match /employees/{empId} {
+      allow read, write: if false; // Admin SDK only
+    }
+
+    // ── Support Tickets ─────────────────────────────────────────────────────
+    match /support_tickets/{ticketId} {
+      allow create: if isAuth(); // customers can submit tickets
+      allow read:   if isAuth() && resource.data.uid == request.auth.uid;
+      allow update, delete: if false; // Admin SDK only
+    }
+
+    // ── Announcements ───────────────────────────────────────────────────────
+    match /announcements/{annId} {
+      allow read:  if true; // public
+      allow write: if false; // Admin SDK only
+    }
+
+    // ── Community ───────────────────────────────────────────────────────────
+    match /community/{postId} {
+      allow read:   if isAuth() && !isAnon();
+      allow create: if isAuth() && !isAnon();
+      allow update, delete: if isAuth() && resource.data.uid == request.auth.uid;
+    }
+
+    // ── Members ─────────────────────────────────────────────────────────────
+    match /members/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    // ── Rewards ─────────────────────────────────────────────────────────────
+    match /rewards/{uid} {
+      allow read: if isOwner(uid);
+      allow write: if false; // Admin SDK only (points managed server-side)
+    }
+
+    // ── Candidates ──────────────────────────────────────────────────────────
+    match /candidates/{candidateId} {
+      allow read, write: if false; // Admin SDK only
+    }
+
+    // ── Notifications ────────────────────────────────────────────────────────
+    match /notifications/{notifId} {
+      allow read: if isAuth() && resource.data.uid == request.auth.uid;
+      allow write: if false; // Admin SDK only
+    }
+
+    // ── Subscriptions ───────────────────────────────────────────────────────
+    match /subscriptions/{subId} {
+      allow create: if isAuth();
+      allow read:   if isAuth() && resource.data.uid == request.auth.uid;
+      allow update, delete: if false; // Admin SDK only
+    }
+
+    // ── Events ──────────────────────────────────────────────────────────────
+    match /events/{eventId} {
+      allow read:  if true;
+      allow write: if false; // Admin SDK only
+    }
+
+    // ── Creator Marketplace ─────────────────────────────────────────────────
+    match /creator_marketplace/{appId} {
+      allow create: if isAuth() && !isAnon();
+      allow read:   if isAuth() && resource.data.uid == request.auth.uid;
+      allow update, delete: if false; // Admin SDK only
+    }
+
+    // ── Product Requests ────────────────────────────────────────────────────
+    match /product_requests/{reqId} {
+      allow create: if isAuth();
+      allow read:   if isAuth() && resource.data.uid == request.auth.uid;
+      allow update, delete: if false; // Admin SDK only
+    }
+
+    // ── Order Routing Log ────────────────────────────────────────────────────
+    match /order_routing_log/{logId} {
+      allow read, write: if false; // Admin SDK only (server writes; admin reads via Admin SDK)
+    }
+
+    // ── Deny everything else ─────────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+  }
+}

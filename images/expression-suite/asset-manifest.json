@@ -1,0 +1,627 @@
+{
+  "ashley": [
+    {
+      "name": "Neutral",
+      "file": "ashley-neutral.png",
+      "slug": "neutral"
+    },
+    {
+      "name": "Soft Smile",
+      "file": "ashley-soft-smile.png",
+      "slug": "soft-smile"
+    },
+    {
+      "name": "Big Smile",
+      "file": "ashley-big-smile.png",
+      "slug": "big-smile"
+    },
+    {
+      "name": "Laughing",
+      "file": "ashley-laughing.png",
+      "slug": "laughing"
+    },
+    {
+      "name": "Playful",
+      "file": "ashley-playful.png",
+      "slug": "playful"
+    },
+    {
+      "name": "Side Eye",
+      "file": "ashley-side-eye.png",
+      "slug": "side-eye"
+    },
+    {
+      "name": "Sassy",
+      "file": "ashley-sassy.png",
+      "slug": "sassy"
+    },
+    {
+      "name": "Confident",
+      "file": "ashley-confident.png",
+      "slug": "confident"
+    },
+    {
+      "name": "Boss Mode",
+      "file": "ashley-boss-mode.png",
+      "slug": "boss-mode"
+    },
+    {
+      "name": "Flirty",
+      "file": "ashley-flirty.png",
+      "slug": "flirty"
+    },
+    {
+      "name": "Thoughtful",
+      "file": "ashley-thoughtful.png",
+      "slug": "thoughtful"
+    },
+    {
+      "name": "Focused",
+      "file": "ashley-focused.png",
+      "slug": "focused"
+    },
+    {
+      "name": "Surprised",
+      "file": "ashley-surprised.png",
+      "slug": "surprised"
+    },
+    {
+      "name": "Excited",
+      "file": "ashley-excited.png",
+      "slug": "excited"
+    },
+    {
+      "name": "Unbothered",
+      "file": "ashley-unbothered.png",
+      "slug": "unbothered"
+    },
+    {
+      "name": "Skeptical",
+      "file": "ashley-skeptical.png",
+      "slug": "skeptical"
+    },
+    {
+      "name": "Over It",
+      "file": "ashley-over-it.png",
+      "slug": "over-it"
+    },
+    {
+      "name": "Amused",
+      "file": "ashley-amused.png",
+      "slug": "amused"
+    },
+    {
+      "name": "Determined",
+      "file": "ashley-determined.png",
+      "slug": "determined"
+    },
+    {
+      "name": "Loving It",
+      "file": "ashley-loving-it.png",
+      "slug": "loving-it"
+    }
+  ],
+  "dimi": [
+    {
+      "name": "Welcome",
+      "file": "dimi-welcome.png",
+      "slug": "welcome"
+    },
+    {
+      "name": "One Moment",
+      "file": "dimi-one-moment.png",
+      "slug": "one-moment"
+    },
+    {
+      "name": "I've Got You",
+      "file": "dimi-ive-got-you.png",
+      "slug": "ive-got-you"
+    },
+    {
+      "name": "Allow Me",
+      "file": "dimi-allow-me.png",
+      "slug": "allow-me"
+    },
+    {
+      "name": "Happy to Help",
+      "file": "dimi-happy-to-help.png",
+      "slug": "happy-to-help"
+    },
+    {
+      "name": "My Pleasure",
+      "file": "dimi-my-pleasure.png",
+      "slug": "my-pleasure"
+    },
+    {
+      "name": "Working on It",
+      "file": "dimi-working-on-it.png",
+      "slug": "working-on-it"
+    },
+    {
+      "name": "Processing",
+      "file": "dimi-processing.png",
+      "slug": "processing"
+    },
+    {
+      "name": "Order Confirmed",
+      "file": "dimi-order-confirmed.png",
+      "slug": "order-confirmed"
+    },
+    {
+      "name": "Payment Received",
+      "file": "dimi-payment-received.png",
+      "slug": "payment-received"
+    },
+    {
+      "name": "Almost Ready",
+      "file": "dimi-almost-ready.png",
+      "slug": "almost-ready"
+    },
+    {
+      "name": "You're All Set",
+      "file": "dimi-youre-all-set.png",
+      "slug": "youre-all-set"
+    },
+    {
+      "name": "VIP Service",
+      "file": "dimi-vip-service.png",
+      "slug": "vip-service"
+    },
+    {
+      "name": "Thank You",
+      "file": "dimi-thank-you.png",
+      "slug": "thank-you"
+    },
+    {
+      "name": "Come Back Soon",
+      "file": "dimi-come-back-soon.png",
+      "slug": "come-back-soon"
+    },
+    {
+      "name": "How Can I Help",
+      "file": "dimi-how-can-i-help.png",
+      "slug": "how-can-i-help"
+    },
+    {
+      "name": "Noted",
+      "file": "dimi-noted.png",
+      "slug": "noted"
+    },
+    {
+      "name": "Let's Make It Amazing",
+      "file": "dimi-lets-make-it-amazing.png",
+      "slug": "lets-make-it-amazing"
+    },
+    {
+      "name": "Enjoy Your Order",
+      "file": "dimi-enjoy-your-order.png",
+      "slug": "enjoy-your-order"
+    },
+    {
+      "name": "We Appreciate You",
+      "file": "dimi-we-appreciate-you.png",
+      "slug": "we-appreciate-you"
+    }
+  ],
+  "badges": [
+    {
+      "name": "DS Approved",
+      "file": "badge-ds-approved.png",
+      "slug": "ds-approved"
+    },
+    {
+      "name": "VIP Member",
+      "file": "badge-vip-member.png",
+      "slug": "vip-member"
+    },
+    {
+      "name": "Best Seller",
+      "file": "badge-best-seller.png",
+      "slug": "best-seller"
+    },
+    {
+      "name": "Luxury Pick",
+      "file": "badge-luxury-pick.png",
+      "slug": "luxury-pick"
+    },
+    {
+      "name": "Editor's Pick",
+      "file": "badge-editors-pick.png",
+      "slug": "editors-pick"
+    },
+    {
+      "name": "Top Rated",
+      "file": "badge-top-rated.png",
+      "slug": "top-rated"
+    },
+    {
+      "name": "Exclusive",
+      "file": "badge-exclusive.png",
+      "slug": "exclusive"
+    },
+    {
+      "name": "Limited Edition",
+      "file": "badge-limited-edition.png",
+      "slug": "limited-edition"
+    },
+    {
+      "name": "Members Only",
+      "file": "badge-members-only.png",
+      "slug": "members-only"
+    },
+    {
+      "name": "New Arrival",
+      "file": "badge-new-arrival.png",
+      "slug": "new-arrival"
+    },
+    {
+      "name": "Just Dropped",
+      "file": "badge-just-dropped.png",
+      "slug": "just-dropped"
+    },
+    {
+      "name": "Highly Recommended",
+      "file": "badge-highly-recommended.png",
+      "slug": "highly-recommended"
+    },
+    {
+      "name": "Customer Favorite",
+      "file": "badge-customer-favorite.png",
+      "slug": "customer-favorite"
+    },
+    {
+      "name": "Verified",
+      "file": "badge-verified.png",
+      "slug": "verified"
+    },
+    {
+      "name": "Loved by Bosses",
+      "file": "badge-loved-by-bosses.png",
+      "slug": "loved-by-bosses"
+    },
+    {
+      "name": "Quality Guaranteed",
+      "file": "badge-quality-guaranteed.png",
+      "slug": "quality-guaranteed"
+    },
+    {
+      "name": "Premium Quality",
+      "file": "badge-premium-quality.png",
+      "slug": "premium-quality"
+    },
+    {
+      "name": "100% Authentic",
+      "file": "badge-100%-authentic.png",
+      "slug": "100%-authentic"
+    },
+    {
+      "name": "Trusted Brand",
+      "file": "badge-trusted-brand.png",
+      "slug": "trusted-brand"
+    },
+    {
+      "name": "Award Winning",
+      "file": "badge-award-winning.png",
+      "slug": "award-winning"
+    },
+    {
+      "name": "Boss Choice",
+      "file": "badge-boss-choice.png",
+      "slug": "boss-choice"
+    },
+    {
+      "name": "Drippin' Approved",
+      "file": "badge-drippin-approved.png",
+      "slug": "drippin-approved"
+    },
+    {
+      "name": "Elite Status",
+      "file": "badge-elite-status.png",
+      "slug": "elite-status"
+    },
+    {
+      "name": "Priority Access",
+      "file": "badge-priority-access.png",
+      "slug": "priority-access"
+    },
+    {
+      "name": "Forever Favorite",
+      "file": "badge-forever-favorite.png",
+      "slug": "forever-favorite"
+    }
+  ],
+  "icons": [
+    {
+      "name": "DS Monogram",
+      "file": "icon-primary-ds-monogram.png",
+      "slug": "ds-monogram",
+      "section": "primary"
+    },
+    {
+      "name": "Crown",
+      "file": "icon-primary-crown.png",
+      "slug": "crown",
+      "section": "primary"
+    },
+    {
+      "name": "Dripping Lips",
+      "file": "icon-primary-dripping-lips.png",
+      "slug": "dripping-lips",
+      "section": "primary"
+    },
+    {
+      "name": "Diamond",
+      "file": "icon-primary-diamond.png",
+      "slug": "diamond",
+      "section": "primary"
+    },
+    {
+      "name": "Boss Necklace",
+      "file": "icon-primary-boss-necklace.png",
+      "slug": "boss-necklace",
+      "section": "primary"
+    },
+    {
+      "name": "Handcuffs",
+      "file": "icon-primary-handcuffs.png",
+      "slug": "handcuffs",
+      "section": "primary"
+    },
+    {
+      "name": "High Heel",
+      "file": "icon-primary-high-heel.png",
+      "slug": "high-heel",
+      "section": "primary"
+    },
+    {
+      "name": "Lipstick",
+      "file": "icon-primary-lipstick.png",
+      "slug": "lipstick",
+      "section": "primary"
+    },
+    {
+      "name": "Heart Gem",
+      "file": "icon-primary-heart-gem.png",
+      "slug": "heart-gem",
+      "section": "primary"
+    },
+    {
+      "name": "Signature Script",
+      "file": "icon-primary-signature-script.png",
+      "slug": "signature-script",
+      "section": "primary"
+    },
+    {
+      "name": "Shop",
+      "file": "icon-lifestyle-shop.png",
+      "slug": "shop",
+      "section": "lifestyle"
+    },
+    {
+      "name": "Unboxing",
+      "file": "icon-lifestyle-unboxing.png",
+      "slug": "unboxing",
+      "section": "lifestyle"
+    },
+    {
+      "name": "VIP Access",
+      "file": "icon-lifestyle-vip-access.png",
+      "slug": "vip-access",
+      "section": "lifestyle"
+    },
+    {
+      "name": "Members Only",
+      "file": "icon-lifestyle-members-only.png",
+      "slug": "members-only",
+      "section": "lifestyle"
+    },
+    {
+      "name": "Exclusive",
+      "file": "icon-lifestyle-exclusive.png",
+      "slug": "exclusive",
+      "section": "lifestyle"
+    },
+    {
+      "name": "Pleasure",
+      "file": "icon-lifestyle-pleasure.png",
+      "slug": "pleasure",
+      "section": "lifestyle"
+    },
+    {
+      "name": "Confidence",
+      "file": "icon-lifestyle-confidence.png",
+      "slug": "confidence",
+      "section": "lifestyle"
+    },
+    {
+      "name": "Indulgence",
+      "file": "icon-lifestyle-indulgence.png",
+      "slug": "indulgence",
+      "section": "lifestyle"
+    },
+    {
+      "name": "Connection",
+      "file": "icon-lifestyle-connection.png",
+      "slug": "connection",
+      "section": "lifestyle"
+    },
+    {
+      "name": "Escape",
+      "file": "icon-lifestyle-escape.png",
+      "slug": "escape",
+      "section": "lifestyle"
+    },
+    {
+      "name": "Home",
+      "file": "icon-navigation-home.png",
+      "slug": "home",
+      "section": "navigation"
+    },
+    {
+      "name": "Store",
+      "file": "icon-navigation-store.png",
+      "slug": "store",
+      "section": "navigation"
+    },
+    {
+      "name": "Account",
+      "file": "icon-navigation-account.png",
+      "slug": "account",
+      "section": "navigation"
+    },
+    {
+      "name": "Favorites",
+      "file": "icon-navigation-favorites.png",
+      "slug": "favorites",
+      "section": "navigation"
+    },
+    {
+      "name": "Cart",
+      "file": "icon-navigation-cart.png",
+      "slug": "cart",
+      "section": "navigation"
+    },
+    {
+      "name": "Search",
+      "file": "icon-navigation-search.png",
+      "slug": "search",
+      "section": "navigation"
+    },
+    {
+      "name": "Menu",
+      "file": "icon-navigation-menu.png",
+      "slug": "menu",
+      "section": "navigation"
+    },
+    {
+      "name": "Play",
+      "file": "icon-navigation-play.png",
+      "slug": "play",
+      "section": "navigation"
+    },
+    {
+      "name": "Lock",
+      "file": "icon-navigation-lock.png",
+      "slug": "lock",
+      "section": "navigation"
+    },
+    {
+      "name": "Notifications",
+      "file": "icon-navigation-notifications.png",
+      "slug": "notifications",
+      "section": "navigation"
+    },
+    {
+      "name": "Purple Glitter",
+      "file": "icon-decorative-purple-glitter.png",
+      "slug": "purple-glitter",
+      "section": "decorative"
+    },
+    {
+      "name": "Gold Foil",
+      "file": "icon-decorative-gold-foil.png",
+      "slug": "gold-foil",
+      "section": "decorative"
+    },
+    {
+      "name": "Black Leather",
+      "file": "icon-decorative-black-leather.png",
+      "slug": "black-leather",
+      "section": "decorative"
+    },
+    {
+      "name": "Satin Purple",
+      "file": "icon-decorative-satin-purple.png",
+      "slug": "satin-purple",
+      "section": "decorative"
+    },
+    {
+      "name": "Gold Chain",
+      "file": "icon-decorative-gold-chain.png",
+      "slug": "gold-chain",
+      "section": "decorative"
+    },
+    {
+      "name": "Smoke",
+      "file": "icon-decorative-smoke.png",
+      "slug": "smoke",
+      "section": "decorative"
+    },
+    {
+      "name": "Paint Drip",
+      "file": "icon-decorative-paint-drip.png",
+      "slug": "paint-drip",
+      "section": "decorative"
+    },
+    {
+      "name": "Splatter",
+      "file": "icon-decorative-splatter.png",
+      "slug": "splatter",
+      "section": "decorative"
+    },
+    {
+      "name": "Sparkle",
+      "file": "icon-decorative-sparkle.png",
+      "slug": "sparkle",
+      "section": "decorative"
+    },
+    {
+      "name": "Silk Fabric",
+      "file": "icon-decorative-silk-fabric.png",
+      "slug": "silk-fabric",
+      "section": "decorative"
+    }
+  ],
+  "sheets": [
+    {
+      "name": "Ashley Expression Sheet",
+      "file": "ashley-expression-sheet.png"
+    },
+    {
+      "name": "Dimi Expression & Concierge Sheet",
+      "file": "dimi-expression-sheet.png"
+    },
+    {
+      "name": "Badge Collection Sheet",
+      "file": "badge-collection-sheet.png"
+    },
+    {
+      "name": "Brand Icon Sheet",
+      "file": "brand-icon-sheet.png"
+    },
+    {
+      "name": "Seasonal Mega Sheet",
+      "file": "seasonal-mega-sheet.png"
+    },
+    {
+      "name": "Typography Collection Sheet",
+      "file": "typography-collection-sheet.png"
+    },
+    {
+      "name": "Shopping & Product Sheet 1",
+      "file": "shopping-product-sheet-1.png"
+    },
+    {
+      "name": "Shopping & Product Sheet 2",
+      "file": "shopping-product-sheet-2.png"
+    },
+    {
+      "name": "Community & Business Sheet",
+      "file": "community-business-sheet.png"
+    },
+    {
+      "name": "Lifestyle Sheet",
+      "file": "lifestyle-sheet.png"
+    }
+  ],
+  "brand": [
+    {
+      "name": "Official Circle Logo",
+      "file": "ds-circle-logo-official.png"
+    },
+    {
+      "name": "Dimi Digital Concierge Portrait",
+      "file": "dimi-portrait.png"
+    }
+  ]
+}

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Document Verification — Dripping Secrets</title>
+  <link rel="icon" href="images/ds-circle-logo-official.png"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      background:#0e0616;
+      color:#e2d4f0;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+    }
+    /* Header */
+    .vrf-header{
+      width:100%;
+      background:linear-gradient(135deg,#2a0d3a,#1a0823);
+      border-bottom:1px solid rgba(212,175,55,.25);
+      padding:18px 24px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+    .vrf-header img{width:42px;height:42px;border-radius:50%}
+    .vrf-header-text h1{font-size:1.05rem;font-weight:700;color:#d4af37}
+    .vrf-header-text p{font-size:.75rem;color:rgba(226,212,240,.6);margin-top:2px}
+
+    /* Main card */
+    .vrf-card{
+      margin:48px auto;
+      width:100%;
+      max-width:560px;
+      background:linear-gradient(160deg,#1e0d2e,#140920);
+      border:1px solid rgba(212,175,55,.2);
+      border-radius:20px;
+      overflow:hidden;
+      box-shadow:0 24px 80px rgba(0,0,0,.6);
+    }
+    .vrf-card-header{
+      background:linear-gradient(135deg,#4B1F5F,#2a0d3a);
+      padding:28px 28px 20px;
+      border-bottom:1px solid rgba(212,175,55,.15);
+      text-align:center;
+    }
+    .vrf-card-header .shield{font-size:2.4rem;margin-bottom:8px}
+    .vrf-card-header h2{font-size:1.15rem;color:#d4af37;font-weight:700}
+    .vrf-card-header p{font-size:.8rem;color:rgba(226,212,240,.65);margin-top:6px}
+
+    .vrf-body{padding:28px}
+
+    /* Search input */
+    .vrf-input-group{margin-bottom:20px}
+    .vrf-input-group label{display:block;font-size:.78rem;color:rgba(212,175,55,.9);font-weight:600;margin-bottom:6px;letter-spacing:.03em}
+    .vrf-input-group input{
+      width:100%;
+      padding:12px 16px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(212,175,55,.2);
+      border-radius:10px;
+      color:#e2d4f0;
+      font-size:.9rem;
+      outline:none;
+      transition:border-color .2s;
+    }
+    .vrf-input-group input:focus{border-color:#d4af37}
+    .vrf-input-group input::placeholder{color:rgba(226,212,240,.3)}
+
+    .vrf-btn{
+      width:100%;
+      padding:14px;
+      background:linear-gradient(135deg,#d4af37,#c49a2a);
+      color:#1a0823;
+      border:none;
+      border-radius:10px;
+      font-size:.95rem;
+      font-weight:700;
+      cursor:pointer;
+      transition:opacity .2s;
+      letter-spacing:.03em;
+    }
+    .vrf-btn:hover{opacity:.9}
+    .vrf-btn:disabled{opacity:.4;cursor:not-allowed}
+
+    /* Result box */
+    .vrf-result{
+      margin-top:24px;
+      border-radius:14px;
+      overflow:hidden;
+      display:none;
+    }
+    .vrf-result.show{display:block}
+    .vrf-result-header{
+      padding:16px 20px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .vrf-result.valid .vrf-result-header{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);border-bottom:none;border-radius:14px 14px 0 0}
+    .vrf-result.invalid .vrf-result-header{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-bottom:none;border-radius:14px 14px 0 0}
+    .vrf-result.revoked .vrf-result-header{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-bottom:none;border-radius:14px 14px 0 0}
+    .vrf-result.expired .vrf-result-header{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-bottom:none;border-radius:14px 14px 0 0}
+    .vrf-result.error .vrf-result-header{background:rgba(156,163,175,.08);border:1px solid rgba(156,163,175,.15);border-bottom:none;border-radius:14px 14px 0 0}
+
+    .vrf-status-icon{font-size:1.8rem}
+    .vrf-status-text h3{font-size:1rem;font-weight:700}
+    .vrf-result.valid .vrf-status-text h3{color:#22c55e}
+    .vrf-result.invalid .vrf-status-text h3,
+    .vrf-result.revoked .vrf-status-text h3{color:#f87171}
+    .vrf-result.expired .vrf-status-text h3{color:#f59e0b}
+    .vrf-result.error .vrf-status-text h3{color:#9ca3af}
+    .vrf-status-text p{font-size:.78rem;color:rgba(226,212,240,.6);margin-top:3px}
+
+    .vrf-result-body{
+      padding:18px 20px;
+      border:1px solid rgba(212,175,55,.1);
+      border-top:none;
+      border-radius:0 0 14px 14px;
+    }
+    .vrf-detail-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      padding:8px 0;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      gap:12px;
+    }
+    .vrf-detail-row:last-child{border-bottom:none}
+    .vrf-detail-label{font-size:.74rem;color:rgba(212,175,55,.8);font-weight:600;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+    .vrf-detail-value{font-size:.83rem;color:#e2d4f0;text-align:right;word-break:break-all}
+
+    .vrf-cert-id{
+      margin-top:16px;
+      padding:10px 14px;
+      background:rgba(212,175,55,.06);
+      border:1px solid rgba(212,175,55,.15);
+      border-radius:8px;
+      font-family:monospace;
+      font-size:.78rem;
+      color:#d4af37;
+      text-align:center;
+      word-break:break-all;
+    }
+
+    /* Footer */
+    .vrf-footer{
+      margin-top:auto;
+      padding:24px;
+      text-align:center;
+      font-size:.72rem;
+      color:rgba(226,212,240,.3);
+      border-top:1px solid rgba(255,255,255,.05);
+      width:100%;
+    }
+    .vrf-footer a{color:rgba(212,175,55,.5);text-decoration:none}
+
+    /* Loading spinner */
+    .vrf-spinner{
+      display:inline-block;
+      width:20px;height:20px;
+      border:2px solid rgba(212,175,55,.2);
+      border-top-color:#d4af37;
+      border-radius:50%;
+      animation:spin .7s linear infinite;
+      margin-right:8px;
+      vertical-align:middle;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    @media(max-width:600px){
+      .vrf-card{margin:24px 16px;border-radius:14px}
+      .vrf-body{padding:20px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="vrf-header">
+  <img src="images/ds-circle-logo-official.png" alt="Dripping Secrets"/>
+  <div class="vrf-header-text">
+    <h1>Dripping Secrets</h1>
+    <p>Enterprise Document Verification Portal</p>
+  </div>
+</header>
+
+<!-- Main card -->
+<div class="vrf-card">
+  <div class="vrf-card-header">
+    <div class="shield">🔐</div>
+    <h2>Verify Document Authenticity</h2>
+    <p>Enter a Document ID or Certificate ID to verify that a Dripping Secrets document is authentic, unaltered, and properly signed.</p>
+  </div>
+  <div class="vrf-body">
+    <div class="vrf-input-group">
+      <label>Document ID or Certificate ID</label>
+      <input type="text" id="vrfDocInput" placeholder="e.g. doc-1720000000000  or  DS-CERT-ABC1234" autocomplete="off"/>
+    </div>
+    <button class="vrf-btn" id="vrfVerifyBtn" onclick="vrfVerify()">Verify Document</button>
+
+    <!-- Result -->
+    <div class="vrf-result" id="vrfResult">
+      <div class="vrf-result-header">
+        <div class="vrf-status-icon" id="vrfStatusIcon"></div>
+        <div class="vrf-status-text">
+          <h3 id="vrfStatusTitle"></h3>
+          <p id="vrfStatusMsg"></p>
+        </div>
+      </div>
+      <div class="vrf-result-body" id="vrfResultBody"></div>
+    </div>
+  </div>
+</div>
+
+<footer class="vrf-footer">
+  <p>This portal verifies documents issued by Dripping Secrets. You deserve a secret this good.</p>
+  <p style="margin-top:6px"><a href="/">DrippingSecrets.com</a></p>
+</footer>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+  /* ── Firebase init ── */
+  const firebaseConfig = {
+    apiKey: "AIzaSyCi7IU6jKfMOuS3DfKPIBx3X5k0-aMFfpg",
+    authDomain: "dripping-secrets.firebaseapp.com",
+    projectId: "dripping-secrets",
+    storageBucket: "dripping-secrets.appspot.com",
+    messagingSenderId: "1027826370083",
+    appId: "1:1027826370083:web:drippingsecrets"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  window.db = firebase.firestore();
+
+  /* ── Read URL params ── */
+  const _params = new URLSearchParams(window.location.search);
+  const _urlDoc  = _params.get('doc')  || '';
+  const _urlCert = _params.get('cert') || '';
+
+  if (_urlDoc || _urlCert) {
+    document.getElementById('vrfDocInput').value = _urlCert || _urlDoc;
+    window.addEventListener('load', () => setTimeout(vrfVerify, 600));
+  }
+
+  /* ── Verify function ── */
+  async function vrfVerify() {
+    const input = document.getElementById('vrfDocInput').value.trim();
+    if (!input) { alert('Please enter a Document ID or Certificate ID.'); return; }
+
+    const btn = document.getElementById('vrfVerifyBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="vrf-spinner"></span>Verifying…';
+
+    const result = document.getElementById('vrfResult');
+    result.className = 'vrf-result';
+    result.classList.add('show');
+    document.getElementById('vrfStatusIcon').textContent = '⏳';
+    document.getElementById('vrfStatusTitle').textContent = 'Checking…';
+    document.getElementById('vrfStatusMsg').textContent = '';
+    document.getElementById('vrfResultBody').innerHTML = '';
+
+    try {
+      // Determine if input is a cert ID or doc ID
+      const isCert = input.startsWith('DS-CERT-');
+      let docId = isCert ? (_urlDoc || '') : input;
+      let certId = isCert ? input : (_urlCert || '');
+
+      // Query Firestore
+      let snap, cert = null;
+      if (isCert) {
+        snap = await db.collection('signature_certificates').where('certId','==',certId).limit(1).get();
+      } else {
+        snap = await db.collection('signature_certificates').where('docId','==',docId).orderBy('issuedAt','desc').limit(1).get();
+      }
+
+      if (snap && !snap.empty) {
+        cert = { id: snap.docs[0].id, ...snap.docs[0].data() };
+      }
+
+      // Also check signature_records (Phase 1 fallback)
+      let sigRecord = null;
+      if (!cert) {
+        const srSnap = await db.collection('signature_records').doc(input).get().catch(()=>null);
+        if (srSnap && srSnap.exists) sigRecord = { id: srSnap.id, ...srSnap.data() };
+      }
+
+      // Record verification attempt
+      await db.collection('signature_verifications').add({
+        input, docId: cert?.docId || docId, certId: cert?.certId || certId,
+        status: cert ? cert.status : (sigRecord ? 'Valid' : 'Invalid'),
+        verifiedAt: new Date().toISOString(), method: 'portal',
+        userAgent: navigator.userAgent
+      }).catch(()=>{});
+
+      // Display result
+      if (cert) {
+        vrfShowResult(cert);
+      } else if (sigRecord) {
+        vrfShowRecord(sigRecord);
+      } else {
+        vrfShowInvalid(input);
+      }
+    } catch (e) {
+      vrfShowError(e.message);
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Verify Document';
+  }
+
+  function vrfShowResult(cert) {
+    const result = document.getElementById('vrfResult');
+    const now = new Date();
+    const expired = cert.expiresAt && now > new Date(cert.expiresAt);
+    const status = expired ? 'Expired' : cert.status;
+
+    const icons = { Valid:'✅', Revoked:'❌', Expired:'⚠️', Invalid:'❌' };
+    const titles = { Valid:'Document Verified', Revoked:'Certificate Revoked', Expired:'Certificate Expired', Invalid:'Verification Failed' };
+    const msgs = {
+      Valid:   'This document signature is authentic and has not been altered.',
+      Revoked: 'This certificate has been officially revoked. Contact Dripping Secrets for details.',
+      Expired: 'This certificate has passed its expiration date.',
+      Invalid: 'No valid certificate was found for this identifier.'
+    };
+
+    result.className = `vrf-result show ${status.toLowerCase()}`;
+    document.getElementById('vrfStatusIcon').textContent = icons[status] || '❓';
+    document.getElementById('vrfStatusTitle').textContent = titles[status] || status;
+    document.getElementById('vrfStatusMsg').textContent = msgs[status] || '';
+
+    const body = document.getElementById('vrfResultBody');
+    const rows = [
+      ['Document', cert.docTitle || '—'],
+      ['Signer', cert.signerName || '—'],
+      ['Title', cert.signerTitle || '—'],
+      ['Issued', cert.issuedAt ? new Date(cert.issuedAt).toLocaleString('en-US',{dateStyle:'long',timeStyle:'short'}) : '—'],
+      ['Status', `<strong style="color:${status==='Valid'?'#22c55e':status==='Expired'?'#f59e0b':'#f87171'}">${status}</strong>`],
+    ];
+    if (cert.revokedAt) rows.push(['Revoked On', new Date(cert.revokedAt).toLocaleString('en-US',{dateStyle:'long',timeStyle:'short'})]);
+    if (cert.revokeReason) rows.push(['Revoke Reason', cert.revokeReason]);
+    if (cert.expiresAt) rows.push(['Expires', new Date(cert.expiresAt).toLocaleString('en-US',{dateStyle:'long'})]);
+
+    body.innerHTML =
+      rows.map(([l,v]) => `<div class="vrf-detail-row"><span class="vrf-detail-label">${l}</span><span class="vrf-detail-value">${v}</span></div>`).join('') +
+      `<div class="vrf-cert-id">Certificate: ${cert.certId || '—'}<br>Hash: ${cert.hash || '—'}</div>`;
+  }
+
+  function vrfShowRecord(rec) {
+    const result = document.getElementById('vrfResult');
+    result.className = 'vrf-result show valid';
+    document.getElementById('vrfStatusIcon').textContent = '✅';
+    document.getElementById('vrfStatusTitle').textContent = 'Signature Record Found';
+    document.getElementById('vrfStatusMsg').textContent = 'A signature record exists for this identifier in the Dripping Secrets system.';
+    const body = document.getElementById('vrfResultBody');
+    const ts = rec.timestamp ? new Date(rec.timestamp).toLocaleString('en-US',{dateStyle:'long',timeStyle:'short'}) : '—';
+    body.innerHTML = [
+      ['Signer', rec.signerName || '—'],
+      ['Title', rec.signerTitle || '—'],
+      ['Signed', ts],
+      ['Mode', rec.mode || '—']
+    ].map(([l,v])=>`<div class="vrf-detail-row"><span class="vrf-detail-label">${l}</span><span class="vrf-detail-value">${v}</span></div>`).join('');
+  }
+
+  function vrfShowInvalid(input) {
+    const result = document.getElementById('vrfResult');
+    result.className = 'vrf-result show invalid';
+    document.getElementById('vrfStatusIcon').textContent = '❌';
+    document.getElementById('vrfStatusTitle').textContent = 'Not Found';
+    document.getElementById('vrfStatusMsg').textContent = 'No document or certificate matches this identifier. It may be invalid, expired, or not yet issued.';
+    document.getElementById('vrfResultBody').innerHTML =
+      `<div class="vrf-detail-row"><span class="vrf-detail-label">Searched For</span><span class="vrf-detail-value" style="font-family:monospace;font-size:.8rem">${input}</span></div>
+       <div style="margin-top:12px;font-size:.78rem;color:rgba(226,212,240,.5)">If you believe this is an error, contact <a href="mailto:management@drippingsecrets.com" style="color:#d4af37">management@drippingsecrets.com</a>.</div>`;
+  }
+
+  function vrfShowError(msg) {
+    const result = document.getElementById('vrfResult');
+    result.className = 'vrf-result show error';
+    document.getElementById('vrfStatusIcon').textContent = '⚠️';
+    document.getElementById('vrfStatusTitle').textContent = 'Verification Error';
+    document.getElementById('vrfStatusMsg').textContent = 'A system error occurred. Please try again.';
+    document.getElementById('vrfResultBody').innerHTML =
+      `<div class="vrf-detail-row"><span class="vrf-detail-label">Error</span><span class="vrf-detail-value" style="font-size:.77rem;color:#f87171">${msg}</span></div>`;
+  }
+
+  /* Allow Enter key */
+  document.getElementById('vrfDocInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') vrfVerify();
+  });
+</script>
+</body>
+</html>

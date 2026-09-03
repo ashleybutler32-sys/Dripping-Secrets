@@ -1,0 +1,262 @@
+/* ═══════════════════════════════════════════════════════════════
+   DIMI ACTOR SYSTEM  —  css/dimi-actor.css
+   Dripping Secrets v9.76
+   Character stage, SVG walk-in, state animations, emotion overlays.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Stage container ─────────────────────────────────────────── */
+#dimi-stage {
+  display: none !important;  /* character actor permanently hidden — visual conflict with chat panel */
+  position: fixed;
+  bottom: 92px;          /* sits just above the 60px dimi-bubble at bottom:24px */
+  right: 10px;
+  width: 80px;
+  z-index: 9997;
+  pointer-events: none;
+  overflow: visible;
+}
+
+#dimi-avatar-svg {
+  width: 80px;
+  height: 130px;
+  overflow: visible;
+  display: block;
+}
+
+/* ── Proactive speech bubble ─────────────────────────────────── */
+#dimi-speech-bubble {
+  position: absolute;
+  bottom: 108px;
+  right: 0;
+  background: #fff;
+  border: 1.5px solid #B76E79;
+  border-radius: 14px 14px 14px 4px;
+  padding: 8px 11px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #1a1a2e;
+  max-width: 168px;
+  min-width: 80px;
+  text-align: center;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.14);
+  opacity: 0;
+  transform: scale(0.82) translateY(10px);
+  transform-origin: bottom right;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+  pointer-events: none;
+  white-space: normal;
+}
+
+#dimi-speech-bubble.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* bubble tail */
+#dimi-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  right: 20px;
+  width: 0; height: 0;
+  border-left: 8px solid transparent;
+  border-right: 0px solid transparent;
+  border-top: 8px solid #B76E79;
+}
+
+/* ── Walk-in animations ──────────────────────────────────────── */
+@keyframes dimi-walk-in {
+  0%   { transform: translateX(110px); opacity: 0; }
+  8%   { opacity: 1; }
+  75%  { transform: translateX(-5px); }
+  88%  { transform: translateX(3px); }
+  100% { transform: translateX(0);    opacity: 1; }
+}
+
+#dimi-stage.walking {
+  animation: dimi-walk-in 1.25s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+/* Leg stride during walk-in */
+@keyframes leg-l-stride { 0%,100% { transform: rotate(-16deg) translateY(0);   } 50% { transform: rotate(16deg)  translateY(2px); } }
+@keyframes leg-r-stride { 0%,100% { transform: rotate(16deg)  translateY(2px); } 50% { transform: rotate(-16deg) translateY(0);   } }
+
+#dimi-stage.walking #leg-left,
+#dimi-stage.walking #shoe-left  {
+  animation: leg-l-stride 0.38s ease-in-out infinite;
+  transform-origin: 32px 93px;
+}
+#dimi-stage.walking #leg-right,
+#dimi-stage.walking #shoe-right {
+  animation: leg-r-stride 0.38s ease-in-out infinite;
+  transform-origin: 47px 93px;
+}
+
+/* ── IDLE  — gentle breathing bob ────────────────────────────── */
+@keyframes dimi-idle-bob {
+  0%,100% { transform: translateY(0);    }
+  50%      { transform: translateY(-2.5px); }
+}
+
+#dimi-stage.state-idle #dimi-char {
+  animation: dimi-idle-bob 3.2s ease-in-out infinite;
+}
+
+/* ── THINKING — head tilt + think-dots appear ────────────────── */
+@keyframes dimi-think-tilt {
+  0%,100% { transform: rotate(0deg) translateY(0);    }
+  35%      { transform: rotate(-7deg) translateY(-2px); }
+  70%      { transform: rotate(-5deg) translateY(-3px); }
+}
+
+@keyframes td-1 { 0%,100%{ opacity:0;transform:scale(0.4);} 25%{opacity:1;transform:scale(1);} }
+@keyframes td-2 { 0%,10%,100%{opacity:0;transform:scale(0.4);} 45%{opacity:1;transform:scale(1);} }
+@keyframes td-3 { 0%,25%,95%,100%{opacity:0;transform:scale(0.4);} 65%{opacity:1;transform:scale(1);} }
+
+#dimi-stage.state-thinking #dimi-char {
+  animation: dimi-think-tilt 2.1s ease-in-out infinite;
+}
+
+#dimi-stage.state-thinking #dimi-think-dots { opacity: 1 !important; }
+
+#dimi-stage.state-thinking #dimi-think-dots circle:nth-child(1) {
+  animation: td-1 1.3s ease-in-out infinite;
+  transform-origin: 61px 22px;
+}
+#dimi-stage.state-thinking #dimi-think-dots circle:nth-child(2) {
+  animation: td-2 1.3s ease-in-out infinite;
+  transform-origin: 68px 14px;
+}
+#dimi-stage.state-thinking #dimi-think-dots circle:nth-child(3) {
+  animation: td-3 1.3s ease-in-out infinite;
+  transform-origin: 74px 7px;
+}
+
+/* ── SPEAKING — rhythmic talking bob ─────────────────────────── */
+@keyframes dimi-speak-bob {
+  0%,100% { transform: translateY(0)    rotate(0deg);   }
+  20%      { transform: translateY(-4px) rotate(-2deg); }
+  60%      { transform: translateY(-1px) rotate(2deg);  }
+}
+
+@keyframes dimi-speak-head {
+  0%,100% { transform: scale(1); }
+  50%      { transform: scale(1.03) translateY(-1px); }
+}
+
+#dimi-stage.state-speaking #dimi-char {
+  animation: dimi-speak-bob 0.58s ease-in-out infinite;
+}
+
+#dimi-stage.state-speaking #dimi-head-shape {
+  animation: dimi-speak-head 0.58s ease-in-out infinite;
+  transform-origin: 40px 28px;
+}
+
+/* ── GUIDING — lean + pointing arm ──────────────────────────── */
+@keyframes dimi-guide-lean {
+  0%,100% { transform: rotate(0deg) translateX(0);      }
+  50%      { transform: rotate(-4deg) translateX(-3px); }
+}
+
+@keyframes dimi-point-arm {
+  0%,100% { transform: rotate(0deg);  }
+  50%      { transform: rotate(-18deg) translateX(4px); }
+}
+
+#dimi-stage.state-guiding #dimi-char {
+  animation: dimi-guide-lean 2s ease-in-out infinite;
+}
+
+#dimi-stage.state-guiding #arm-right {
+  animation: dimi-point-arm 1.6s ease-in-out infinite;
+}
+
+#dimi-stage.state-guiding #finger-point {
+  opacity: 1 !important;
+}
+
+/* ── SUCCESS — quick jump ────────────────────────────────────── */
+@keyframes dimi-success-jump {
+  0%,100% { transform: translateY(0)     scale(1);     }
+  30%      { transform: translateY(-14px) scale(1.06); }
+  65%      { transform: translateY(-6px)  scale(1.03); }
+}
+
+#dimi-stage.state-success #dimi-char {
+  animation: dimi-success-jump 0.65s ease-in-out 2;
+}
+
+/* ── WARNING — shake ─────────────────────────────────────────── */
+@keyframes dimi-shake {
+  0%,100% { transform: translateX(0);    }
+  18%      { transform: translateX(-6px); }
+  36%      { transform: translateX(6px);  }
+  54%      { transform: translateX(-5px); }
+  72%      { transform: translateX(5px);  }
+}
+
+#dimi-stage.state-warning #dimi-char {
+  animation: dimi-shake 0.52s ease-in-out 1;
+}
+
+/* ── CELEBRATING — dance bounce + arms up + sparkles ─────────── */
+@keyframes dimi-celebrate-bounce {
+  0%,100% { transform: translateY(0)     rotate(0deg)  scale(1);     }
+  14%      { transform: translateY(-16px) rotate(-5deg) scale(1.08); }
+  28%      { transform: translateY(-7px)  rotate(4deg)  scale(1.04); }
+  42%      { transform: translateY(-20px) rotate(-4deg) scale(1.11); }
+  56%      { transform: translateY(-5px)  rotate(3deg)  scale(1.03); }
+  70%      { transform: translateY(-14px) rotate(-3deg) scale(1.07); }
+}
+
+@keyframes arm-l-celebrate { 0%,100%{transform:rotate(0);} 50%{transform:rotate(32deg);} }
+@keyframes arm-r-celebrate { 0%,100%{transform:rotate(0);} 50%{transform:rotate(-32deg);} }
+
+@keyframes sparkle-burst {
+  0%,100% { opacity:0; transform:scale(0.4) rotate(0deg);    }
+  35%      { opacity:1; transform:scale(1)   rotate(18deg);  }
+  75%      { opacity:.6;transform:scale(1.3) rotate(38deg);  }
+}
+
+#dimi-stage.state-celebrating #dimi-char {
+  animation: dimi-celebrate-bounce 0.75s ease-in-out 3;
+}
+
+#dimi-stage.state-celebrating #arm-left {
+  animation: arm-l-celebrate 0.38s ease-in-out infinite;
+}
+
+#dimi-stage.state-celebrating #arm-right {
+  animation: arm-r-celebrate 0.38s ease-in-out infinite;
+}
+
+#dimi-stage.state-celebrating #dimi-sparkles {
+  opacity: 1 !important;
+  animation: sparkle-burst 1.1s ease-in-out infinite;
+  transform-origin: 40px 20px;
+}
+
+/* ── Shared overlay transitions ──────────────────────────────── */
+#dimi-blush,
+#dimi-sweat,
+#dimi-sparkles,
+#dimi-think-dots { transition: opacity 0.35s ease; }
+
+/* ── Mobile adjustments ──────────────────────────────────────── */
+@media (max-width: 480px) {
+  #dimi-stage {
+    bottom: 86px;
+    right: 6px;
+    width: 66px;
+  }
+  #dimi-avatar-svg {
+    width: 66px;
+    height: 107px;
+  }
+  #dimi-speech-bubble {
+    font-size: 10.5px;
+    max-width: 148px;
+    bottom: 96px;
+  }
+}

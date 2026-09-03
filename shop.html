@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shop — Dripping Secrets</title>
+  <meta name="description" content="Dripping Secrets sells adult products, lingerie, intimacy items, and provides event planning and sexual wellness education services in the DFW Metro area and nationwide." />
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#7c3aed" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Dripping Secrets" />
+  <link rel="apple-touch-icon" href="/images/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>body{padding-top:40px}
+/* ── Product Detail Modal ── */
+#product-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.72);
+  z-index: 1100;
+  backdrop-filter: blur(4px);
+}
+#product-modal-overlay.open { display: block; }
+#product-modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  width: min(520px, 94vw);
+  max-height: 88vh;
+  overflow-y: auto;
+  background: #1a0a2e;
+  border: 1px solid rgba(183,110,121,.3);
+  border-radius: 20px;
+  padding: 0;
+  z-index: 1101;
+  font-family: 'Jost', sans-serif;
+  box-shadow: 0 20px 60px rgba(0,0,0,.7);
+}
+#product-modal.open { display: block; }
+.pm-img-wrap {
+  width: 100%;
+  aspect-ratio: 1/1;
+  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+  background: #120827;
+}
+.pm-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.pm-body {
+  padding: 20px 24px 28px;
+}
+.pm-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(0,0,0,.55);
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  z-index: 10;
+}
+.pm-close:hover { background: rgba(183,110,121,.7); }
+.pm-badge {
+  display: inline-block;
+  background: linear-gradient(135deg,#B76E79,#7c3aed);
+  color: #fff;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+}
+.pm-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #e8c4d0;
+  margin: 0 0 10px;
+  line-height: 1.3;
+}
+.pm-pricing {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.pm-price {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #B76E79;
+}
+.pm-compare {
+  font-size: 1rem;
+  color: rgba(255,255,255,.38);
+  text-decoration: line-through;
+}
+.pm-description {
+  font-size: .88rem;
+  color: rgba(255,255,255,.72);
+  line-height: 1.65;
+  margin-bottom: 16px;
+}
+
+    /* ─── Product Gallery ─── */
+    .pm-gallery { display:flex; flex-direction:column; gap:10px; background:#0d0618; padding:16px; }
+    .pm-hero-img { width:100%; aspect-ratio:1/1; object-fit:contain; border-radius:10px; max-height:320px; background:#150826; }
+    .pm-thumbs { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; scrollbar-width:thin; }
+    .pm-thumb { width:64px; height:64px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid transparent; flex-shrink:0; opacity:.7; transition:all .2s; }
+    .pm-thumb.active, .pm-thumb:hover { border-color:#B76E79; opacity:1; }
+    .pm-details-list { list-style:none; padding:0; margin:10px 0 0; display:flex; flex-wrap:wrap; gap:6px; }
+    .pm-details-list li { font-size:.78rem; color:#c9a8b4; background:rgba(183,110,121,.12); border:1px solid rgba(183,110,121,.2); border-radius:20px; padding:4px 12px; }
+.pm-ship-note {
+  font-size: .75rem;
+  color: rgba(255,255,255,.45);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pm-section-label {
+  font-size: .72rem;
+  color: rgba(255,255,255,.5);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+/* Color swatches */
+.pm-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.pm-color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform .15s, border-color .15s;
+  flex-shrink: 0;
+}
+.pm-color-swatch.selected, .pm-color-swatch:hover {
+  border-color: #B76E79;
+  transform: scale(1.15);
+}
+.pm-color-label {
+  font-size: .75rem;
+  color: rgba(255,255,255,.45);
+  margin-left: 4px;
+  align-self: center;
+}
+/* Size pills */
+.pm-sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.pm-size-pill {
+  padding: 6px 16px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 20px;
+  background: transparent;
+  color: rgba(255,255,255,.7);
+  font-family: 'Jost', sans-serif;
+  font-size: .8rem;
+  cursor: pointer;
+  transition: all .15s;
+}
+.pm-size-pill.selected, .pm-size-pill:hover {
+  border-color: #B76E79;
+  color: #B76E79;
+  background: rgba(183,110,121,.12);
+}
+/* ATC button */
+.pm-atc-btn {
+  width: 100%;
+  background: linear-gradient(135deg,#B76E79,#7c3aed);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-family: 'Jost', sans-serif;
+  font-size: .95rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  cursor: pointer;
+  transition: opacity .2s, transform .15s;
+}
+.pm-atc-btn:hover { opacity: .9; transform: translateY(-1px); }
+.pm-wishlist-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+.pm-wishlist-btn {
+  background: none;
+  border: 1px solid rgba(183,110,121,.3);
+  color: rgba(183,110,121,.8);
+  border-radius: 8px;
+  padding: 7px 18px;
+  font-family: 'Jost', sans-serif;
+  font-size: .8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all .15s;
+}
+.pm-wishlist-btn:hover {
+  border-color: #B76E79;
+  color: #B76E79;
+  background: rgba(183,110,121,.08);
+}
+
+
+    /* ── Safe Space Footer Pride Row ──────────────────────────── */
+    .footer-pride-row {
+      display: flex; align-items: center; justify-content: center;
+      flex-wrap: wrap; gap: 0.5rem 0.75rem;
+      margin: 0.75rem 0 0.5rem; padding: 0.5rem 0;
+      border-top: 1px solid rgba(201,168,76,0.15);
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+    }
+    .footer-pride-flags { display: flex; gap: 0.4rem; align-items: center; }
+    .footer-flag { border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+    .footer-triskelion { opacity: 0.6; }
+    .footer-pride-label {
+      font-size: 0.7rem; color: #8a7a6a; letter-spacing: 0.02em;
+      text-align: center; line-height: 1.5;
+    }
+    .footer-privacy-excerpt {
+      font-size: 0.72rem; color: #7a6a5a; line-height: 1.55;
+      margin: 0.4rem auto 0.75rem; max-width: 480px;
+      text-align: center;
+    }
+    .footer-privacy-excerpt strong { color: #9a8a7a; }
+    .footer-privacy-excerpt em { color: #8a7a6a; font-style: normal; }
+    @media (max-width: 600px) {
+      .footer-pride-label { font-size: 0.63rem; }
+      .footer-flag { width: 34px; height: 22px; }
+    }
+
+  </style>
+  <link rel="stylesheet" href="/css/dimi-actor.css">
+</head>
+<body>
+  <a href="#main-content" class="skip-to-main">Skip to main content</a>
+
+  <!-- ===== TOP ANNOUNCEMENT BAR ===== -->
+  <div id="top-sale-bar" style="background:linear-gradient(90deg,#7c3aed,#a855f7,#7c3aed);background-size:200% auto;animation:gradShift 4s linear infinite;color:#fff;text-align:center;font-size:0.82rem;font-weight:600;letter-spacing:0.07em;padding:8px 16px;z-index:1001;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px"><path d="M12 2c0 0-5 5-5 10a5 5 0 0010 0C17 7 12 2 12 2zm0 13a3 3 0 01-3-3c0-2 1.5-4 3-6 1.5 2 3 4 3 6a3 3 0 01-3 3z"/></svg> FLASH SALE — 30% OFF SITEWIDE · ENDS JUNE 20, 2026 · AUTO-APPLIED AT CHECKOUT <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px"><path d="M12 2c0 0-5 5-5 10a5 5 0 0010 0C17 7 12 2 12 2zm0 13a3 3 0 01-3-3c0-2 1.5-4 3-6 1.5 2 3 4 3 6a3 3 0 01-3 3z"/></svg>
+  </div>
+  <style>
+    @keyframes gradShift { to { background-position: 200% center; } }
+    @media(max-width:480px){ #top-sale-bar { font-size:0.7rem; } }
+  </style>
+  <script>
+    (function(){
+      const end = new Date('2026-06-21T00:00:00');
+      const bar = document.getElementById('top-sale-bar');
+      if(bar && new Date() >= end) bar.style.display='none';
+    })();
+  </script>
+
+  <a href="#main-content" class="skip-nav">Skip to Main Content</a>
+
+  <!-- ===== HEADER ===== -->
+  <header id="site-header">
+    <div class="header-inner">
+      <a href="/" class="logo-link">
+        <img src="/images/logo.png" alt="Dripping Secrets" class="logo" />
+      </a>
+      <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+        <a href="/">Home</a>
+        <a href="/shop.html" class="nav-active">Shop</a>
+        <a href="/party.html">Secrets Party</a>
+        <a href="/services.html">Services</a>
+        <a href="/bundles.html">Bundles</a>
+        <a href="/boxes.html">Build a Box</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        
+        <a href="/admin.html" class="nav-admin-link" title="Back Office" aria-label="Back Office"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
+      </nav>
+      <div class="header-actions">
+        <button class="account-btn" id="account-btn" onclick="openAccountBtn()" aria-label="My Account" title="Sign In / Create Account">
+          <span id="account-label"><svg width="20" height="20" viewBox="0 0 24 24" fill="#B76E79" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v1h20v-1c0-3.33-6.67-5-10-5z"/></svg></span>
+          <span class="wishlist-badge" id="wishlist-badge" style="display:none;">0</span>
+        </button>
+        <button class="cart-btn" onclick="openCart()" aria-label="Open cart">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#B76E79" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96C5 16.1 5.9 17 7 17h14v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63H19c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0023.45 4H5.21L4.27 2H1z"/></svg>
+          <span class="cart-badge" id="cart-badge" style="display:none;">0</span>
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Menu" onclick="toggleNav()">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== SHOP PAGE ===== -->
+  <section role="main" id="main-content" class="section" id="shop" style="padding-top:80px;">
+    <div class="section-header">
+      <p class="section-eyebrow">The Collection</p>
+      <h2 class="section-title">Shop the Secrets</h2>
+      <p class="section-sub">Premium adult products at prices that won't hurt. Click any product to explore.</p>
+    </div>
+
+    <!-- Shop Search -->
+    <div id="shop-search-wrap" style="padding:0 0 14px;">
+      <div style="position:relative;max-width:420px;">
+        <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;opacity:.5;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="search" id="shop-search-input" placeholder="Search products..." aria-label="Search products"
+          oninput="shopDoSearch(this.value)"
+          style="width:100%;padding:10px 14px 10px 38px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:12px;color:#fff;font-family:'Jost',sans-serif;font-size:.9rem;outline:none;" />
+      </div>
+    </div>
+    <!-- Filter Bar -->
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterProducts('all', this)">All</button>
+        <button class="filter-btn" onclick="filterProducts('roses', this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="margin-right:4px;vertical-align:-2px"><path d="M12 2C9 2 7 4 7 7c0 1.5.5 2.8 1.3 3.8C6.5 12.3 6 14 6 16c0 3.3 2.7 6 6 6s6-2.7 6-6c0-2-.5-3.7-1.3-5.2C17.5 9.8 18 8.5 18 7c0-3-2-5-6-5zm0 2c2.2 0 4 1.5 4 3 0 1-.4 2-1.1 2.7l-.9.9.6 1.1C15.5 13 16 14.5 16 16c0 2.2-1.8 4-4 4s-4-1.8-4-4c0-1.5.5-3 1.4-4.3l.6-1.1-.9-.9C8.4 9 8 8 8 7c0-1.5 1.8-3 4-3z"/></svg>Roses</button>
+        <button class="filter-btn" onclick="filterProducts('toys', this)">Toys</button>
+        <button class="filter-btn" onclick="filterProducts('couples', this)">Couples</button>
+        <button class="filter-btn" onclick="filterProducts('games', this)">Games</button>
+        <button class="filter-btn" onclick="filterProducts('accessories', this)">Accessories</button>
+        <button class="filter-btn" onclick="filterProducts('condoms', this)">Condoms</button>
+        <button class="filter-btn" onclick="filterProducts('lube', this)">Lube</button>
+        <button class="filter-btn" onclick="filterProducts('swimwear', this)">Swimwear</button>
+        <button class="filter-btn filter-btn-luxury" onclick="filterProducts('luxury', this)" style="background:linear-gradient(135deg,rgba(124,58,237,.35),rgba(212,175,55,.2));border-color:rgba(212,175,55,.6);color:#d4af37;">✦ Luxury Play</button>
+        <button class="filter-btn" onclick="filterProducts('anal', this)">Anal</button>
+        <button class="filter-btn" onclick="filterProducts('bondage', this)">Bondage</button>
+        <button class="filter-btn" onclick="filterProducts('costumes', this)">Costumes</button>
+        <button class="filter-btn" onclick="filterProducts('strokers', this)">Strokers</button>
+        <button class="filter-btn" onclick="filterProducts('fantasy', this)">Fantasy</button>
+        <button class="filter-btn" onclick="filterProducts('machines', this)">Machines</button>
+        <button class="filter-btn" onclick="filterProducts('dolls', this)">Dolls</button>
+        <button class="filter-btn" onclick="filterProducts('wellness', this)">Wellness</button>
+        <button class="filter-btn" onclick="filterProducts('lingerie', this)">Lingerie</button>
+        <button class="filter-btn filter-btn-genderx" onclick="filterProducts('gender_x', this)" style="background:linear-gradient(135deg,rgba(75,31,95,.35),rgba(183,110,121,.25));border-color:rgba(183,110,121,.5);color:#e8b4ba;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="margin-right:4px;vertical-align:-1px"><path d="M11.5 2C9 2 7 4 7 6.5S9 11 11.5 11 16 9 16 6.5 14 2 11.5 2zm0 7C10.1 9 9 7.9 9 6.5S10.1 4 11.5 4 14 5.1 14 6.5 12.9 9 11.5 9zm6.5 5h-2v2h2v2h-2v2h-2v-2h-2v-2h2v-2h-2v-2h2v-2h2v2h2v2z"/></svg>Gender X
+        </button>
+      </div>
+
+    <!-- Sort + Size Row -->
+    <div id="shop-controls" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:0 8px 4px;justify-content:space-between;">
+      <div id="size-filter-row" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:.75rem;color:rgba(255,255,255,.45);letter-spacing:.06em;text-transform:uppercase;">Size:</span>
+        <button class="size-pill active" onclick="filterBySize('all',this)">All</button>
+        <button class="size-pill" onclick="filterBySize('XS',this)">XS</button>
+        <button class="size-pill" onclick="filterBySize('S',this)">S</button>
+        <button class="size-pill" onclick="filterBySize('M',this)">M</button>
+        <button class="size-pill" onclick="filterBySize('L',this)">L</button>
+        <button class="size-pill" onclick="filterBySize('XL',this)">XL</button>
+        <button class="size-pill" onclick="filterBySize('1X',this)">1X</button>
+        <button class="size-pill" onclick="filterBySize('2X',this)">2X</button>
+        <button class="size-pill" onclick="filterBySize('3X',this)">3X</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:.75rem;color:rgba(255,255,255,.45);letter-spacing:.06em;text-transform:uppercase;">Sort:</span>
+        <select id="sort-select" onchange="applySort(this.value)"
+          style="background:rgba(124,58,237,.18);border:1px solid rgba(139,92,246,.35);color:#fff;border-radius:20px;padding:5px 12px;font-size:.8rem;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;padding-right:28px;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%226%22 viewBox=%220 0 10 6%22><path d=%22M0 0l5 6 5-6z%22 fill=%22rgba(255,255,255,0.5)%22/></svg>');background-repeat:no-repeat;background-position:right 10px center;">
+          <option value="default">Featured</option>
+          <option value="price-asc">Price: Low &rarr; High</option>
+          <option value="price-desc">Price: High &rarr; Low</option>
+          <option value="az">A &rarr; Z</option>
+          <option value="bestsellers">Best Sellers First</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Gender X Banner (shown/hidden by JS) -->
+    <div id="genderx-banner" style="display:none;margin-bottom:24px;">
+      <div style="background:linear-gradient(135deg,rgba(75,31,95,.55) 0%,rgba(183,110,121,.3) 100%);border:1px solid rgba(183,110,121,.4);border-radius:16px;padding:24px 28px;text-align:center;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 0%,rgba(183,110,121,.12),transparent);pointer-events:none;"></div>
+        <div style="position:relative;z-index:1;">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.5rem,3.5vw,2.2rem);font-weight:600;color:#e8c4d0;margin-bottom:8px;">You belong here. Full stop.</div>
+          <p style="font-family:'Jost',sans-serif;font-size:.9rem;color:rgba(255,255,255,.72);max-width:560px;margin:0 auto 14px;line-height:1.7;">Our Gender X collection is thoughtfully curated for trans, non-binary, gender-fluid, and all exploring bodies. This is a judgment-free zone.</p>
+          <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(183,110,121,.18);border:1px solid rgba(183,110,121,.3);border-radius:20px;padding:5px 14px;font-size:.75rem;color:#e8b4ba;font-family:'Jost',sans-serif;letter-spacing:.07em;text-transform:uppercase;">You deserve a secret this good. who gets it</div>
+        </div>
+      </div>
+    </div>
+    <div class="products-grid" id="products-grid">
+      <!-- Rendered by JS -->
+    </div>
+
+    <!-- 7-14 day dropship notice -->
+    <div id="dropship-notice" style="display:none;text-align:center;margin-top:16px;padding:12px 20px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);border-radius:12px;font-size:.82rem;color:rgba(255,255,255,.65);">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="10" fill="#B76E79" opacity=".18"/><path d="M20 8h-3V6c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v5c0 1.1.9 2 2 2h1v1a1 1 0 002 0v-1h10v1a1 1 0 002 0v-1h1c1.1 0 2-.9 2-2v-5c0-1.1-.9-2-2-2zm-5-2v2H9V6h6z" fill="#B76E79"/></svg>Some items in your view ship directly to you in 5–21 business days depending on the item.
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <img src="/images/logo.png" alt="Dripping Secrets" class="footer-logo" />
+      <p class="footer-mission"><em>"Explore, play, and connect — your next dripping adventure is just a secret away."</em></p>
+      <div class="footer-links">
+        <a href="/shop.html">Shop</a>
+        <a href="/party.html">Secrets Party</a>
+        <a href="/services.html">Services</a>
+        <a href="/bundles.html">Bundles</a>
+        <a href="/boxes.html">Build a Box</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        
+      </div>
+      <p class="footer-taglines">
+        <em>You deserve a secret this good.</em> &nbsp;·&nbsp;
+        <em>Same box twice? Not how we move.</em>
+      </p>
+      <!-- ===== SAFE SPACE & INCLUSIVE COMMUNITY ===== -->
+      <div class="footer-pride-row" role="region" aria-label="Inclusive safe space indicators">
+        <div class="footer-pride-flags" aria-hidden="true">
+          <!-- Rainbow Pride Flag -->
+          <svg class="footer-flag" width="44" height="28" viewBox="0 0 44 28" role="img" aria-label="LGBTQ+ Pride rainbow flag">
+            <rect y="0"  width="44" height="4.67" fill="#E40303"/>
+            <rect y="4.67" width="44" height="4.67" fill="#FF8C00"/>
+            <rect y="9.33" width="44" height="4.67" fill="#FFED00"/>
+            <rect y="14"  width="44" height="4.67" fill="#008026"/>
+            <rect y="18.67" width="44" height="4.67" fill="#004CFF"/>
+            <rect y="23.33" width="44" height="4.67" fill="#732982"/>
+          </svg>
+          <!-- Transgender Pride Flag -->
+          <svg class="footer-flag" width="44" height="28" viewBox="0 0 44 28" role="img" aria-label="Transgender pride flag symbol">
+            <rect y="0"   width="44" height="5.6"  fill="#5BCEFA"/>
+            <rect y="5.6"  width="44" height="5.6"  fill="#F5A9B8"/>
+            <rect y="11.2" width="44" height="5.6"  fill="#FFFFFF"/>
+            <rect y="16.8" width="44" height="5.6"  fill="#F5A9B8"/>
+            <rect y="22.4" width="44" height="5.6"  fill="#5BCEFA"/>
+          </svg>
+          <!-- Bisexual Pride Flag -->
+          <svg class="footer-flag" width="44" height="28" viewBox="0 0 44 28" role="img" aria-label="Bisexual pride flag symbol">
+            <rect y="0"    width="44" height="11.2" fill="#D60270"/>
+            <rect y="11.2" width="44" height="5.6"  fill="#9B4F96"/>
+            <rect y="16.8" width="44" height="11.2" fill="#0038A8"/>
+          </svg>
+          <!-- Leather Pride Flag (Kink/Lifestyle community) -->
+          <svg class="footer-flag" width="44" height="28" viewBox="0 0 44 28" role="img" aria-label="Leather pride flag — kink and alternative lifestyle safe space indicator">
+            <rect y="0"  width="44" height="4"  fill="#000000"/>
+            <rect y="4"  width="44" height="4"  fill="#2B2BFF"/>
+            <rect y="8"  width="44" height="4"  fill="#000000"/>
+            <rect y="12" width="44" height="4"  fill="#2B2BFF"/>
+            <rect y="16" width="44" height="4"  fill="#000000"/>
+            <rect y="20" width="44" height="4"  fill="#2B2BFF"/>
+            <rect y="24" width="44" height="4"  fill="#000000"/>
+            <!-- White chevron right -->
+            <polygon points="44,0 30,14 44,28" fill="#FFFFFF"/>
+            <!-- Red heart -->
+            <path d="M37 10 C37 8 35 6 33 8 C31 6 29 8 29 10 C29 12 33 16 33 16 C33 16 37 12 37 10Z" fill="#FF0000"/>
+          </svg>
+        </div>
+        <!-- BDSM Triskelion -->
+        <svg class="footer-triskelion" width="22" height="22" viewBox="0 0 100 100"
+             role="img" aria-label="BDSM triskelion — safe, sane, and consensual community symbol">
+          <circle cx="50" cy="50" r="48" fill="none" stroke="#888" stroke-width="3"/>
+          <path d="M50 50 L50 10 A40 40 0 0 1 84.6 70 Z" fill="#555" opacity="0.7"/>
+          <path d="M50 50 L84.6 70 A40 40 0 0 1 15.4 70 Z" fill="#777" opacity="0.7"/>
+          <path d="M50 50 L15.4 70 A40 40 0 0 1 50 10 Z" fill="#444" opacity="0.7"/>
+          <circle cx="50" cy="50" r="8" fill="#999"/>
+        </svg>
+        <span class="footer-pride-label" aria-label="LGBTQ+ inclusive safe space">
+          Safe Space &amp; Inclusive Community — LGBTQ+ Affirming · Sex-Positive · Kink &amp; Lifestyle Welcoming
+        </span>
+      </div>
+      <!-- ===== PRIVACY & DISCREET BILLING EXCERPT ===== -->
+      <p class="footer-privacy-excerpt">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" style="vertical-align:middle;margin-right:4px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <strong>Discreet &amp; Private:</strong> Your orders ship in plain, unmarked packaging. Billing appears as <em>"DS Boutique"</em> — no adult product descriptions on your statement. We never sell, rent, or share your personal information. Payment details are processed securely and are never stored on our servers.
+      </p>
+      <p class="footer-legal">© 2026 Dripping Secrets. All rights reserved. | 18+ only. All sales are final. Orders are packaged discreetly.</p>
+    </div>
+  </footer>
+
+  <!-- ===== CART DRAWER ===== -->
+  <div class="cart-overlay" id="cart-overlay" onclick="closeCart()"></div>
+  <div class="cart-drawer" id="cart-drawer">
+    <div class="cart-drawer-header">
+      <h3>Your Bag</h3>
+      <button class="cart-close-btn" onclick="closeCart()" aria-label="Close cart">✕</button>
+    </div>
+    <div class="cart-items" id="cart-items"></div>
+    <div class="cart-drawer-footer">
+      <div class="cart-footer-total">
+        <span>Subtotal</span>
+        <span id="cart-total">$0.00</span>
+      </div>
+      <button class="btn-primary checkout-btn" onclick="openCheckout()">Checkout</button>
+      <p class="cart-footer-note">Fast, discreet packaging. Local pickup &amp; delivery available.</p>
+    </div>
+  </div>
+
+  <!-- ===== CHECKOUT MODAL ===== -->
+  <div class="checkout-overlay" id="checkout-overlay" onclick="closeCheckout()"></div>
+  <div class="checkout-modal" id="checkout-modal" role="dialog" aria-modal="true" aria-label="Checkout"></div>
+
+  <!-- ===== PRODUCT DETAIL MODAL ===== -->
+  <div id="product-modal-overlay" onclick="closeProductModal()"></div>
+  <div id="product-modal"></div>
+
+  <!-- ===== AUTH MODAL ===== -->
+  <div id="auth-overlay" onclick="closeAuthModal()"></div>
+  <div id="auth-modal"></div>
+
+  <!-- ===== ACCOUNT MODAL ===== -->
+  <div id="account-overlay" onclick="closeAccountModal()"></div>
+  <div id="account-modal"></div>
+
+  <!-- ===== BUILD-A-BOX MODAL ===== -->
+  <div id="box-modal-overlay" onclick="closeBuildABox()"></div>
+  <div id="box-modal"></div>
+
+  <!-- ===== BOOKING MODAL ===== -->
+  <div id="booking-overlay" onclick="closeBookingModal()"></div>
+  <div id="booking-modal"></div>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    (function(){
+      if (typeof emailjs !== 'undefined') {
+        emailjs.init({ publicKey: 'KpF8LPtlgYmBZIRUW' });
+      }
+    })();
+  </script>
+  <script src="/js/boxes.js"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/products.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>window.dimiContext = { page: 'shop' };</script>
+  <script src="/js/dimi-actor.js"></script>
+  <script src="/js/dimi-memory.js"></script>
+  <script src="/js/dimi.js"></script>
+  <script>
+    function toggleNav() {
+      document.getElementById('main-nav').classList.toggle('open');
+      document.getElementById('hamburger').classList.toggle('active');
+    }
+    document.querySelectorAll('.main-nav a').forEach(a => {
+      a.addEventListener('click', () => {
+        document.getElementById('main-nav').classList.remove('open');
+        document.getElementById('hamburger').classList.remove('active');
+      });
+    });
+    window.addEventListener('scroll', () => {
+      document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 50);
+    });
+    let _shopFilter = 'all';
+    let _shopSearch = '';
+    function shopDoSearch(val) { _shopSearch = (val||'').toLowerCase().trim(); renderProducts(); }
+
+    let _shopSize   = 'all';
+    let _shopSort   = 'default';
+
+    const FALLBACK_IMG = "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23170d2e'/><text x='200' y='185' font-family='serif' font-size='56' text-anchor='middle' fill='%237c3aed'>🌹</text><text x='200' y='235' font-family='sans-serif' font-size='15' text-anchor='middle' fill='rgba(255,255,255,0.35)'>🌹</text></svg>`);
+
+    function renderProducts(filter, size, sort) {
+      if (filter !== undefined) _shopFilter = filter;
+      if (size   !== undefined) _shopSize   = size;
+      if (sort   !== undefined) _shopSort   = sort;
+      const grid     = document.getElementById('products-grid');
+      const products = typeof getProducts === 'function' ? getProducts() : window.PRODUCTS || [];
+      // Only show in-stock items — OOS items are backlisted (hidden) until restocked
+      const availableProducts = products.filter(p => p.inStock !== false);
+      let filtered = (_shopFilter === 'all') ? availableProducts : availableProducts.filter(p => p.category === _shopFilter);
+      if (_shopSearch) {
+        filtered = filtered.filter(p =>
+          (p.name  && p.name.toLowerCase().includes(_shopSearch)) ||
+          (p.description && p.description.toLowerCase().includes(_shopSearch)) ||
+          (p.category && p.category.toLowerCase().includes(_shopSearch))
+        );
+      }
+      if (_shopSize && _shopSize !== 'all') {
+        filtered = filtered.filter(p => p.sizes && p.sizes.includes(_shopSize));
+      }
+      const sorted = [...filtered];
+      if (_shopSort === 'price-asc')    sorted.sort((a,b) => (a.price||0) - (b.price||0));
+      else if (_shopSort === 'price-desc') sorted.sort((a,b) => (b.price||0) - (a.price||0));
+      else if (_shopSort === 'az')      sorted.sort((a,b) => a.name.localeCompare(b.name));
+      else if (_shopSort === 'bestsellers') sorted.sort((a,b) => {
+        const bs = v => (v && (v.toLowerCase().includes('best seller') || v.toLowerCase().includes('fan fav'))) ? 0 : 1;
+        return bs(a.badge) - bs(b.badge);
+      });
+      const hasSizeable = filtered.some(p => p.sizes && p.sizes.length);
+      const sizeRow = document.getElementById('size-filter-row');
+      if (sizeRow) sizeRow.style.display = hasSizeable ? 'flex' : 'none';
+      if (!grid) return;
+      if (!sorted.length) {
+        grid.innerHTML = '<div style="text-align:center;padding:60px 20px;color:rgba(255,255,255,.4);"><p style="font-size:1.1rem;margin-bottom:8px;">No products found.</p><p style="font-size:.85rem;">Try a different search or filter.</p></div>';
+        return;
+      }
+      grid.innerHTML = sorted.map(p => `
+        <div class="product-card"
+             data-id="${p.id}" data-category="${p.category}"
+             onclick="openProductModal(${p.id})">
+          ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
+          <button class="wishlist-btn ${typeof isWishlisted === 'function' && isWishlisted(p.id) ? 'wishlisted' : ''}"
+            data-pid="${p.id}"
+            onclick="event.stopPropagation(); toggleWishlist(${p.id})"
+            aria-label="Wishlist">
+            ${typeof isWishlisted === 'function' && isWishlisted(p.id) ? '<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"#B76E79\"><path d=\"M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z\"/></svg>' : '<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#B76E79\" stroke-width=\"1.5\"><path d=\"M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z\"/></svg>'}
+          </button>
+          <div class="product-img-wrap">
+            <img src="${p.image || ''}" alt="${p.name}" class="product-img" loading="lazy"
+              onerror="this.onerror=null;this.src='${FALLBACK_IMG}';" />
+          </div>
+          
+          <div class="product-card-hover">
+            <button class="pc-view-btn">View Details</button>
+            <button class="pc-atc-btn" data-id="${p.id}" onclick="event.stopPropagation(); addToCart(${p.id})">Add to Cart</button>
+          </div>
+          <div class="product-card-body">
+            <h3 class="product-name">${p.name}</h3>
+            ${p.sizes && p.sizes.length ? `<div class="product-sizes">${p.sizes.map(s=>`<span class="size-tag">${s}</span>`).join('')}</div>` : ''}
+            <div class="product-pricing">
+              ${p.comparePrice ? `<span class="product-compare">$${p.comparePrice.toFixed(2)}</span>` : ''}
+              <span class="product-price">$${(p.price||0).toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterProducts(filter, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      _shopSize = 'all';
+      document.querySelectorAll('.size-pill').forEach(b => b.classList.remove('active'));
+      const allSizePill = document.querySelector('.size-pill');
+      if (allSizePill) allSizePill.classList.add('active');
+      // Gender X welcome banner
+      const gxBanner = document.getElementById('genderx-banner');
+      if (gxBanner) gxBanner.style.display = (filter === 'gender_x') ? 'block' : 'none';
+      renderProducts(filter);
+    }
+    function filterBySize(size, btn) {
+      document.querySelectorAll('.size-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderProducts(undefined, size);
+    }
+    function applySort(sortVal) { renderProducts(undefined, undefined, sortVal); }
+
+
+    /* ── Color name to CSS color map ── */
+    const COLOR_MAP = {
+      'black':'#111','white':'#f5f5f5','beige':'#d4b896','pink':'#e8a0b4',
+      'rose':'#B76E79','red':'#c0392b','blue':'#2980b9','green':'#27ae60',
+      'purple':'#7c3aed','gold':'#b8860b','silver':'#aaa','camel':'#c19a6b',
+      'apricot':'#f4a460','orchid':'#da70d6','fiery red':'#c0392b',
+      'vineyard green':'#2e8b57','beau blue':'#7ec8e3','multicolor':'linear-gradient(135deg,#e8a0b4,#B76E79,#7c3aed)',
+    };
+    function _colorToCss(name) {
+      const key = name.toLowerCase();
+      return COLOR_MAP[key] || '#666';
+    }
+    let _pmSelectedColor = null;
+    let _pmSelectedSize = null;
+
+    function openProductModal(id) {
+      const products = typeof getProducts === 'function' ? getProducts() : window.PRODUCTS || [];
+      const p = products.find(x => x.id == id);
+      if (!p) return;
+      _pmSelectedColor = (p.colors && p.colors.length) ? p.colors[0] : null;
+      _pmSelectedSize  = (p.sizes  && p.sizes.length)  ? null : null;
+      const FALLBACK = "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23170d2e'/><text x='200' y='210' font-family='serif' font-size='80' text-anchor='middle' fill='%237c3aed'>🌹</text></svg>`);
+      const colorHtml = (p.colors && p.colors.length > 0) ? `
+        <div class="pm-section-label">Color</div>
+        <div class="pm-colors" id="pm-color-row">
+          ${p.colors.map(c => `
+            <div class="pm-color-swatch ${c===_pmSelectedColor?'selected':''}"
+                 title="${c}"
+                 style="background:${_colorToCss(c)}"
+                 onclick="_pmPickColor('${c.replace(/'/g,"\'")}',this)"></div>
+            <span class="pm-color-label" id="pm-color-name">${_pmSelectedColor||''}</span>
+          `).join('')}
+        </div>` : '';
+      const sizeHtml = (p.sizes && p.sizes.length > 0) ? `
+        <div class="pm-section-label">Size</div>
+        <div class="pm-sizes" id="pm-size-row">
+          ${p.sizes.map(s => `<button class="pm-size-pill" onclick="_pmPickSize('${s}',this)">${s}</button>`).join('')}
+        </div>` : '';
+      const descHtml = p.description ? `<p class="pm-description">${p.description}</p>` : '';
+      const detailsHtml = (p.details && p.details.length) ? `<ul class="pm-details-list">${p.details.map(d=>`<li>${d}</li>`).join('')}</ul>` : '';
+      const shipHtml = p.shippingNote ? `
+        <div class="pm-ship-note">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          ${p.shippingNote}
+        </div>` : '';
+      const modalEl = document.getElementById('product-modal');
+      const flash = (p.price && p.comparePrice && new Date() < new Date('2026-06-21')) ?
+        (p.category === 'boxes' || p.category === 'bundles' ? 0.10 : 0.30) : 0;
+      const salePrice = flash ? (p.price * (1 - flash)).toFixed(2) : null;
+      modalEl.innerHTML = `
+        <div style="position:relative">
+          <div class="pm-gallery">
+            <img id="pm-hero-img" class="pm-hero-img" src="${(p.images&&p.images[0])||p.image||''}" alt="${p.name}" onerror="this.src='${FALLBACK}'" />
+            ${(()=>{ const imgs = p.images && p.images.length > 1 ? p.images : (p.image ? [p.image] : []); if (p.supplier === 'luxury_play') { return `<div class="pm-thumbs" id="pm-thumbs-row"><img class="pm-thumb active" src="${p.image||''}" alt="${p.name} view 1" onerror="this.style.display='none'" onclick="_pmSetHero(this,'${p.image||''}')" ></div>`; } return imgs.length > 1 ? `<div class="pm-thumbs">${imgs.map((src,i)=>`<img class="pm-thumb${i===0?' active':''}" src="${src}" alt="${p.name} view ${i+1}" onerror="this.style.display='none'" onclick="_pmSetHero(this,'${src}')">`).join('')}</div>` : ''; })()}
+          </div>
+          <button class="pm-close" onclick="closeProductModal()" aria-label="Close product details">&times;</button>
+        </div>
+        <div class="pm-body">
+          ${p.badge ? `<div class="pm-badge">${p.badge}</div>` : ''}
+          <h2 class="pm-name">${p.name}</h2>
+          <div class="pm-pricing">
+            <span class="pm-price">$${salePrice || (p.price||0).toFixed(2)}</span>
+            ${p.comparePrice ? `<span class="pm-compare">$${p.comparePrice.toFixed(2)}</span>` : ''}
+            ${flash ? `<span style="font-size:.72rem;background:rgba(183,110,121,.2);color:#B76E79;padding:2px 8px;border-radius:10px;font-weight:700">${(flash*100).toFixed(0)}% OFF</span>` : ''}
+          </div>
+          ${descHtml}
+          ${detailsHtml}
+          ${colorHtml}
+          ${sizeHtml}
+          ${shipHtml}
+          <button class="pm-atc-btn" onclick="closeProductModal(); addToCart(${p.id}, _pmSelectedColor, _pmSelectedSize)" id="pm-atc">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-3px;margin-right:6px"><path d="M11 9h2V6h3V4h-3V1h-2v3H8v2h3v3zm-4 9c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-8.9-5h7.45c.75 0 1.41-.41 1.75-1.03l3.86-7.01L19.42 4l-3.87 7H8.53L4.27 2H1v2h2l3.6 8.59-1.35 2.45c-.16.28-.25.61-.25.96C5 17.1 5.9 18 7 18h12v-2H7.42c-.13 0-.25-.11-.25-.25l.03-.12.9-1.63z"/></svg>
+            Add to Cart
+          </button>
+          <div class="pm-wishlist-row">
+            <button class="pm-wishlist-btn" onclick="toggleWishlist(${p.id}); this.innerHTML = (typeof isWishlisted === 'function' && isWishlisted(${p.id})) ? '❤ Wishlisted' : '♡ Add to Wishlist'">
+              ${typeof isWishlisted === 'function' && isWishlisted(p.id) ? '❤ Wishlisted' : '♡ Add to Wishlist'}
+            </button>
+          </div>
+        </div>
+      `;
+      document.getElementById('product-modal-overlay').classList.add('open');
+      modalEl.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      if (p.supplier === 'luxury_play') _discoverGallery(p.image, p.name);
+    }
+
+    function closeProductModal() {
+      document.getElementById('product-modal-overlay').classList.remove('open');
+      document.getElementById('product-modal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function _pmSetHero(thumbEl, src) {
+      const hero = document.getElementById('pm-hero-img');
+      if (hero) hero.src = src;
+      document.querySelectorAll('.pm-thumb').forEach(t => t.classList.remove('active'));
+      thumbEl.classList.add('active');
+    }
+
+    // Auto-discover additional numbered images for luxury_play products
+    // Probes baseUrl variants: ...-2.jpg, -3.jpg … -10.jpg (stops on first miss)
+    function _discoverGallery(baseUrl, productName) {
+      if (!baseUrl) return;
+      const match = baseUrl.match(/^(.+-)(\d+)(\.(?:jpg|jpeg|png|webp))$/i);
+      if (!match) return;
+      const prefix = match[1], ext = match[3];
+      const row = document.getElementById('pm-thumbs-row');
+      if (!row) return;
+      let idx = 2;
+      function tryNext() {
+        if (idx > 10) return;
+        const src = prefix + idx + ext;
+        const probe = new window.Image();
+        probe.onload = function () {
+          const live = document.getElementById('pm-thumbs-row');
+          if (!live) return; // modal was closed
+          const img = document.createElement('img');
+          img.className = 'pm-thumb';
+          img.src = src;
+          img.alt = productName + ' view ' + idx;
+          img.onclick = function () { _pmSetHero(img, src); };
+          live.appendChild(img);
+          idx++;
+          tryNext();
+        };
+        probe.onerror = function () { /* sequential numbering — stop on first 404 */ };
+        probe.src = src;
+      }
+      tryNext();
+    }
+
+    function _pmPickColor(color, el) {
+      _pmSelectedColor = color;
+      document.querySelectorAll('#product-modal .pm-color-swatch').forEach(s => s.classList.remove('selected'));
+      el.classList.add('selected');
+      const lbl = document.getElementById('pm-color-name');
+      if (lbl) lbl.textContent = color;
+    }
+
+    function _pmPickSize(size, el) {
+      _pmSelectedSize = size;
+      document.querySelectorAll('#product-modal .pm-size-pill').forEach(s => s.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProductModal(); });
+
+    renderProducts();
+    // Gender X banner on direct URL param
+    const _urlParams = new URLSearchParams(window.location.search);
+    if (_urlParams.get('filter') === 'gender_x') {
+      const _gxBtn = document.querySelector(".filter-btn[onclick*=\"'gender_x'\"]");
+      if (_gxBtn) filterProducts('gender_x', _gxBtn);
+    }
+    // Apply filter from URL param (?filter=roses) or legacy sessionStorage
+    const _urlF = new URLSearchParams(window.location.search).get('filter');
+    const _ssF  = sessionStorage.getItem('shopFilter');
+    const _pf   = _urlF || _ssF;
+    if (_pf) {
+      if (_ssF) sessionStorage.removeItem('shopFilter');
+      // Map aliases
+      const _fMap = { 'lingerie': 'lingerie', 'fashion': 'fashion', 'toys': 'toys', 'roses': 'roses' };
+      const _fKey = _fMap[_pf] || _pf;
+      const _fb = document.querySelector(`.filter-btn[onclick*="'${_fKey}'"]`);
+      if (_fb) {
+        filterProducts(_fKey, _fb);
+        setTimeout(() => _fb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }), 100);
+      } else {
+        filterProducts(_fKey, null);
+      }
+      // Clean URL without reloading
+      if (_urlF) history.replaceState(null, '', '/shop.html');
+    }
+    renderCartDrawer();
+  </script>
+  <!-- PWA Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(() => console.log('✅ Dripping Secrets SW registered'))
+          .catch(e => console.error('SW error:', e));
+      });
+    }
+  </script>
+<script src="js/dimi-walker.js"></script>
+
+<!-- ── PRODUCT REQUEST FLOAT BUTTON ──────────────────────────── -->
+<button id="product-request-btn" onclick="openProductRequest()" style="position:fixed;bottom:90px;right:20px;z-index:900;background:linear-gradient(135deg,#4B1F5F,#7c3aed);color:#fff;border:none;border-radius:50px;padding:12px 18px;font-family:'Jost',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.04em;cursor:pointer;box-shadow:0 4px 20px rgba(75,31,95,.5);display:flex;align-items:center;gap:8px;transition:transform .2s;" onmouseenter="this.style.transform='scale(1.06)'" onmouseleave="this.style.transform='scale(1)'">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+  Don't see it? Request it
+</button>
+
+<!-- ── PRODUCT REQUEST MODAL ──────────────────────────────────── -->
+<div id="product-request-overlay" onclick="closeProductRequest()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1200;backdrop-filter:blur(4px);"></div>
+<div id="product-request-modal" style="display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:#1a0a2e;border:1px solid rgba(183,110,121,.3);border-radius:20px 20px 0 0;padding:32px 28px 40px;z-index:1201;font-family:'Jost',sans-serif;">
+  <div style="text-align:center;margin-bottom:24px;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:600;color:#e8c4d0;margin-bottom:6px;">Request a Product</div>
+    <p style="font-size:.85rem;color:rgba(255,255,255,.6);margin:0;">Don't see what you're looking for? Let us know — Dimi will find it and add it to the shop. We'll text or email when it goes live.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:14px;">
+    <div>
+      <label style="font-size:.75rem;color:rgba(255,255,255,.5);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Your Name</label>
+      <input id="req-name" type="text" placeholder="First name is fine" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 14px;color:#fff;font-family:'Jost',sans-serif;font-size:.9rem;box-sizing:border-box;" />
+    </div>
+    <div>
+      <label style="font-size:.75rem;color:rgba(255,255,255,.5);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Your Email or Phone</label>
+      <input id="req-contact" type="text" placeholder="So we can notify you when it drops" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 14px;color:#fff;font-family:'Jost',sans-serif;font-size:.9rem;box-sizing:border-box;" />
+    </div>
+    <div>
+      <label style="font-size:.75rem;color:rgba(255,255,255,.5);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:6px;">What are you looking for?</label>
+      <textarea id="req-description" rows="3" placeholder="Brand, type, color, vibe — tell us everything" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 14px;color:#fff;font-family:'Jost',sans-serif;font-size:.9rem;resize:vertical;box-sizing:border-box;"></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div>
+        <label style="font-size:.75rem;color:rgba(255,255,255,.5);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Category</label>
+        <select id="req-category" style="width:100%;background:#1a0a2e;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 14px;color:#fff;font-family:'Jost',sans-serif;font-size:.9rem;">
+          <option value="">Any</option>
+          <option>Toys</option><option>Roses</option><option>Couples</option>
+          <option>Bondage</option><option>Lingerie</option><option>Machines</option>
+          <option>Gender X</option><option>Wellness</option><option>Games</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:.75rem;color:rgba(255,255,255,.5);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Budget (approx)</label>
+        <input id="req-budget" type="text" placeholder="e.g. Under $50" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 14px;color:#fff;font-family:'Jost',sans-serif;font-size:.9rem;box-sizing:border-box;" />
+      </div>
+    </div>
+    <button onclick="submitProductRequest()" style="background:linear-gradient(135deg,#B76E79,#7c3aed);color:#fff;border:none;border-radius:10px;padding:14px;font-family:'Jost',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;margin-top:6px;letter-spacing:.04em;">
+      Send My Request to Dimi
+    </button>
+    <div id="req-status" style="text-align:center;font-size:.85rem;color:#B76E79;min-height:20px;"></div>
+  </div>
+  <button onclick="closeProductRequest()" style="position:absolute;top:16px;right:18px;background:none;border:none;color:rgba(255,255,255,.4);font-size:1.4rem;cursor:pointer;line-height:1;">&times;</button>
+</div>
+
+<script>
+function openProductRequest() {
+  document.getElementById('product-request-overlay').style.display = 'block';
+  document.getElementById('product-request-modal').style.display = 'block';
+  // Pre-fill from Firebase auth if logged in
+  if (typeof firebase !== 'undefined' && firebase.auth().currentUser) {
+    const u = firebase.auth().currentUser;
+    if (u.displayName) document.getElementById('req-name').value = u.displayName;
+    if (u.email) document.getElementById('req-contact').value = u.email;
+  }
+}
+function closeProductRequest() {
+  document.getElementById('product-request-overlay').style.display = 'none';
+  document.getElementById('product-request-modal').style.display = 'none';
+}
+async function submitProductRequest() {
+  const name = document.getElementById('req-name').value.trim();
+  const contact = document.getElementById('req-contact').value.trim();
+  const description = document.getElementById('req-description').value.trim();
+  const category = document.getElementById('req-category').value;
+  const budget = document.getElementById('req-budget').value.trim();
+  const status = document.getElementById('req-status');
+  if (!description) { status.textContent = 'Please describe what you\'re looking for.'; status.style.color='#f87171'; return; }
+  status.textContent = 'Sending to Dimi...'; status.style.color='#B76E79';
+  try {
+    const db = firebase.firestore();
+    await db.collection('productRequests').add({
+      name: name || 'Anonymous',
+      contact: contact || '',
+      description,
+      category: category || 'Any',
+      budget: budget || '',
+      status: 'new',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      userId: firebase.auth().currentUser ? firebase.auth().currentUser.uid : null
+    });
+    status.textContent = '✓ Dimi got it! We\'ll notify you when it drops.';
+    status.style.color='#4ade80';
+    setTimeout(closeProductRequest, 2500);
+    document.getElementById('req-description').value = '';
+  } catch(e) {
+    status.textContent = 'Something went sideways — try again.';
+    status.style.color='#f87171';
+  }
+}
+</script>
+<script src="js/recommendations.js"></script>
+<script src="js/exit-intent.js"></script>
+<script src="js/adls.js"></script>
+<script src="js/pwa.js"></script>
+  <script src="/js/age-gate.js" defer></script>
+</body>
+</html>

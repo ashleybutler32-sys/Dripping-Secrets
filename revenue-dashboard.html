@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Revenue Command — Dripping Secrets</title>
+  <meta name="robots" content="noindex,nofollow"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/images/icon-192.png"/>
+  <meta name="theme-color" content="#4B1F5F"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0618; color: #fff; min-height: 100vh; }
+
+    /* Top Bar */
+    .rev-topbar {
+      background: rgba(26,10,36,0.95); border-bottom: 1px solid rgba(255,255,255,.08);
+      padding: 14px 24px; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px);
+    }
+    .rev-topbar-brand { display: flex; align-items: center; gap: 12px; }
+    .rev-topbar-brand img { height: 28px; }
+    .rev-topbar-title { font-size: 1rem; font-weight: 700; color: #fff; }
+    .rev-topbar-sub { font-size: .75rem; color: rgba(255,255,255,.4); }
+    .rev-topbar-actions { display: flex; gap: 10px; align-items: center; }
+    .rev-back-btn { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); color: rgba(255,255,255,.7); padding: 7px 14px; border-radius: 50px; font-size: .82rem; cursor: pointer; text-decoration: none; transition: all .2s; }
+    .rev-back-btn:hover { border-color: rgba(233,30,140,.4); color: #fff; }
+    .rev-refresh-btn { background: linear-gradient(135deg,#E91E8C,#c2185b); color: #fff; border: none; padding: 7px 16px; border-radius: 50px; font-size: .82rem; font-weight: 700; cursor: pointer; transition: opacity .2s; }
+    .rev-refresh-btn:hover { opacity: .85; }
+    .rev-last-updated { color: rgba(255,255,255,.35); font-size: .75rem; }
+
+    /* Period Toggle */
+    .rev-period-bar { max-width: 1400px; margin: 0 auto; padding: 20px 24px 0; display: flex; gap: 0; }
+    .rev-period-btn { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); color: rgba(255,255,255,.5); padding: 8px 18px; font-size: .85rem; font-weight: 600; cursor: pointer; transition: all .2s; border-right: none; }
+    .rev-period-btn:first-child { border-radius: 50px 0 0 50px; }
+    .rev-period-btn:last-child  { border-radius: 0 50px 50px 0; border-right: 1px solid rgba(255,255,255,.08); }
+    .rev-period-btn.active { background: rgba(233,30,140,.2); border-color: rgba(233,30,140,.4); color: #fff; }
+
+    /* Grid */
+    .rev-main { max-width: 1400px; margin: 0 auto; padding: 20px 24px 60px; }
+    .rev-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+    .rev-kpi-grid-2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+    .rev-kpi-grid-3 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 20px; }
+
+    /* KPI Card */
+    .rev-kpi {
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px; padding: 20px 18px; transition: border-color .2s;
+    }
+    .rev-kpi:hover { border-color: rgba(233,30,140,.2); }
+    .rev-kpi.pink  { border-left: 3px solid #E91E8C; }
+    .rev-kpi.gold  { border-left: 3px solid #C89B3C; }
+    .rev-kpi.green { border-left: 3px solid #4CAF50; }
+    .rev-kpi.blue  { border-left: 3px solid #2196F3; }
+    .rev-kpi.purple{ border-left: 3px solid #9C27B0; }
+    .rev-kpi-label { color: rgba(255,255,255,.45); font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+    .rev-kpi-value { font-size: 1.9rem; font-weight: 800; color: #fff; margin-bottom: 4px; line-height: 1.1; }
+    .rev-kpi-delta { font-size: .78rem; display: flex; align-items: center; gap: 4px; }
+    .rev-kpi-delta.up   { color: #4CAF50; }
+    .rev-kpi-delta.down { color: #ff4757; }
+    .rev-kpi-delta.flat { color: rgba(255,255,255,.35); }
+    .rev-kpi-sub { color: rgba(255,255,255,.35); font-size: .75rem; margin-top: 2px; }
+
+    /* Section Header */
+    .rev-section-h { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .rev-section-h h3 { color: #fff; font-size: 1rem; font-weight: 700; }
+    .rev-section-h .badge { background: rgba(233,30,140,.15); color: #E91E8C; font-size: .72rem; font-weight: 700; padding: 3px 10px; border-radius: 50px; }
+
+    /* Wide Cards */
+    .rev-wide-card {
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px; padding: 20px;
+    }
+
+    /* Table */
+    .rev-table { width: 100%; border-collapse: collapse; }
+    .rev-table th { color: rgba(255,255,255,.35); font-size: .75rem; font-weight: 600; text-transform: uppercase; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,.08); text-align: left; }
+    .rev-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,.04); font-size: .88rem; color: rgba(255,255,255,.75); }
+    .rev-table tr:last-child td { border-bottom: none; }
+    .rev-table .rank { color: rgba(255,255,255,.35); width: 28px; }
+    .rev-table .val  { font-weight: 700; color: #fff; }
+    .rev-table .green { color: #4CAF50; }
+
+    /* Progress bar */
+    .rev-progress-wrap { margin-bottom: 12px; }
+    .rev-progress-label { display: flex; justify-content: space-between; color: rgba(255,255,255,.6); font-size: .82rem; margin-bottom: 5px; }
+    .rev-progress-bar { height: 6px; background: rgba(255,255,255,.08); border-radius: 50px; overflow: hidden; }
+    .rev-progress-fill { height: 100%; background: linear-gradient(90deg, #E91E8C, #c2185b); border-radius: 50px; transition: width .8s ease; }
+    .rev-progress-fill.gold   { background: linear-gradient(90deg, #C89B3C, #a07830); }
+    .rev-progress-fill.green  { background: linear-gradient(90deg, #4CAF50, #388E3C); }
+    .rev-progress-fill.blue   { background: linear-gradient(90deg, #2196F3, #1565C0); }
+    .rev-progress-fill.purple { background: linear-gradient(90deg, #9C27B0, #6A1B9A); }
+
+    /* Dimi panel */
+    .rev-dimi-panel {
+      background: rgba(233,30,140,.04); border: 1px solid rgba(233,30,140,.15);
+      border-radius: 16px; padding: 20px;
+    }
+    .rev-dimi-panel .dimi-icon { font-size: 2rem; margin-bottom: 8px; }
+    .rev-dimi-stat { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+    .rev-dimi-stat:last-child { border-bottom: none; }
+    .rev-dimi-stat .lbl { color: rgba(255,255,255,.55); font-size: .85rem; }
+    .rev-dimi-stat .val { color: #fff; font-size: .95rem; font-weight: 700; }
+
+    /* Auth gate */
+    .rev-auth-gate { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 60px); }
+    .rev-auth-box { text-align: center; max-width: 360px; padding: 40px 20px; }
+    .rev-auth-box h2 { color: #fff; margin: 0 0 10px; }
+    .rev-auth-box p  { color: rgba(255,255,255,.5); margin: 0 0 24px; }
+
+    /* Spinner */
+    .rev-spinner { display: flex; align-items: center; justify-content: center; padding: 40px; }
+    .rev-spinner::after { content:''; width:32px; height:32px; border:3px solid rgba(255,255,255,.1); border-top-color:#E91E8C; border-radius:50%; animation:rev-spin .8s linear infinite; }
+    @keyframes rev-spin { to { transform: rotate(360deg); } }
+
+    @media(max-width:1024px) { .rev-kpi-grid { grid-template-columns: repeat(2,1fr); } .rev-kpi-grid-2 { grid-template-columns: repeat(2,1fr); } }
+    @media(max-width:640px) { .rev-kpi-grid,.rev-kpi-grid-2,.rev-kpi-grid-3 { grid-template-columns:1fr; } .rev-topbar { padding:12px 16px; } .rev-main { padding:16px; } }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="rev-topbar">
+  <div class="rev-topbar-brand">
+    <img src="images/logo.png" alt="Dripping Secrets" onerror="this.style.display='none'"/>
+    <div>
+      <div class="rev-topbar-title">Revenue Command</div>
+      <div class="rev-topbar-sub">CEO Dashboard · <span id="rev-timestamp">—</span></div>
+    </div>
+  </div>
+  <div class="rev-topbar-actions">
+    <span class="rev-last-updated" id="rev-last-updated"></span>
+    <button class="rev-refresh-btn" onclick="RevDashboard.refresh()">↻ Refresh</button>
+    <a href="admin.html" class="rev-back-btn">← Back Office</a>
+  </div>
+</header>
+
+<!-- AUTH GATE -->
+<div id="rev-auth-gate" class="rev-auth-gate">
+  <div class="rev-auth-box">
+    <div style="font-size:3rem;margin-bottom:16px">🔐</div>
+    <h2>Admin Access Required</h2>
+    <p>Sign in to your admin account to view the Revenue Command Dashboard.</p>
+    <a href="/account.html" style="display:inline-block;background:linear-gradient(135deg,#E91E8C,#c2185b);color:#fff;padding:12px 28px;border-radius:50px;font-size:.95rem;font-weight:700;text-decoration:none">Sign In</a>
+  </div>
+</div>
+
+<!-- DASHBOARD (hidden until auth) -->
+<div id="rev-dashboard" style="display:none">
+  <!-- Period Toggle -->
+  <div class="rev-period-bar">
+    <button class="rev-period-btn" data-period="today" onclick="RevDashboard.setPeriod('today')">Today</button>
+    <button class="rev-period-btn active" data-period="week" onclick="RevDashboard.setPeriod('week')">This Week</button>
+    <button class="rev-period-btn" data-period="month" onclick="RevDashboard.setPeriod('month')">This Month</button>
+    <button class="rev-period-btn" data-period="alltime" onclick="RevDashboard.setPeriod('alltime')">All Time</button>
+  </div>
+
+  <main class="rev-main">
+
+    <!-- REVENUE KPIs -->
+    <div class="rev-section-h"><h3>Revenue</h3><span class="badge" id="rev-period-label">This Week</span></div>
+    <div class="rev-kpi-grid">
+      <div class="rev-kpi pink">
+        <div class="rev-kpi-label">Revenue Today</div>
+        <div class="rev-kpi-value" id="rev-today">—</div>
+        <div class="rev-kpi-sub">Orders today</div>
+      </div>
+      <div class="rev-kpi pink">
+        <div class="rev-kpi-label">Revenue This Week</div>
+        <div class="rev-kpi-value" id="rev-week">—</div>
+        <div class="rev-kpi-delta" id="rev-week-delta"></div>
+      </div>
+      <div class="rev-kpi pink">
+        <div class="rev-kpi-label">Revenue This Month</div>
+        <div class="rev-kpi-value" id="rev-month">—</div>
+        <div class="rev-kpi-sub">Current month</div>
+      </div>
+      <div class="rev-kpi gold">
+        <div class="rev-kpi-label">Avg Order Value</div>
+        <div class="rev-kpi-value" id="rev-aov">—</div>
+        <div class="rev-kpi-sub">Per transaction</div>
+      </div>
+    </div>
+
+    <!-- SUBSCRIPTIONS + MEMBERS -->
+    <div class="rev-section-h"><h3>Subscriptions &amp; Members</h3></div>
+    <div class="rev-kpi-grid-2">
+      <div class="rev-kpi green">
+        <div class="rev-kpi-label">Active Subscriptions</div>
+        <div class="rev-kpi-value" id="rev-subs">—</div>
+        <div class="rev-kpi-sub">Monthly recurring</div>
+      </div>
+      <div class="rev-kpi green">
+        <div class="rev-kpi-label">New Members</div>
+        <div class="rev-kpi-value" id="rev-new-members">—</div>
+        <div class="rev-kpi-sub">Signed up this period</div>
+      </div>
+      <div class="rev-kpi green">
+        <div class="rev-kpi-label">Monthly Recurring Revenue</div>
+        <div class="rev-kpi-value" id="rev-mrr">—</div>
+        <div class="rev-kpi-sub">Subscriptions MRR</div>
+      </div>
+    </div>
+
+    <!-- AFFILIATE + CREATOR -->
+    <div class="rev-section-h"><h3>Affiliate &amp; Creator Sales</h3></div>
+    <div class="rev-kpi-grid-2">
+      <div class="rev-kpi blue">
+        <div class="rev-kpi-label">Affiliate Sales</div>
+        <div class="rev-kpi-value" id="rev-affiliate">—</div>
+        <div class="rev-kpi-sub">This period</div>
+      </div>
+      <div class="rev-kpi blue">
+        <div class="rev-kpi-label">Creator Sales</div>
+        <div class="rev-kpi-value" id="rev-creator">—</div>
+        <div class="rev-kpi-sub">Marketplace driven</div>
+      </div>
+      <div class="rev-kpi purple">
+        <div class="rev-kpi-label">Dimi Recommendations</div>
+        <div class="rev-kpi-value" id="rev-dimi-recs">—</div>
+        <div class="rev-kpi-sub">Shown this period</div>
+      </div>
+    </div>
+
+    <!-- DIMI + COMMUNITY -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+      <div class="rev-dimi-panel">
+        <div class="dimi-icon">✨</div>
+        <div class="rev-section-h" style="margin-bottom:14px"><h3 style="font-size:.95rem">Dimi Performance</h3></div>
+        <div class="rev-dimi-stat"><span class="lbl">Recommendations Shown</span><span class="val" id="rev-dimi-shown">—</span></div>
+        <div class="rev-dimi-stat"><span class="lbl">Recommendations Accepted</span><span class="val" id="rev-dimi-accepted">—</span></div>
+        <div class="rev-dimi-stat"><span class="lbl">Conversion Rate</span><span class="val" id="rev-dimi-rate">—</span></div>
+        <div class="rev-dimi-stat"><span class="lbl">Revenue Attributed</span><span class="val" id="rev-dimi-revenue">—</span></div>
+        <div class="rev-dimi-stat"><span class="lbl">Cart Rescues</span><span class="val" id="rev-dimi-rescues">—</span></div>
+      </div>
+      <div class="rev-wide-card">
+        <div class="rev-section-h" style="margin-bottom:14px"><h3 style="font-size:.95rem">Community Growth</h3></div>
+        <div class="rev-dimi-stat"><span class="lbl">Total Posts</span><span class="val" id="rev-com-posts">—</span></div>
+        <div class="rev-dimi-stat"><span class="lbl">New Members This Month</span><span class="val" id="rev-com-members">—</span></div>
+        <div class="rev-dimi-stat"><span class="lbl">Active Areas</span><span class="val">5</span></div>
+        <div class="rev-dimi-stat"><span class="lbl">Email Subscribers</span><span class="val" id="rev-email-subs">—</span></div>
+        <div class="rev-dimi-stat"><span class="lbl">Creator Applications</span><span class="val" id="rev-creator-apps">—</span></div>
+      </div>
+    </div>
+
+    <!-- TOP PRODUCTS + CATEGORIES -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+      <div class="rev-wide-card">
+        <div class="rev-section-h"><h3>Top Products</h3></div>
+        <div id="rev-top-products"><div class="rev-spinner"></div></div>
+      </div>
+      <div class="rev-wide-card">
+        <div class="rev-section-h"><h3>Top Categories</h3></div>
+        <div id="rev-top-cats"><div class="rev-spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- RECENT ORDERS -->
+    <div class="rev-wide-card">
+      <div class="rev-section-h"><h3>Recent Orders</h3><span class="badge" id="rev-orders-count">0 orders</span></div>
+      <div style="overflow-x:auto">
+        <table class="rev-table" id="rev-orders-table">
+          <thead><tr><th>Order</th><th>Customer</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="rev-orders-body"><tr><td colspan="5" style="text-align:center;color:rgba(255,255,255,.3);padding:24px">Loading orders…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="js/firebase-config.js"></script>
+<script>
+'use strict';
+const RevDashboard = (() => {
+  let db = null;
+  let period = 'week';
+  const ADMIN_EMAILS = ['ashleybutler322@gmail.com', 'assistant.manager@drippingsecrets.com'];
+
+  function fmt$(n) { return '$' + (n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function fmtN(n) { return (n||0).toLocaleString(); }
+
+  function setPeriod(p) {
+    period = p;
+    document.querySelectorAll('.rev-period-btn').forEach(b => b.classList.toggle('active', b.dataset.period === p));
+    const labels = { today:'Today', week:'This Week', month:'This Month', alltime:'All Time' };
+    document.getElementById('rev-period-label').textContent = labels[p] || p;
+    loadData();
+  }
+
+  function getPeriodStart() {
+    const now = new Date();
+    if (period === 'today') { const d = new Date(now); d.setHours(0,0,0,0); return d; }
+    if (period === 'week')  { const d = new Date(now); d.setDate(d.getDate()-7); return d; }
+    if (period === 'month') { return new Date(now.getFullYear(), now.getMonth(), 1); }
+    return new Date(2020,0,1); // all time
+  }
+
+  async function loadData() {
+    if (!db) return;
+    const start = getPeriodStart();
+    const ts = firebase.firestore.Timestamp.fromDate(start);
+
+    // Orders
+    try {
+      const ordersSnap = await db.collection('orders').where('createdAt','>=',ts).orderBy('createdAt','desc').get();
+      const orders = ordersSnap.docs.map(d => d.data());
+      const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+      const todayOrders = orders.filter(o => o.createdAt?.toDate?.() >= todayStart);
+      const weekStart = new Date(); weekStart.setDate(weekStart.getDate()-7);
+      const weekOrders = orders.filter(o => o.createdAt?.toDate?.() >= weekStart);
+      const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0);
+      const monthOrders = orders.filter(o => o.createdAt?.toDate?.() >= monthStart);
+
+      document.getElementById('rev-today').textContent  = fmt$(todayOrders.reduce((s,o) => s+(o.total||0),0));
+      document.getElementById('rev-week').textContent   = fmt$(weekOrders.reduce((s,o) => s+(o.total||0),0));
+      document.getElementById('rev-month').textContent  = fmt$(monthOrders.reduce((s,o) => s+(o.total||0),0));
+      const totalRev = orders.reduce((s,o) => s+(o.total||0),0);
+      document.getElementById('rev-aov').textContent    = orders.length ? fmt$(totalRev/orders.length) : '$0.00';
+      document.getElementById('rev-orders-count').textContent = orders.length + ' orders';
+      renderOrdersTable(orders.slice(0,15));
+    } catch (_) {}
+
+    // Subscriptions
+    try {
+      const subSnap = await db.collection('subscriptions').where('status','==','active').get();
+      const subs = subSnap.docs.map(d => d.data());
+      document.getElementById('rev-subs').textContent = fmtN(subs.length);
+      document.getElementById('rev-mrr').textContent  = fmt$(subs.reduce((s,sub) => s+(sub.price||0),0));
+    } catch (_) {}
+
+    // New Members
+    try {
+      const memSnap = await db.collection('members').where('joinedAt','>=',ts).get();
+      document.getElementById('rev-new-members').textContent = fmtN(memSnap.size);
+    } catch (_) {}
+
+    // Dimi Analytics
+    try {
+      const dimiSnap = await db.collection('dimi_analytics').where('timestamp','>=',ts).get();
+      const events = dimiSnap.docs.map(d => d.data());
+      const shown    = events.filter(e => e.eventType === 'recommendation_shown').length;
+      const accepted = events.filter(e => e.eventType === 'recommendation_accepted').length;
+      const rescues  = events.filter(e => e.eventType === 'cart_rescue_shown').length;
+      const dimiRev  = events.filter(e => e.eventType === 'revenue_attributed').reduce((s,e) => s+(e.amount||0),0);
+      const rate     = shown ? ((accepted/shown)*100).toFixed(1)+'%' : '0%';
+      document.getElementById('rev-dimi-shown').textContent    = fmtN(shown);
+      document.getElementById('rev-dimi-accepted').textContent = fmtN(accepted);
+      document.getElementById('rev-dimi-rate').textContent     = rate;
+      document.getElementById('rev-dimi-revenue').textContent  = fmt$(dimiRev);
+      document.getElementById('rev-dimi-rescues').textContent  = fmtN(rescues);
+      document.getElementById('rev-dimi-recs').textContent     = fmtN(shown);
+    } catch (_) {}
+
+    // Community
+    try {
+      const comSnap = await db.collection('community').where('flagged','==',false).get();
+      document.getElementById('rev-com-posts').textContent = fmtN(comSnap.size);
+    } catch (_) {}
+
+    // Email subs
+    try {
+      const emailSnap = await db.collection('email_subscribers').get();
+      document.getElementById('rev-email-subs').textContent = fmtN(emailSnap.size);
+    } catch (_) {}
+
+    // Creator apps
+    try {
+      const creatorSnap = await db.collection('creator_marketplace').get();
+      document.getElementById('rev-creator-apps').textContent = fmtN(creatorSnap.size);
+    } catch (_) {}
+
+    // Top Products
+    loadTopProducts(ts);
+    loadTopCats(ts);
+
+    document.getElementById('rev-last-updated').textContent = 'Updated: ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  }
+
+  async function loadTopProducts(ts) {
+    const wrap = document.getElementById('rev-top-products');
+    if (!wrap || !db) return;
+    try {
+      const snap = await db.collection('orders').where('createdAt','>=',ts).get();
+      const freq = {};
+      snap.docs.forEach(d => {
+        (d.data().items || []).forEach(item => {
+          const k = item.name || item.id || 'Unknown';
+          freq[k] = (freq[k] || 0) + (item.qty || item.quantity || 1);
+        });
+      });
+      const top = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0,6);
+      if (!top.length) { wrap.innerHTML = '<p style="color:rgba(255,255,255,.35);font-size:.85rem">No orders yet.</p>'; return; }
+      const max = top[0][1] || 1;
+      wrap.innerHTML = top.map(([name,cnt]) => `
+        <div class="rev-progress-wrap">
+          <div class="rev-progress-label"><span>${escH(name)}</span><span>${cnt} sold</span></div>
+          <div class="rev-progress-bar"><div class="rev-progress-fill" style="width:${Math.round(cnt/max*100)}%"></div></div>
+        </div>`).join('');
+    } catch (_) { wrap.innerHTML = '<p style="color:rgba(255,255,255,.3);font-size:.85rem">Unavailable.</p>'; }
+  }
+
+  async function loadTopCats(ts) {
+    const wrap = document.getElementById('rev-top-cats');
+    if (!wrap || !db) return;
+    try {
+      const snap = await db.collection('orders').where('createdAt','>=',ts).get();
+      const freq = {};
+      snap.docs.forEach(d => {
+        (d.data().items || []).forEach(item => {
+          const k = item.category || 'General';
+          freq[k] = (freq[k] || 0) + (item.qty || item.quantity || 1);
+        });
+      });
+      const top = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0,5);
+      const colors = ['pink','gold','green','blue','purple'];
+      const max = top[0]?.[1] || 1;
+      if (!top.length) { wrap.innerHTML = '<p style="color:rgba(255,255,255,.35);font-size:.85rem">No data yet.</p>'; return; }
+      wrap.innerHTML = top.map(([cat,cnt],i) => `
+        <div class="rev-progress-wrap">
+          <div class="rev-progress-label"><span>${escH(cat)}</span><span>${cnt} units</span></div>
+          <div class="rev-progress-bar"><div class="rev-progress-fill ${colors[i]||'pink'}" style="width:${Math.round(cnt/max*100)}%"></div></div>
+        </div>`).join('');
+    } catch (_) { wrap.innerHTML = '<p style="color:rgba(255,255,255,.3);font-size:.85rem">Unavailable.</p>'; }
+  }
+
+  function renderOrdersTable(orders) {
+    const tbody = document.getElementById('rev-orders-body');
+    if (!tbody) return;
+    if (!orders.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:rgba(255,255,255,.3);padding:24px">No orders in this period.</td></tr>'; return; }
+    tbody.innerHTML = orders.map(o => {
+      const dt = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+      const statusColor = o.status === 'paid' || o.status === 'completed' ? '#4CAF50' : o.status === 'pending' ? '#ff9800' : 'rgba(255,255,255,.5)';
+      return `<tr>
+        <td class="rank">#${o.orderId||o.id||'—'}</td>
+        <td>${escH(o.email||o.customerEmail||'—')}</td>
+        <td class="val">${fmt$(o.total||0)}</td>
+        <td><span style="color:${statusColor}">${o.status||'—'}</span></td>
+        <td>${dt}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function escH(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function refresh() { loadData(); }
+
+  function init() {
+    if (!window.firebase) return;
+    db = firebase.firestore();
+    firebase.auth().onAuthStateChanged(u => {
+      const gate = document.getElementById('rev-auth-gate');
+      const dash = document.getElementById('rev-dashboard');
+      if (u && ADMIN_EMAILS.includes(u.email)) {
+        gate.style.display = 'none';
+        dash.style.display = 'block';
+        document.getElementById('rev-timestamp').textContent = new Date().toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric'});
+        loadData();
+      } else {
+        gate.style.display = 'flex';
+        dash.style.display = 'none';
+      }
+    });
+  }
+
+  return { init, setPeriod, refresh, loadData };
+})();
+
+document.addEventListener('DOMContentLoaded', RevDashboard.init);
+</script>
+  <script src="/js/age-gate.js" defer></script>
+</body>
+</html>

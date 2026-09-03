@@ -1,0 +1,101 @@
+/* ================================================================
+   RECOMMENDATIONS — DS v9.78
+   ================================================================ */
+
+.rec-section { margin: 20px 0 0; }
+
+.rec-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 12px;
+}
+
+.rec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.rec-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.rec-card:hover,
+.rec-card:focus {
+  border-color: rgba(183,110,121,0.45);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.rec-img-wrap {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: rgba(75,31,95,0.2);
+}
+
+.rec-img-wrap img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  transition: transform 0.3s;
+}
+
+.rec-card:hover .rec-img-wrap img { transform: scale(1.04); }
+
+.rec-badge {
+  position: absolute;
+  top: 6px; left: 6px;
+  background: linear-gradient(135deg, #4B1F5F, #B76E79);
+  color: #fff;
+  font-size: 0.6rem; font-weight: 700;
+  padding: 2px 6px; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  pointer-events: none;
+}
+
+.rec-badge-sale {
+  left: auto; right: 6px;
+  background: linear-gradient(135deg, #B76E79, #e91e8c);
+}
+
+.rec-body { padding: 9px; }
+
+.rec-name {
+  font-size: 0.76rem; font-weight: 500;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 4px; line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.rec-price {
+  font-size: 0.8rem; color: #B76E79; font-weight: 600;
+}
+
+.rec-compare {
+  font-size: 0.7rem; color: rgba(255,255,255,0.3);
+  text-decoration: line-through; margin-left: 4px;
+  font-weight: 400;
+}
+
+/* Cart drawer context */
+.cart-rec-wrap .rec-grid {
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+}
+.cart-rec-wrap .rec-body { padding: 7px; }
+
+/* ── Mobile ── */
+@media (max-width: 480px) {
+  .rec-grid { grid-template-columns: repeat(2, 1fr); }
+}

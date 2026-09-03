@@ -1,0 +1,180 @@
+/* ============================================================
+   DRIPPING SECRETS — Wellness Hub CSS  (v9.86)
+   ============================================================ */
+
+:root {
+  --wl-pink:   #E91E8C;
+  --wl-purple: #4B1F5F;
+  --wl-sage:   #7CA67A;
+  --wl-gold:   #C89B3C;
+  --wl-dark:   #1a0a24;
+  --wl-card:   rgba(255,255,255,0.04);
+  --wl-border: rgba(255,255,255,0.08);
+  --wl-radius: 16px;
+}
+
+/* ── Hero ─────────────────────────────────────────────────── */
+.wl-hero {
+  background: linear-gradient(135deg, #0f1a14 0%, #1a2b1a 40%, #1a0a24 100%);
+  padding: 80px 20px 60px; text-align: center; position: relative; overflow: hidden;
+}
+.wl-hero::before {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(124,166,122,.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.wl-hero h1 { font-size: clamp(2rem,5vw,3.2rem); color:#fff; margin:0 0 12px; }
+.wl-hero p  { font-size:1.1rem; color:rgba(255,255,255,.7); max-width:560px; margin:0 auto 32px; }
+.wl-search-bar {
+  max-width: 520px; margin: 0 auto;
+  display: flex; gap: 0; background: rgba(255,255,255,.08);
+  border: 1px solid var(--wl-border); border-radius: 50px; overflow: hidden;
+}
+.wl-search-bar input {
+  flex: 1; background: transparent; border: none; color: #fff;
+  padding: 14px 20px; font-size: 1rem; outline: none;
+}
+.wl-search-bar input::placeholder { color: rgba(255,255,255,.4); }
+.wl-search-bar button {
+  background: var(--wl-pink); color: #fff; border: none;
+  padding: 14px 24px; cursor: pointer; font-size: .95rem; font-weight: 600;
+}
+
+/* ── Categories ───────────────────────────────────────────── */
+.wl-cats {
+  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  padding: 28px 20px; background: var(--wl-dark);
+  border-bottom: 1px solid var(--wl-border);
+}
+.wl-cat-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--wl-card); color: rgba(255,255,255,.7);
+  border: 1px solid var(--wl-border); padding: 10px 18px;
+  border-radius: 50px; cursor: pointer; font-size: .9rem; transition: all .2s;
+}
+.wl-cat-btn:hover, .wl-cat-btn.active {
+  background: var(--wl-pink); color: #fff; border-color: var(--wl-pink);
+}
+
+/* ── Section ──────────────────────────────────────────────── */
+.wl-section { max-width: 1200px; margin: 0 auto; padding: 48px 20px; }
+.wl-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+}
+.wl-section-header h2 { color: #fff; font-size: 1.5rem; margin: 0; }
+.wl-view-all { color: var(--wl-pink); font-size: .9rem; text-decoration: none; cursor: pointer; }
+
+/* ── Featured Article ─────────────────────────────────────── */
+.wl-featured {
+  background: linear-gradient(135deg, rgba(75,31,95,.5), rgba(26,10,36,.8));
+  border: 1px solid rgba(233,30,140,.2); border-radius: 20px;
+  overflow: hidden; margin-bottom: 40px;
+  display: grid; grid-template-columns: 1fr 1fr; min-height: 340px;
+}
+.wl-featured-banner {
+  background: linear-gradient(135deg, #1a2b1a, #2d1a3e);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 5rem;
+}
+.wl-featured-body { padding: 40px; display: flex; flex-direction: column; justify-content: center; }
+.wl-featured-tag {
+  display: inline-block; background: rgba(124,166,122,.2); color: var(--wl-sage);
+  font-size: .75rem; padding: 4px 12px; border-radius: 50px;
+  text-transform: uppercase; letter-spacing: .05em; margin-bottom: 16px; width: fit-content;
+}
+.wl-featured-body h2 { color: #fff; font-size: 1.6rem; margin: 0 0 12px; line-height: 1.3; }
+.wl-featured-body p  { color: rgba(255,255,255,.6); line-height: 1.6; margin: 0 0 24px; }
+.wl-read-btn {
+  background: linear-gradient(135deg, var(--wl-pink), #c2185b);
+  color: #fff; border: none; padding: 12px 28px; border-radius: 50px;
+  font-size: .95rem; font-weight: 600; cursor: pointer; width: fit-content;
+  transition: opacity .2s;
+}
+.wl-read-btn:hover { opacity: .85; }
+
+/* ── Content Grid ─────────────────────────────────────────── */
+.wl-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(300px,1fr)); gap: 24px; }
+
+.wl-card {
+  background: var(--wl-card); border: 1px solid var(--wl-border);
+  border-radius: var(--wl-radius); overflow: hidden;
+  transition: transform .2s, border-color .2s; cursor: pointer;
+  display: flex; flex-direction: column;
+}
+.wl-card:hover { transform: translateY(-4px); border-color: rgba(233,30,140,.3); }
+.wl-card-thumb {
+  height: 160px; display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; position: relative;
+  background: linear-gradient(135deg, rgba(26,42,26,.8), rgba(45,16,64,.6));
+}
+.wl-card-thumb .wl-card-tag {
+  position: absolute; top: 12px; left: 12px;
+  background: rgba(0,0,0,.5); color: rgba(255,255,255,.8);
+  font-size: .7rem; padding: 3px 10px; border-radius: 50px; backdrop-filter: blur(6px);
+  text-transform: uppercase;
+}
+.wl-card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.wl-card-title { color: #fff; font-size: 1.05rem; font-weight: 700; margin: 0; line-height: 1.4; }
+.wl-card-excerpt { color: rgba(255,255,255,.55); font-size: .87rem; line-height: 1.5; flex: 1; }
+.wl-card-meta { color: rgba(255,255,255,.35); font-size: .78rem; margin-top: 8px; }
+.wl-card-footer {
+  padding: 14px 20px 18px; display: flex; justify-content: space-between; align-items: center;
+}
+.wl-card-cta { color: var(--wl-pink); font-size: .87rem; font-weight: 600; }
+.wl-save-btn {
+  background: transparent; border: 1px solid var(--wl-border); color: rgba(255,255,255,.5);
+  width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: .9rem;
+  transition: all .2s;
+}
+.wl-save-btn:hover, .wl-save-btn.saved { border-color: var(--wl-pink); color: var(--wl-pink); }
+
+/* ── Series / Video ───────────────────────────────────────── */
+.wl-series-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 16px; }
+.wl-series-card {
+  background: var(--wl-card); border: 1px solid var(--wl-border); border-radius: 14px;
+  padding: 20px; text-align: center; transition: border-color .2s; cursor: pointer;
+}
+.wl-series-card:hover { border-color: rgba(233,30,140,.3); }
+.wl-series-icon { font-size: 2.4rem; margin-bottom: 10px; }
+.wl-series-title { color: #fff; font-size: .95rem; font-weight: 600; margin: 0 0 6px; }
+.wl-series-count { color: rgba(255,255,255,.4); font-size: .82rem; }
+
+/* ── Article Modal ────────────────────────────────────────── */
+.wl-article-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.85);
+  z-index: 9999; display: flex; align-items: flex-start; justify-content: center;
+  padding: 40px 20px; overflow-y: auto; opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.wl-article-overlay.open { opacity: 1; pointer-events: all; }
+.wl-article {
+  background: #1e0d2e; border: 1px solid var(--wl-border); border-radius: 20px;
+  width: 100%; max-width: 680px; padding: 40px;
+  transform: translateY(20px); transition: transform .2s;
+}
+.wl-article-overlay.open .wl-article { transform: translateY(0); }
+.wl-article-close {
+  float: right; background: rgba(255,255,255,.08); border: none;
+  color: rgba(255,255,255,.6); width: 36px; height: 36px; border-radius: 50%;
+  cursor: pointer; font-size: 1.1rem; transition: background .2s;
+}
+.wl-article-close:hover { background: rgba(233,30,140,.2); }
+.wl-article-content h1 { color: #fff; font-size: 1.8rem; line-height: 1.3; margin: 24px 0 12px; }
+.wl-article-content p  { color: rgba(255,255,255,.7); line-height: 1.8; margin: 0 0 16px; }
+.wl-article-content h2 { color: #fff; font-size: 1.2rem; margin: 28px 0 12px; }
+.wl-article-content ul { color: rgba(255,255,255,.7); line-height: 1.8; padding-left: 20px; }
+.wl-article-content ul li { margin-bottom: 6px; }
+
+/* ── Favorites ────────────────────────────────────────────── */
+.wl-fav-empty { text-align:center; padding:40px 20px; color:rgba(255,255,255,.4); }
+
+/* ── Mobile ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .wl-hero { padding: 60px 20px 40px; }
+  .wl-featured { grid-template-columns: 1fr; }
+  .wl-featured-banner { height: 200px; }
+  .wl-featured-body { padding: 24px; }
+  .wl-grid { grid-template-columns: 1fr; }
+  .wl-article { padding: 24px; }
+}

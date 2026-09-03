@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Creator Marketplace — Dripping Secrets</title>
+  <meta name="description" content="Browse Dripping Secrets creator storefronts, discover curated collections, and apply to become a creator. Earn 12-16% commissions on every sale you inspire."/>
+  <link rel="canonical" href="https://drippingsecrets.com/creator-marketplace.html"/>
+  <meta property="og:title" content="Creator Marketplace — Dripping Secrets"/>
+  <meta property="og:url" content="https://drippingsecrets.com/creator-marketplace.html"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/images/icon-192.png"/>
+  <meta name="theme-color" content="#4B1F5F"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/creator-marketplace.css"/>
+</head>
+<body>
+<a href="#main-content" class="skip-nav">Skip to Main Content</a>
+<nav class="main-nav" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="/index.html" class="nav-logo"><img src="images/logo.png" alt="Dripping Secrets" height="38"/></a>
+    <div class="nav-links">
+      <a href="/shop.html">Shop</a>
+      <a href="/creators.html">Creators</a>
+      <a href="/creator-marketplace.html" class="active">Marketplace</a>
+      <a href="/community.html">Community</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="nav-actions">
+      <a href="admin.html" class="nav-gear" title="Back Office" aria-label="Back Office">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </a>
+      <button class="cart-btn" onclick="openCart()" aria-label="Open cart"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg><span class="cart-count" id="cart-badge" aria-live="polite">0</span></button>
+      <button class="nav-account-btn" onclick="location.href='/account.html'" aria-label="Account"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+    </div>
+  </div>
+</nav>
+<main id="main-content">
+<!-- HERO -->
+<section class="cm-hero">
+  <p class="cm-eyebrow">Creator Marketplace</p>
+  <h1>Shop With Your<br>Favorite Creators</h1>
+  <p>Discover curated storefronts, exclusive collections, and the creators who inspire the culture.</p>
+  <div class="cm-hero-stats">
+    <div class="cm-hero-stat"><span class="num" id="cm-stat-creators">—</span><span class="lbl">Active Creators</span></div>
+    <div class="cm-hero-stat"><span class="num">12–16%</span><span class="lbl">Commission Rate</span></div>
+    <div class="cm-hero-stat"><span class="num">$0</span><span class="lbl">Cost to Apply</span></div>
+  </div>
+</section>
+<!-- TABS -->
+<div style="max-width:1140px;margin:0 auto;padding:0 20px">
+  <nav class="cm-tabs" aria-label="Marketplace tabs">
+    <button class="cm-tab active" data-tab="discover" onclick="DSCreatorMarketplace.switchTab('discover')">Featured Creators</button>
+    <button class="cm-tab" data-tab="rankings" onclick="DSCreatorMarketplace.switchTab('rankings');loadRankings()">Rankings</button>
+    <button class="cm-tab" data-tab="storefront" onclick="DSCreatorMarketplace.switchTab('storefront')" style="display:none">Storefront</button>
+    <button class="cm-tab" data-tab="apply" onclick="DSCreatorMarketplace.switchTab('apply')">Apply to Join</button>
+    <button class="cm-tab" data-tab="dashboard" onclick="DSCreatorMarketplace.switchTab('dashboard');DSCreatorMarketplace.loadCreatorDashboard()" style="display:none">My Dashboard</button>
+  </nav>
+</div>
+<!-- PANELS -->
+<div style="max-width:1140px;margin:0 auto;padding:32px 20px">
+  <!-- Discover -->
+  <div id="panel-discover" class="cm-panel">
+    <h2 style="color:#fff;margin:0 0 6px">Featured Creators</h2>
+    <p style="color:rgba(255,255,255,.5);margin:0 0 28px">Shop curated picks from the Dripping Secrets creator family.</p>
+    <div class="cm-grid" id="cm-creators-grid"></div>
+  </div>
+  <!-- Rankings -->
+  <div id="panel-rankings" class="cm-panel" style="display:none">
+    <h2 style="color:#fff;margin:0 0 6px">Creator Rankings</h2>
+    <p style="color:rgba(255,255,255,.5);margin:0 0 28px">Top creators ranked by total sales this month.</p>
+    <div id="cm-rankings-wrap"></div>
+  </div>
+  <!-- Storefront -->
+  <div id="panel-storefront" class="cm-panel" style="display:none">
+    <div id="cm-storefront-wrap"><p style="color:rgba(255,255,255,.4)">Select a creator to view their storefront.</p></div>
+  </div>
+  <!-- Apply -->
+  <div id="panel-apply" class="cm-panel" style="display:none">
+    <h2 style="color:#fff;margin:0 0 6px;text-align:center">Join the Creator Program</h2>
+    <p style="color:rgba(255,255,255,.5);text-align:center;margin:0 0 32px;max-width:480px;margin-left:auto;margin-right:auto">Earn 12–16% on every sale you inspire. No minimum orders. No gatekeeping.</p>
+    <form class="cm-apply-form" id="cm-apply-form" onsubmit="DSCreatorMarketplace.submitApplication(event)">
+      <div class="cm-form-group"><label for="cm-app-name">Creator Name / Handle *</label><input class="cm-input" id="cm-app-name" placeholder="@YourHandle" required/></div>
+      <div class="cm-form-group"><label for="cm-app-bio">Bio (tell us about you) *</label><textarea class="cm-textarea" id="cm-app-bio" placeholder="Who you are, your vibe, and your audience…" required></textarea></div>
+      <div class="cm-form-group"><label for="cm-app-niche">Content Niche *</label>
+        <select class="cm-select" id="cm-app-niche" required>
+          <option value="">Select your niche…</option>
+          <option>Intimate Wellness</option><option>Self Care</option><option>Couples Content</option>
+          <option>Lifestyle</option><option>Fashion &amp; Beauty</option><option>Education</option><option>Entertainment</option>
+        </select>
+      </div>
+      <div class="cm-form-group"><label for="cm-app-link">Social Media or Website Link</label><input class="cm-input" id="cm-app-link" type="url" placeholder="https://…"/></div>
+      <div class="cm-form-group"><label for="cm-app-why">Why do you want to partner with Dripping Secrets?</label><textarea class="cm-textarea" id="cm-app-why" placeholder="Tell us your vision for this partnership…"></textarea></div>
+      <div style="text-align:center"><button class="cm-submit-btn" id="cm-app-submit" type="submit">Submit Application</button></div>
+    </form>
+  </div>
+  <!-- Dashboard -->
+  <div id="panel-dashboard" class="cm-panel" style="display:none">
+    <h2 style="color:#fff;margin:0 0 20px">Creator Dashboard</h2>
+    <div id="cm-dashboard-wrap"></div>
+  </div>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-col"><a href="/index.html" class="footer-logo"><img src="images/logo.png" alt="Dripping Secrets" height="34"/></a></div>
+    <div class="footer-col"><h4>Creators</h4><ul><li><a href="/creators.html">Creator Program</a></li><li><a href="/creator-marketplace.html">Marketplace</a></li><li><a href="/affiliates.html">Affiliates</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><p>&copy; 2026 Dripping Secrets. All rights reserved.</p></div>
+</footer>
+<div id="cart-overlay" onclick="closeCart()"></div><div id="cart-drawer"></div>
+<script src="js/firebase-config.js"></script>
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/creator-marketplace.js"></script>
+<script src="js/pwa.js"></script>
+<script>window.dimiContext={page:'creator-marketplace'};</script>
+<script src="js/dimi-actor.js"></script>
+<script src="js/dimi-memory.js"></script>
+<script src="js/dimi.js"></script>
+  <script src="/js/age-gate.js" defer></script>
+</body>
+</html>

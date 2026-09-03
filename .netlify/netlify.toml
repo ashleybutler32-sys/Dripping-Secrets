@@ -1,0 +1,148 @@
+functionsDirectory = "/tasklet/agent/home/ds-site/netlify/functions"
+functionsDirectoryOrigin = "config-v1"
+headersOrigin = "config"
+plugins = []
+
+[build]
+publish = "/tasklet/agent/home/ds-site"
+publishOrigin = "config"
+functions = "/tasklet/agent/home/ds-site/netlify/functions"
+
+[build.environment]
+SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
+
+[functions]
+
+[functions.dimi-briefing]
+schedule = "0 14 * * *"
+
+[functions.dimi-social]
+schedule = "0 15 * * *"
+
+[functions.dimi-analytics]
+schedule = "0 19 1 * *"
+
+[functions."*"]
+
+[[headers]]
+for = "/.well-known/*"
+
+[headers.values]
+Access-Control-Allow-Origin = "*"
+Content-Type = "text/plain"
+
+[[headers]]
+for = "/.netlify/functions/*"
+
+[headers.values]
+Access-Control-Allow-Origin = "*"
+Access-Control-Allow-Headers = "Content-Type"
+Access-Control-Allow-Methods = "POST, OPTIONS"
+
+[[redirects]]
+from = "/shop"
+to = "/shop.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/bundles"
+to = "/bundles.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/boxes"
+to = "/boxes.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/booking"
+to = "/booking.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/sneaky-link-bags"
+to = "/sneaky-link-bags.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/about"
+to = "/about.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/employee"
+to = "/employee.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
